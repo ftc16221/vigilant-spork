@@ -68,7 +68,7 @@ class LinearSlide(opMode: OpMode): Subassembly(opMode, "Linear Slide") {
         get() = linearSlide.currentPosition * (motorGearDiameter * PI) / motorEncoderRes
 
     companion object {
-        @JvmField var motorEncoderRes = 4800.0
+        @JvmField var motorEncoderRes = 1425.1
         @JvmField var motorGearDiameter = 39.0 // mm
 
         @JvmField var servoCoefficient = 0.001 // this value should be the highest possible without the pinion overshooting it's controls

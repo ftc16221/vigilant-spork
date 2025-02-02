@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
 import org.firstinspires.ftc.teamcode.util.log
 
+@Disabled
 @TeleOp(name = "Claw TeleOp", group = "main")
 class ClawTeleOp: LinearOpMode() {
 

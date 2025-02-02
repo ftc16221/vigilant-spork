@@ -84,18 +84,16 @@ public class DNBBasketDelivery extends LinearOpMode {
             altClaw.setPosition(1);
             altRotate.setPosition(0.8);
 
-            raiseSlidesForSpecimen();
             driveToPos(
                     -47,
                     61,
                     -135,
                     2,
                     true);
-
-            scoreSpecimen();
+            scoreSample();
             driveToPos(
                     -48,
-                    36,
+                    43,
                     -135,
                     10,
                     false);
@@ -113,12 +111,6 @@ public class DNBBasketDelivery extends LinearOpMode {
                     2,
                     true);
         }
-    }
-
-    /**
-     * Describe this function...
-     */
-    private void raiseSlidesForSpecimen() {
     }
 
     /**
@@ -174,13 +166,15 @@ public class DNBBasketDelivery extends LinearOpMode {
     /**
      * Describe this function...
      */
-    private void scoreSpecimen() {
+    private void scoreSample() {
         altRotate.setPosition(0.8);
         linearSlide.setTargetPosition((int) (SLIDE_ENCODER_RES * (LOW_BASKET_POS / (SLIDE_GEAR_DIAMETER * Math.PI))));
         linearSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         linearSlide.setPower(1);
         while (linearSlide.isBusy() && opModeIsActive()) {
+            linearSlide.setPower(1);
             telemetry.addData("linear slide pos", linearSlide.getCurrentPosition());
+            telemetry.update();
         }
         linearSlide.setPower(1);
         altRotate.setPosition(0.4);

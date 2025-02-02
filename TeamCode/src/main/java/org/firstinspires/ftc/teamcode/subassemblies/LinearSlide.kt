@@ -67,9 +67,19 @@ class LinearSlide(opMode: OpMode): Subassembly(opMode, "Linear Slide") {
         }
         get() = linearSlide.currentPosition * (motorGearDiameter * PI) / motorEncoderRes
 
+    /**
+     * @param position desired position in inches
+     * @param power power the slides will be ran at
+     */
+    fun moveSlide(position: Double, power: Double) {
+        linearSlide.targetPosition = (position / (motorGearDiameter * PI) * motorEncoderRes).toInt()
+        linearSlide.mode = DcMotor.RunMode.RUN_TO_POSITION
+        linearSlide.power = power
+    }
+
     companion object {
         @JvmField var motorEncoderRes = 1425.1
-        @JvmField var motorGearDiameter = 39.0 // mm
+        @JvmField var motorGearDiameter = 1.54 // in
 
         @JvmField var servoCoefficient = 0.001 // this value should be the highest possible without the pinion overshooting it's controls
         @JvmField var servoGearDiameter = 18.0 // mm

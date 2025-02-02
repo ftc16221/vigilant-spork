@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
 import org.firstinspires.ftc.teamcode.util.log
 
+@Disabled
 @TeleOp(name = "Claw TeleOp", group = "main")
 class ClawTeleOp: LinearOpMode() {
 

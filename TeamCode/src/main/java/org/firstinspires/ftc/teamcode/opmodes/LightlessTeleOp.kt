@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
 import org.firstinspires.ftc.teamcode.util.log
 
-@TeleOp(name = "Alt Claw TeleOp", group = "main")
-class AltClawTeleOp: LinearOpMode() {
+@TeleOp(name = "No Light TeleOp", group = "main")
+open class LightlessTeleOp: LinearOpMode() {
 
     override fun runOpMode() {
         // init, no movement allowed

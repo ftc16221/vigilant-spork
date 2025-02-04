@@ -16,7 +16,8 @@ public class Underglow extends Subassembly {
 
     public enum Alliance {
         RED,
-        BLUE
+        BLUE,
+        OFF
     }
 
     public void setAlliance(Alliance alliance) {
@@ -26,6 +27,9 @@ public class Underglow extends Subassembly {
                 break;
             case BLUE:
                 underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_OCEAN_PALETTE);
+                break;
+            case OFF:
+                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
                 break;
         }
     }

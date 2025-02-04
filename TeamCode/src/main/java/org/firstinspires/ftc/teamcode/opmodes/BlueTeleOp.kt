@@ -9,12 +9,6 @@ import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow
 import org.firstinspires.ftc.teamcode.util.log
 
-@TeleOp(name = "Blue TeleOp", group = "main")
-class BlueTeleOp: LightlessTeleOp() {
 
-    override fun runOpMode() {
-        val underglow = Underglow(this)
-        underglow.setAlliance(Underglow.Alliance.BLUE)
-        super.runOpMode()
-    }
-}
+@TeleOp(name = "Blue TeleOp", group = "main")
+class BlueTeleOp: LightlessTeleOp(Underglow.Alliance.BLUE)

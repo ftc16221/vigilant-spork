@@ -6,10 +6,11 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
+import org.firstinspires.ftc.teamcode.subassemblies.Underglow
 import org.firstinspires.ftc.teamcode.util.log
 
 @TeleOp(name = "No Light TeleOp", group = "main")
-open class LightlessTeleOp: LinearOpMode() {
+open class LightlessTeleOp(val alliance: Underglow.Alliance = Underglow.Alliance.OFF): LinearOpMode() {
 
     override fun runOpMode() {
         // init, no movement allowed
@@ -18,10 +19,13 @@ open class LightlessTeleOp: LinearOpMode() {
         val driveBase = MecDriveBase(this)
         val claw = AltClaw(this)
         val linearSlide = LinearSlide(this)
+        val underglow = Underglow(this)
         // add other subassemblies here
 
         val loopTime = ElapsedTime()
 //        val subassemblyList = listOf(driveBase)
+
+        underglow.setAlliance(alliance)
 
         log("OpMode initialized")
         waitForStart()

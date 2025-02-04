@@ -21,10 +21,10 @@ public class Follower extends Subassembly {
     public static boolean USE_Y = true;
     public static boolean USE_HEADING = true;
 
-    public static double DRIVE_GAIN = 0.06; // Forward Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error. (0.50 / 25.0)
-    public static double TURN_GAIN = 0.02; // Turn Control "Gain". e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
+    public static double DRIVE_GAIN = 0.07; // Forward Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error. (0.50 / 25.0)
+    public static double TURN_GAIN = 0.04; // Turn Control "Gain". e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
     public static double MAX_AUTO_SPEED = 0.4; // Clip the approach speed to this max value (adjust for your robot)
-    public static double MAX_AUTO_TURN = 0.3; // Clip the turn speed to this max value (adjust for your robot)
+    public static double MAX_AUTO_TURN = 0.2; // Clip the turn speed to this max value (adjust for your robot)
 
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 0);
     public static double OTOS_LINEAR_SCALAR = 1.01253481894;

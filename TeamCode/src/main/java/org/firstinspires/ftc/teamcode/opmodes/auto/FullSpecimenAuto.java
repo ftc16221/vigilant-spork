@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 /**
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
  */
+@Disabled
 @Config
 @Autonomous(group = "full", preselectTeleOp = "Alt Claw TeleOp")
 public class FullSpecimenAuto extends LinearOpMode {

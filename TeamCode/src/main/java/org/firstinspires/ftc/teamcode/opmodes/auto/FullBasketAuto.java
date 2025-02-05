@@ -19,7 +19,8 @@ import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 public class FullBasketAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, 36, 0); // starting position
-    public static SparkFunOTOS.Pose2D basketPose = new SparkFunOTOS.Pose2D(-47, 65, -135); // scoring position
+    public static SparkFunOTOS.Pose2D basketPose1 = new SparkFunOTOS.Pose2D(-43, 60, -45); // scoring position helper
+    public static SparkFunOTOS.Pose2D basketPose2 = new SparkFunOTOS.Pose2D(-47, 65, -135); // scoring position
     public static SparkFunOTOS.Pose2D pickup1Pose = new SparkFunOTOS.Pose2D(-31, 42, 90); // first sample pickup
     public static SparkFunOTOS.Pose2D pickup2Pose = new SparkFunOTOS.Pose2D(-31, 52, 90); // second sample pickup
     public static SparkFunOTOS.Pose2D ascendPose1 = new SparkFunOTOS.Pose2D(-12, 43, 0); // first ascension position to avoid hitting submersible
@@ -58,11 +59,11 @@ public class FullBasketAuto extends LinearOpMode {
             // pickup sample
             pickUpSample(pickup1Pose);
             // try to score again
-            scoreSample();
+            scoreSampleHelper();
             // pickup sample again
             pickUpSample(pickup2Pose);
             // try to score again
-            scoreSample();
+            scoreSampleHelper();
             // go in for ascension
             ascend();
             requestOpModeStop();
@@ -73,7 +74,7 @@ public class FullBasketAuto extends LinearOpMode {
         claw.close();
         wristServo.setPosition(0.7);
         linearSlide.moveSlide(SLIDE_HIGH_BASKET_POS, 1);
-        follower.driveToPose(basketPose, 3, true);
+        follower.driveToPose(basketPose2, 3, true);
         while (linearSlideMotor.isBusy() && opModeIsActive()) {
             telemetry.addData("linear slide pos", linearSlideMotor.getCurrentPosition());
             telemetry.update();
@@ -84,6 +85,14 @@ public class FullBasketAuto extends LinearOpMode {
         sleep(250);
         wristServo.setPosition(0.8);
         sleep(400);
+    }
+
+    private void scoreSampleHelper() {
+        claw.close();
+        wristServo.setPosition(0.7);
+        linearSlide.moveSlide(SLIDE_HIGH_BASKET_POS, 1);
+        follower.driveToPose(basketPose1, 5, false);
+        scoreSample();
     }
 
     private void pickUpSample(SparkFunOTOS.Pose2D pose) {

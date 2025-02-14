@@ -74,7 +74,7 @@ public class DNBBasketDelivery extends LinearOpMode {
         altRotate.setDirection(Servo.Direction.FORWARD);
         pinion.setDirection(Servo.Direction.FORWARD);
 
-        configureOTOS(new SparkFunOTOS.Pose2D(-61.8, 36, 0));
+        configureOTOS(new SparkFunOTOS.Pose2D(-61.8, 36, 180));
         altClaw.scaleRange(0.1, 0.8);
         linearSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sleep(10);
@@ -88,14 +88,14 @@ public class DNBBasketDelivery extends LinearOpMode {
             driveToPos(
                     -47,
                     61,
-                    -45,
+                    45,
                     2,
                     true);
             scoreSample();
             driveToPos(
                     -48,
                     43,
-                    -45,
+                    45,
                     10,
                     false);
             driveToPos(
@@ -243,7 +243,7 @@ public class DNBBasketDelivery extends LinearOpMode {
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+        offset = new SparkFunOTOS.Pose2D(0, 0, 180);
         OTOS.setOffset(offset);
         // Here we can set the linear and angular scalars, which can compensate for
         // scaling issues with the sensor measurements. Note that as of firmware

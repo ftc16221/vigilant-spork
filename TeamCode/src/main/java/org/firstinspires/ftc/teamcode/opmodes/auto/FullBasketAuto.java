@@ -18,13 +18,13 @@ import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 @Autonomous(group = "full", preselectTeleOp = "Alt Claw TeleOp")
 public class FullBasketAuto extends LinearOpMode {
 
-    public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, 36, 0); // starting position
-    public static SparkFunOTOS.Pose2D basketPose1 = new SparkFunOTOS.Pose2D(-43, 60, -45); // scoring position helper
-    public static SparkFunOTOS.Pose2D basketPose2 = new SparkFunOTOS.Pose2D(-47, 65, -135); // scoring position
-    public static SparkFunOTOS.Pose2D pickup1Pose = new SparkFunOTOS.Pose2D(-31, 42, 90); // first sample pickup
-    public static SparkFunOTOS.Pose2D pickup2Pose = new SparkFunOTOS.Pose2D(-31, 52, 90); // second sample pickup
-    public static SparkFunOTOS.Pose2D ascendPose1 = new SparkFunOTOS.Pose2D(-12, 43, 0); // first ascension position to avoid hitting submersible
-    public static SparkFunOTOS.Pose2D ascendPose2 = new SparkFunOTOS.Pose2D(-12, 21.2, 0); // second and actual ascension position
+    public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, 36, 180); // starting position
+    public static SparkFunOTOS.Pose2D basketPose1 = new SparkFunOTOS.Pose2D(-43, 60, -135); // scoring position helper
+    public static SparkFunOTOS.Pose2D basketPose2 = new SparkFunOTOS.Pose2D(-47, 65, -45); // scoring position
+    public static SparkFunOTOS.Pose2D pickup1Pose = new SparkFunOTOS.Pose2D(-31, 42, -90); // first sample pickup
+    public static SparkFunOTOS.Pose2D pickup2Pose = new SparkFunOTOS.Pose2D(-31, 52, -90); // second sample pickup
+    public static SparkFunOTOS.Pose2D ascendPose1 = new SparkFunOTOS.Pose2D(-12, 43, 180); // first ascension position to avoid hitting submersible
+    public static SparkFunOTOS.Pose2D ascendPose2 = new SparkFunOTOS.Pose2D(-12, 21.2, 180); // second and actual ascension position
 
     public static double SLIDE_HIGH_BASKET_POS = 38.4;
     public static double SLIDE_PICKUP_POS = 3;

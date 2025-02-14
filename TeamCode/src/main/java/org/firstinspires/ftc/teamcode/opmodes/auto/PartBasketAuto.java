@@ -20,7 +20,7 @@ public class PartBasketAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, 36, 180); // starting position
     public static SparkFunOTOS.Pose2D basketPose1 = new SparkFunOTOS.Pose2D(-47, 61, -45); // scoring position
-    public static SparkFunOTOS.Pose2D basketPose2 = new SparkFunOTOS.Pose2D(-45, 59, -45); // scoring position
+    public static SparkFunOTOS.Pose2D basketPose2 = new SparkFunOTOS.Pose2D(-45, 59, 45); // scoring position
     public static SparkFunOTOS.Pose2D ascendPose1 = new SparkFunOTOS.Pose2D(-12, 43, 180); // first ascension position to avoid hitting submersible
     public static SparkFunOTOS.Pose2D ascendPose2 = new SparkFunOTOS.Pose2D(-12, 21.2, 180); // second and actual ascension position
 

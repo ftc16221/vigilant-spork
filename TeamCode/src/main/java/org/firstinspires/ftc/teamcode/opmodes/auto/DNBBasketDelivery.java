@@ -88,27 +88,27 @@ public class DNBBasketDelivery extends LinearOpMode {
             driveToPos(
                     -47,
                     61,
-                    -135,
+                    -45,
                     2,
                     true);
             scoreSample();
             driveToPos(
                     -48,
                     43,
-                    -135,
+                    -45,
                     10,
                     false);
             driveToPos(
                     -12,
                     36,
-                    0,
+                    180,
                     10,
                     false);
             ascend();
             driveToPos(
                     -12,
                     21.2,
-                    0,
+                    180,
                     2,
                     true);
         }

@@ -40,8 +40,8 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
 
         zeroPowerBehavior = ZeroPowerBehavior.FLOAT
 
-        val leftX = powerCurve(-gamepad.left_stick_x.toDouble())
-        val leftY = powerCurve(gamepad.left_stick_y.toDouble())
+        val leftX = powerCurve(gamepad.left_stick_x.toDouble())
+        val leftY = powerCurve(-gamepad.left_stick_y.toDouble())
         val rightX = gamepad.right_stick_x.toDouble()
 
         moveRobot(leftX, leftY, rightX)

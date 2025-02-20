@@ -38,7 +38,8 @@ public class AdvPose {
         this.stopAtEnd = stopAtEnd;
     }
 
-    public void fromSparkFunPose(SparkFunOTOS.Pose2D pose, double tolerance, boolean stopAtEnd, boolean holdUntil) {
+    public void fromSparkFunPose(SparkFunOTOS.Pose2D pose, double tolerance, boolean stopAtEnd, boolean hold) {
         fromSparkFunPose(pose, tolerance, stopAtEnd);
+        this.hold = hold;
     }
 }

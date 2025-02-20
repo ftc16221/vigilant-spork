@@ -11,7 +11,10 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.util.AdvPose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
+
+import java.util.List;
 
 @Config
 public class Follower extends Subassembly {
@@ -44,6 +47,11 @@ public class Follower extends Subassembly {
     SparkFunOTOS.Pose2D startingPosition;
     SparkFunOTOS.Pose2D velocity;
     SparkFunOTOS.Pose2D currentPose;
+    double tolerance = 2;
+    boolean holdEnd = true;
+    List<AdvPose> path;
+    int pathState = 0;
+    boolean busy = false;
     double currentH;
     double yDrive;
     double xDrive;
@@ -70,51 +78,74 @@ public class Follower extends Subassembly {
         configureOTOS(startingPosition);
     }
 
-
-
-
-    /**
-     * v1.3
-     *
-     * Positive y is forward.
-     * Positive x is strafe right.
-     * Positive heading is counter-clockwise.
-     */
-    public void driveToPos(double targetX, double targetY, double targetH, double tolerance, boolean holdEnd) {
-
-        currentPose = OTOS.getPosition();
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        currentH = currentPose.h;
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        xError = currentPose.x - targetX;
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        yError = currentPose.y - targetY;
-        hError = (currentH - targetH) * (Math.abs(currentH - targetH) >= 180 ? -1 : 1);
-        while ((!robotInTolerance(tolerance) || (holdEnd && robotIsMoving())) && opMode.opModeIsActive()) {
-            currentPose = OTOS.getPosition();
-            // Get the x value from the given SparkFunOTOS.Pose2D object.
-            currentH = currentPose.h;
-            // Determine y, x, and heading error so we can use them to control the robot automatically.
-            // Basic error correction based on just the P of PID
-            xError = currentPose.x - targetX;
-            yError = currentPose.y - targetY;
-            // Reverse the error if needed to allow for wrapping.
-            hError = (currentH - targetH) * (Math.abs(currentH - targetH) >= 180 ? -1 : 1);
-            // Use the speed and turn "gains" to calculate how we want the robot to move. Clip it to the maximum.
-            yDrive = Range.clip(-yError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-            xDrive = Range.clip(-xError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-            hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
-
-            moveRobot(
-                    USE_Y ? yDrive : 0,
-                    USE_X ? xDrive : 0,
-                    USE_HEADING ? hDrive : 0
-            );
-            callTelemetry();
-        }
-        moveRobot(0, 0, 0);
-        opMode.sleep(100);
+    public void setPath(List<AdvPose> path) {
+        this.path = path;
     }
+
+    public int getPathState() {
+        return pathState;
+    }
+
+    public void setPathState(int pathState) {
+        this.pathState = pathState;
+    }
+
+    public boolean isBusy() {
+        return busy;
+    }
+
+    public void update() {
+        currentPose = OTOS.getPosition();
+        AdvPose targetPose;
+        if (-1 < pathState && pathState < path.size() - 1) {
+            targetPose = path.get(pathState);
+        } else {
+            return;
+        }
+
+        // Get the x value from the given SparkFunOTOS.Pose2D object.
+        double xError = currentPose.x - targetPose.x;
+        double yError = currentPose.y - targetPose.y;
+        double hError = (currentPose.h - targetPose.h) * (Math.abs(currentPose.h - targetPose.h) >= 180 ? -1 : 1);
+
+        double xDrive = Range.clip(-xError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+        double yDrive = Range.clip(-yError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+        double hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+
+        moveRobot(
+                USE_Y ? yDrive : 0,
+                USE_X ? xDrive : 0,
+                USE_HEADING ? hDrive : 0
+        );
+
+        telemetry.addLine("Error values:");
+        telemetry.addData("X error", xError);
+        telemetry.addData("Y error", yError);
+        telemetry.addData("H error", hError);
+        telemetry.addLine("Drive values:");
+        telemetry.addData("X drive", xDrive);
+        telemetry.addData("Y drive", yDrive);
+        telemetry.addData("H drive", hDrive);
+        callTelemetry();
+
+        if (robotInTolerance() && (!targetPose.stopAtEnd || !robotIsMoving())) {
+            busy = false;
+            moveRobot(0, 0, 0);
+            opMode.sleep(100);
+            if (!targetPose.hold) {
+                // progress through path
+                if (pathState >= path.size() - 1) {
+                    pathState = -1;
+                } else {
+                    pathState++;
+                }
+            }
+        } else {
+            busy = true;
+        }
+
+    }
+
 
     /**
      * v1.3
@@ -124,7 +155,7 @@ public class Follower extends Subassembly {
      * Positive heading is counter-clockwise.
      */
     public void driveToPose(SparkFunOTOS.Pose2D targetPose, double tolerance, boolean holdEnd) {
-
+        this.tolerance = tolerance;
         currentPose = OTOS.getPosition();
         // Get the x value from the given SparkFunOTOS.Pose2D object.
         currentH = currentPose.h;
@@ -133,7 +164,7 @@ public class Follower extends Subassembly {
         // Get the x value from the given SparkFunOTOS.Pose2D object.
         yError = currentPose.y - targetPose.y;
         hError = (currentPose.h - targetPose.h) * (Math.abs(currentPose.h - targetPose.h) >= 180 ? -1 : 1);
-        while ((!robotInTolerance(tolerance) || (holdEnd && robotIsMoving())) && opMode.opModeIsActive()) {
+        while ((!robotInTolerance() || (holdEnd && robotIsMoving())) && opMode.opModeIsActive()) {
             currentPose = OTOS.getPosition();
             // Get the x value from the given SparkFunOTOS.Pose2D object.
             currentH = currentPose.h;
@@ -200,7 +231,7 @@ public class Follower extends Subassembly {
     /**
      * Describe this function...
      */
-    private boolean robotInTolerance(double tolerance) {
+    private boolean robotInTolerance() {
         boolean xInTolerance;
         boolean yInTolerance;
         boolean hInTolerance;
@@ -243,17 +274,13 @@ public class Follower extends Subassembly {
         telemetry.addData("X coordinate", JavaUtil.formatNumber(currentPose.x, 2));
         telemetry.addData("Y coordinate", JavaUtil.formatNumber(currentPose.y, 2));
         telemetry.addData("Heading angle", JavaUtil.formatNumber(currentPose.h, 2));
-        telemetry.addLine("Error:");
-        telemetry.addData("X error", JavaUtil.formatNumber(xError, 2));
-        telemetry.addData("Y error", JavaUtil.formatNumber(yError, 2));
-        telemetry.addData("Heading error", JavaUtil.formatNumber(hError, 2));
         telemetry.addData("Robot is moving", robotIsMoving());
         telemetry.addLine("Velocity:");
         velocity = OTOS.getVelocity();
         telemetry.addData("X velocity", JavaUtil.formatNumber(velocity.x, 2));
         telemetry.addData("Y velocity", JavaUtil.formatNumber(velocity.y, 2));
         telemetry.addData("Heading velocity", JavaUtil.formatNumber(velocity.h, 2));
-        telemetry.addData("Robot in tolerance", robotInTolerance(2));
+        telemetry.addData("Robot in tolerance", robotInTolerance());
         // Update the telemetry on the driver station.
         telemetry.update();
     }
@@ -333,7 +360,6 @@ public class Follower extends Subassembly {
         telemetry.update();
     }
 }
-
 
 
 /*

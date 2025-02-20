@@ -11,6 +11,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
+import org.firstinspires.ftc.teamcode.util.AdvPose;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
@@ -21,18 +25,33 @@ import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 public class FullSpecimenAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, -36, 0); // starting position
-    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-60, -50, -90); // pickup position
-    public static SparkFunOTOS.Pose2D score1Pose = new SparkFunOTOS.Pose2D(-40, -5, 90); // first scoring position
-    public static SparkFunOTOS.Pose2D score2Pose = new SparkFunOTOS.Pose2D(-40, 0, 90); // second scoring position
 
-    public static SparkFunOTOS.Pose2D pushHelperPose = new SparkFunOTOS.Pose2D(-36, -36, 90); // first push position
-    public static SparkFunOTOS.Pose2D push1StartPose = new SparkFunOTOS.Pose2D(-12, -50, 90); // where the robot must start pushing the first sample
-    public static SparkFunOTOS.Pose2D push2StartPose = new SparkFunOTOS.Pose2D(-12, -60, 90); // where the robot must start pushing the second sample
-    public static SparkFunOTOS.Pose2D push1EndPose = new SparkFunOTOS.Pose2D(-60, -50, 90); // where the robot must end pushing the first sample
-    public static SparkFunOTOS.Pose2D push2EndPose = new SparkFunOTOS.Pose2D(-50, -60, 90); // where the robot must end pushing the second sample
+    public static AdvPose pickupPose = new AdvPose(-60, -50, -90, 2.5, true, true); // pickup position
+    public static AdvPose score1Pose = new AdvPose(-40, -5, 90, 2.5, true, true); // first scoring position
+    public static AdvPose score2Pose = new AdvPose(-40, 0, 90, 2.5, true, true); // second scoring position
+
+    public static AdvPose pushHelperPose = new AdvPose(-36, -36, 90, 5, false); // first push position
+    public static AdvPose push1StartPose = new AdvPose(-12, -50, 90, 3, true); // where the robot must start pushing the first sample
+    public static AdvPose push2StartPose = new AdvPose(-12, -60, 90, 3, true); // where the robot must start pushing the second sample
+    public static AdvPose push1EndPose = new AdvPose(-60, -50, 90, 3, true); // where the robot must end pushing the first sample
+    public static AdvPose push2EndPose = new AdvPose(-50, -60, 90, 3, true); // where the robot must end pushing the second sample
 
     public static double HIGH_RUNG_POS = 30;
     public static double PICKUP_POS = 3;
+
+    private final List<AdvPose> path = Arrays.asList(
+            score1Pose, // score preload
+            // push some samples to human player
+            pushHelperPose,
+            push1StartPose,
+            push1EndPose,
+            push1StartPose,
+            push2StartPose,
+            push2EndPose,
+            // score those specimens
+            pickupPose,
+            score2Pose
+    );
 
     private Follower follower;
     private LinearSlide linearSlide;
@@ -51,39 +70,67 @@ public class FullSpecimenAuto extends LinearOpMode {
 
         claw = new AltClaw(this);
         wristServo = claw.getRotateServo();
+        follower.setPath(path);
 
         waitForStart();
         if (opModeIsActive()) {
-            scoreSpecimen(score1Pose);
-            pushSamples();
-
+            while (opModeIsActive()) {
+                follower.update();
+                switch(follower.getPathState()) {
+                    case -1: // end of path
+                        requestOpModeStop();
+                        break;
+                    case 0: // score1Pose
+                        if (scoreSpecimen()) {
+                            score1Pose.hold = false;
+                        }
+                        break;
+                    case 1: // pushHelperPose
+                        collapseSlides();
+                        break;
+                    case 2: case 3: case 4: case 5: case 6: // push1StartPose, push1EndPose, push1StartPose, push2StartPose, push2EndPose
+                        // let drivebase do it's stuff
+                        break;
+                    case 7: // pickupPose
+                        // pickup sample
+                        if (pickUpSpecimen()) {
+                            pickupPose.hold = false;
+                        }
+                        break;
+                    case 8: // score2Pose
+                        if (scoreSpecimen()) {
+                            score2Pose.hold = false;
+                        }
+                        break;
+                }
+            }
         }
     }
 
-    private void scoreSpecimen(SparkFunOTOS.Pose2D pose) {
+    private boolean scoreSpecimen() {
         claw.close();
-        pinionServo.setPosition(0.2);
         linearSlide.moveSlide(HIGH_RUNG_POS, 1);
-        follower.driveToPose(pose, 2.5, true);
-        while(linearSlideMotor.isBusy()) {
-            telemetry.addData("Linear Slide Position", linearSlideMotor.getCurrentPosition());
-            telemetry.update();
+        if (!linearSlideMotor.isBusy() && !follower.isBusy()) {
+            wristServo.setPosition(0.3);
+            sleep(500);
+            linearSlide.moveSlide(HIGH_RUNG_POS - 3, 1);
+            sleep(500);
+            claw.open();
+            sleep(500);
+            wristServo.setPosition(0.8);
+            return true;
+        } else {
+            return false;
         }
-        wristServo.setPosition(0.3);
-        sleep(500);
-        linearSlide.moveSlide(HIGH_RUNG_POS - 3, 1);
-        sleep(500);
-        claw.open();
-        sleep(500);
-        wristServo.setPosition(0.8);
     }
 
-    private void pushSamples() {
-        follower.driveToPose(pushHelperPose, 5, false);
-        follower.driveToPose(push1StartPose, 3, true);
-        follower.driveToPose(push1EndPose, 3, true);
-        follower.driveToPose(push1StartPose, 3, true);
-        follower.driveToPose(push2StartPose, 3, true);
-        follower.driveToPose(push2EndPose, 3, true);
+    private boolean pickUpSpecimen() {
+        // do something
+        return true;
+    }
+
+    private void collapseSlides() {
+        linearSlide.moveSlide(0, 1);
+        wristServo.setPosition(0.7);
     }
 }

@@ -27,7 +27,7 @@ import kotlin.math.sin
 
 /**
  * Vision subassembly for detecting AprilTags and calculating robot position on the field via AprilTags.
- * Possible will be used for Machine Learning in future seasons
+ * Possibly will be used for Machine Learning in future seasons
  */
 @Config
 class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {

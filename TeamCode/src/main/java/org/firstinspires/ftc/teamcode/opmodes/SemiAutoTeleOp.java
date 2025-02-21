@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.util.AdvPose;
 import org.firstinspires.ftc.teamcode.util.Global;
 
 @Config
+@TeleOp(name = "Semi-Auto TeleOp")
 public class SemiAutoTeleOp extends LinearOpMode {
 
     // TODO: make this stuff global

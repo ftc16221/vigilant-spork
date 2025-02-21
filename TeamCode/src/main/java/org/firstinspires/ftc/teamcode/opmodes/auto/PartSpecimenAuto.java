@@ -16,7 +16,6 @@ import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 /**
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
  */
-@Disabled
 @Config
 @Autonomous(group = "part", preselectTeleOp = "Alt Claw TeleOp")
 public class PartSpecimenAuto extends LinearOpMode {

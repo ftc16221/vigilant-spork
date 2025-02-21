@@ -20,7 +20,6 @@ import java.util.List;
 /**
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
  */
-@Disabled
 @Config
 @Autonomous(group = "full", preselectTeleOp = "Alt Claw TeleOp")
 public class FullSpecimenAuto extends LinearOpMode {

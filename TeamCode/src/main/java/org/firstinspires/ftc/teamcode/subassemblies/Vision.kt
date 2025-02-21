@@ -56,21 +56,12 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      * it's pointing straight left, -90 degrees for straight right, etc. You can also set the roll
      * to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
      */
-    @JvmField var CAMERA_POSITION = Position(DistanceUnit.INCH, TODO(), TODO(), TODO(), 0) // TODO: find where our camera is mounted on the robot
+    @JvmField var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
     @JvmField var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
     @JvmField var CAMERA_RESOLUTION = Size(1280, 720)
 
     private val webcam = hardwareMap.get(WebcamName::class.java, "Webcam 1") // for our squirrel overlords
     val dash = DashOpMode.CameraStreamProcessor()
-
-    val visionPortal = VisionPortal.Builder()
-        .setCamera(webcam)
-        .addProcessors(aprilTag, dash)
-        .setCameraResolution(CAMERA_RESOLUTION)
-        .setStreamFormat(VisionPortal.StreamFormat.YUY2)
-        .enableLiveView(false) // LiveView is only accessible if our control hub had a screen, or we plugged in an HDMI cable
-        .setAutoStartStreamOnBuild(true)
-        .build()
 
     // http://localhost:63342/RobotController/Vision-9.0.1-javadoc.jar/org/firstinspires/ftc/vision/apriltag/AprilTagProcessor.Builder.html
     val aprilTag = AprilTagProcessor.Builder()
@@ -83,9 +74,19 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         .setCameraPose(CAMERA_POSITION, CAMERA_ORIENTATION)
         .build()
 
-    val exposureControl = visionPortal.getCameraControl(ExposureControl::class.java)
-    val ptzControl = visionPortal.getCameraControl(PtzControl::class.java)
-    val panTiltHolder = PtzControl.PanTiltHolder()
+    val visionPortal = VisionPortal.Builder()
+        .setCamera(webcam)
+        .addProcessors(aprilTag, dash)
+        .setCameraResolution(CAMERA_RESOLUTION)
+        .setStreamFormat(VisionPortal.StreamFormat.YUY2)
+        .enableLiveView(false) // LiveView is only accessible if our control hub had a screen, or we plugged in an HDMI cable
+        .setAutoStartStreamOnBuild(true)
+        .build()
+
+// this stuff was breaking everything so i commented it out
+//    val exposureControl = visionPortal.getCameraControl(ExposureControl::class.java)
+//    val ptzControl = visionPortal.getCameraControl(PtzControl::class.java)
+//    val panTiltHolder = PtzControl.PanTiltHolder()
 
     init {
         while(visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {}
@@ -134,6 +135,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         val tagY = globalTagPosition[1].toDouble()
         val tagH = globalTagOrientation.thirdAngle.toDouble()
 
+        detection.metadata.distanceUnit
         val robotPose = detection.robotPose
         val robotX = robotPose.position.x
         val robotY = robotPose.position.y

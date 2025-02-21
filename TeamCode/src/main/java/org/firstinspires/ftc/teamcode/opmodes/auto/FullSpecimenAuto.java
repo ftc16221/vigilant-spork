@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
+import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.AdvPose;
 
 import java.util.Arrays;
@@ -63,6 +64,7 @@ public class FullSpecimenAuto extends LinearOpMode {
     @Override
     public void runOpMode() {
         follower = new Follower(this, startPose);
+        new Underglow(this);
 
         linearSlide = new LinearSlide(this);
         linearSlideMotor = linearSlide.getLinearSlide();

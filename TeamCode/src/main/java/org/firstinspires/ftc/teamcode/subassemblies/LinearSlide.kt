@@ -5,12 +5,16 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.Gamepad
-import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.util.Subassembly
 import kotlin.math.PI
 import kotlin.math.roundToInt
 
 class LinearSlide(opMode: OpMode): Subassembly(opMode, "Linear Slide") {
+
+    @JvmField var HIGH_BASKET_POS = 38.4
+    @JvmField var HIGH_RUNG_POS: Double = 30.0
+    @JvmField var PICKUP_POS = 3.0
+    @JvmField var ASCEND_POS = 20
 
     val linearSlide = hardwareMap.dcMotor.get("linear_slide") as DcMotorEx
     val pinion = hardwareMap.servo.get("carter's_opinion")

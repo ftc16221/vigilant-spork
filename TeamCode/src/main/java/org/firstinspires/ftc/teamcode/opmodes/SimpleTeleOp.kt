@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.Underglow
 import org.firstinspires.ftc.teamcode.util.log
 
 @TeleOp(name = "No Light TeleOp", group = "main")
-open class LightlessTeleOp(val alliance: Underglow.Alliance = Underglow.Alliance.OFF): LinearOpMode() {
+class SimpleTeleOp(): LinearOpMode() {
 
     override fun runOpMode() {
         // init, no movement allowed
@@ -19,13 +19,11 @@ open class LightlessTeleOp(val alliance: Underglow.Alliance = Underglow.Alliance
         val driveBase = MecDriveBase(this)
         val claw = AltClaw(this)
         val linearSlide = LinearSlide(this)
-        val underglow = Underglow(this)
+        Underglow(this)
         // add other subassemblies here
 
         val loopTime = ElapsedTime()
 //        val subassemblyList = listOf(driveBase)
-
-        underglow.setAlliance(alliance)
 
         log("OpMode initialized")
         waitForStart()

@@ -2,10 +2,13 @@ package org.firstinspires.ftc.teamcode.subassemblies;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -16,6 +19,11 @@ import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 import java.util.List;
 
+/**
+ * Subassembly to autonomously move the drivebase
+ * <p>
+ * Javadoc comments partially written by Github Copilot, so if they don't make sense \_(ツ)_/ <sub>(thx copilot for that weird face)</sub>
+ */
 @Config
 public class Follower extends Subassembly {
 
@@ -33,25 +41,32 @@ public class Follower extends Subassembly {
     public static double OTOS_LINEAR_SCALAR = 1.01253481894;
     public static double OTOS_ANGULAR_SCALAR = 1;
 
-    private LinearOpMode opMode;
-    private HardwareMap hardwareMap;
-    private Telemetry telemetry;
-    private MecDriveBase driveBase;
+    public static LocalizationMode LOCALIZATION_MODE = LocalizationMode.OTOS;
 
-    private DcMotor leftRear;
-    private DcMotor leftFront;
-    private DcMotor rightRear;
-    private DcMotor rightFront;
-    private SparkFunOTOS OTOS; // Optical Tracking Odometry Sensor
+    private final LinearOpMode opMode;
+    private final HardwareMap hardwareMap;
+    private final Telemetry telemetry;
+    private final MecDriveBase driveBase;
 
+    private final DcMotor leftRear;
+    private final DcMotor leftFront;
+    private final DcMotor rightRear;
+    private final DcMotor rightFront;
+    private final SparkFunOTOS OTOS; // Optical Tracking Odometry Sensor
+    private final Vision vision;
+
+    OpModeType opModeType;
     SparkFunOTOS.Pose2D startingPosition;
     SparkFunOTOS.Pose2D velocity;
     SparkFunOTOS.Pose2D currentPose;
-    double tolerance = 2;
-    boolean holdEnd = true;
+    AdvPose targetPose;
     List<AdvPose> path;
+    boolean enabled = true;
+    boolean usePaths = true;
+    double tolerance = 2;
     int pathState = 0;
     boolean busy = false;
+
     double currentH;
     double yDrive;
     double xDrive;
@@ -60,10 +75,21 @@ public class Follower extends Subassembly {
     double yError;
     double hError;
 
+    /**
+     * Constructor for Follower
+     * @param opMode LinearOpMode object
+     * @param startingPosition The starting position of the robot
+     */
     public Follower(LinearOpMode opMode, SparkFunOTOS.Pose2D startingPosition) {
         super(opMode, "Follower");
         this.opMode = opMode;
-        this.startingPosition = startingPosition;
+        if (startingPosition == null) {
+            RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
+            disable();
+            this.startingPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
+        } else {
+            this.startingPosition = startingPosition;
+        }
         hardwareMap = opMode.hardwareMap;
         telemetry = getTelemetry();
 
@@ -76,6 +102,52 @@ public class Follower extends Subassembly {
 
         OTOS = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
         configureOTOS(startingPosition);
+
+        vision = new Vision(opMode);
+
+        if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
+            opModeType = OpModeType.AUTONOMOUS;
+        } else if (opMode.getClass().isAnnotationPresent(TeleOp.class)) {
+            opModeType = OpModeType.TELEOP;
+        } else {
+            opModeType = OpModeType.UNKNOWN;
+        }
+
+    }
+
+    /**
+     * Enable Autonomous Movement
+     * <p>
+     * Enabled by default
+     */
+    public void enable() {
+        enabled = true;
+    }
+
+    /**
+     * Disable Autonomous Movement
+     * <p>
+     * Should only be disabled during TeleOp
+     */
+    public void disable() {
+        enabled = false;
+    }
+
+    /**
+     * Check if Autonomous Movement is enabled
+     * @return if Autonomous Movement is enabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Set the method of localization for the robot
+     * <p>
+     * OTOS selected by default
+     */
+    public void setLocalizationMode(LocalizationMode mode) {
+        LOCALIZATION_MODE = mode;
     }
 
     public void setPath(List<AdvPose> path) {
@@ -94,13 +166,21 @@ public class Follower extends Subassembly {
         return busy;
     }
 
+    public void setTargetPose(AdvPose targetPose) {
+        this.targetPose = targetPose;
+    }
+
     public void update() {
-        currentPose = OTOS.getPosition();
-        AdvPose targetPose;
-        if (-1 < pathState && pathState < path.size() - 1) {
-            targetPose = path.get(pathState);
-        } else {
+        if (targetPose == null) {
             return;
+        }
+        updatePose();
+        if (usePaths) {
+            if (-1 < pathState && pathState < path.size() - 1) {
+                targetPose = path.get(pathState);
+            } else {
+                return;
+            }
         }
 
         // Get the x value from the given SparkFunOTOS.Pose2D object.
@@ -108,15 +188,17 @@ public class Follower extends Subassembly {
         double yError = currentPose.y - targetPose.y;
         double hError = (currentPose.h - targetPose.h) * (Math.abs(currentPose.h - targetPose.h) >= 180 ? -1 : 1);
 
-        double xDrive = Range.clip(-xError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-        double yDrive = Range.clip(-yError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-        double hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+        double xDrive = Range.clip(-xError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED); // why is this negative error?
+        double yDrive = Range.clip(-yError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED); // eh i mean it works
+        double hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN); // maybe
 
-        moveRobot(
-                USE_Y ? yDrive : 0,
-                USE_X ? xDrive : 0,
-                USE_HEADING ? hDrive : 0
-        );
+        if (enabled) {
+            moveRobot(
+                    USE_Y ? yDrive : 0,
+                    USE_X ? xDrive : 0,
+                    USE_HEADING ? hDrive : 0
+            );
+        }
 
         telemetry.addLine("Error values:");
         telemetry.addData("X error", xError);
@@ -127,6 +209,10 @@ public class Follower extends Subassembly {
         telemetry.addData("Y drive", yDrive);
         telemetry.addData("H drive", hDrive);
         callTelemetry();
+
+        if (!usePaths) {
+            return;
+        }
 
         if (robotInTolerance() && (!targetPose.stopAtEnd || !robotIsMoving())) {
             busy = false;
@@ -146,13 +232,30 @@ public class Follower extends Subassembly {
 
     }
 
+    /**
+     * Gets the relevant pose of the robot based off of the localization mode.
+     */
+    public void updatePose() {
+        switch (LOCALIZATION_MODE) {
+            case OTOS:
+                currentPose = OTOS.getPosition();
+                break;
+            case HYBRID:
+                if (!robotIsMoving() && vision.getPosition() != null) {
+                    OTOS.setPosition(vision.getPosition());
+                }
+                currentPose = OTOS.getPosition();
+            case APRILTAG:
+                currentPose = vision.getPosition();
+                break;
+        }
+    }
 
     /**
-     * v1.3
-     *
      * Positive y is forward.
      * Positive x is strafe right.
      * Positive heading is counter-clockwise.
+     * @version 1.3
      */
     public void driveToPose(SparkFunOTOS.Pose2D targetPose, double tolerance, boolean holdEnd) {
         this.tolerance = tolerance;
@@ -191,13 +294,32 @@ public class Follower extends Subassembly {
     }
 
     /**
+     * Find the type of OpMode that is being run, based off the annotation
+     * <p>
+     * I know there is a reason I wrote this but I forgot
+     * <p>
+     * OHH it's so we don't use paths during teleop
+     * @return type of OpMode (AUTONOMOUS, TELEOP)
+     */
+    private OpModeType getOpModeType() {
+        if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
+            return OpModeType.AUTONOMOUS;
+        } else if (opMode.getClass().isAnnotationPresent(TeleOp.class)) {
+            usePaths = false;
+            return OpModeType.TELEOP;
+        } else {
+            return OpModeType.UNKNOWN;
+        }
+    }
+
+    /**
      * Move robot according to desired axes motions.
      * Positive x is forward.
      * Positive y is strafe left.
      * Positive yaw is counter-clockwise.
-     *
+     * <p>
      * Field Centric Movement
-     * see https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
+     * see <a href="https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html">...</a>
      */
     private void moveRobot(double y, double x, double h) {
         double rotX;
@@ -229,7 +351,8 @@ public class Follower extends Subassembly {
     }
 
     /**
-     * Describe this function...
+     * Check if the robot is within the tolerance of the target position.
+     * @return if robot is within tolerance
      */
     private boolean robotInTolerance() {
         boolean xInTolerance;
@@ -246,7 +369,8 @@ public class Follower extends Subassembly {
     }
 
     /**
-     * Describe this function...
+     * Check if the robot is moving.
+     * @return if robot is moving
      */
     private boolean robotIsMoving() {
         boolean xIsMoving;
@@ -263,11 +387,6 @@ public class Follower extends Subassembly {
         return xIsMoving || yIsMoving || hIsMoving;
     }
 
-
-
-    /**
-     * Describe this function...
-     */
     private void callTelemetry() {
         telemetry.addData("Auto", "yDrive" + JavaUtil.formatNumber(yDrive, 5, 2) + ", xDrive" + JavaUtil.formatNumber(xDrive, 5, 2) + ", turn" + JavaUtil.formatNumber(hDrive, 5, 2));
         telemetry.addLine("Coordinates:");
@@ -358,6 +477,18 @@ public class Follower extends Subassembly {
         telemetry.addLine("OTOS Hardware Version: v" + hwVersion.major + "." + hwVersion.minor);
         telemetry.addLine("OTOS Firmware Version: v" + fwVersion.major + "." + fwVersion.minor);
         telemetry.update();
+    }
+
+    public enum OpModeType {
+        TELEOP,
+        AUTONOMOUS,
+        UNKNOWN
+    }
+
+    public enum LocalizationMode {
+        OTOS,
+        HYBRID,
+        APRILTAG
     }
 }
 

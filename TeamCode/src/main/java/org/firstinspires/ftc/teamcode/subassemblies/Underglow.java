@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subassemblies;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 public class Underglow extends Subassembly {
@@ -12,6 +13,7 @@ public class Underglow extends Subassembly {
     public Underglow(OpMode opMode) {
         super(opMode,"Underglow");
         underglow = opMode.hardwareMap.get(RevBlinkinLedDriver.class, "underglow");
+        setAlliance(Global.alliance);
     }
 
     public enum Alliance {

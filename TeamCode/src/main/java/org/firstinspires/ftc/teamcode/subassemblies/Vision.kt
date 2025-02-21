@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subassemblies
 
+import android.util.Size
 import com.acmerobotics.dashboard.config.Config
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
@@ -57,6 +58,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      */
     @JvmField var CAMERA_POSITION = Position(DistanceUnit.INCH, TODO(), TODO(), TODO(), 0) // TODO: find where our camera is mounted on the robot
     @JvmField var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
+    @JvmField var CAMERA_RESOLUTION = Size(1280, 720)
 
     private val webcam = hardwareMap.get(WebcamName::class.java, "Webcam 1") // for our squirrel overlords
     val dash = DashOpMode.CameraStreamProcessor()
@@ -64,7 +66,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
     val visionPortal = VisionPortal.Builder()
         .setCamera(webcam)
         .addProcessors(aprilTag, dash)
-        .setCameraResolution(TODO())
+        .setCameraResolution(CAMERA_RESOLUTION)
         .setStreamFormat(VisionPortal.StreamFormat.YUY2)
         .enableLiveView(false) // LiveView is only accessible if our control hub had a screen, or we plugged in an HDMI cable
         .setAutoStartStreamOnBuild(true)

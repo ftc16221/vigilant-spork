@@ -31,12 +31,11 @@ public class FullSpecimenAuto extends LinearOpMode {
     public static SparkFunOTOS.Pose2D push2EndPose = new SparkFunOTOS.Pose2D(-50, -60, 90); // where the robot must end pushing the second sample
 
     public static double HIGH_RUNG_POS = 30;
-    public static double PICKUP_POS = 3;
+    public static double PICKUP_POS = 6;
 
     private Follower follower;
     private LinearSlide linearSlide;
     private DcMotor linearSlideMotor;
-    private Servo pinionServo;
     private AltClaw claw;
     private Servo wristServo;
 
@@ -47,7 +46,6 @@ public class FullSpecimenAuto extends LinearOpMode {
 
         linearSlide = new LinearSlide(this);
         linearSlideMotor = linearSlide.getLinearSlide();
-        pinionServo = linearSlide.getPinion();
 
         claw = new AltClaw(this);
         wristServo = claw.getRotateServo();
@@ -56,7 +54,8 @@ public class FullSpecimenAuto extends LinearOpMode {
         if (opModeIsActive()) {
             scoreSpecimen(score1Pose);
             pushSamples();
-
+            pickUpSpecimen();
+            scoreSpecimen(score2Pose);
         }
     }
 
@@ -75,6 +74,19 @@ public class FullSpecimenAuto extends LinearOpMode {
         claw.open();
         sleep(500);
         wristServo.setPosition(0.8);
+    }
+
+    private void pickUpSpecimen() {
+        claw.open();
+        linearSlide.moveSlide(PICKUP_POS, 1);
+        follower.driveToPose(pickupPose, 2.5, true);
+        while(linearSlideMotor.isBusy()) {
+            telemetry.addData("Linear Slide Position", linearSlideMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        wristServo.setPosition(0.3);
+        sleep(500);
+        claw.close();
     }
 
     private void pushSamples() {

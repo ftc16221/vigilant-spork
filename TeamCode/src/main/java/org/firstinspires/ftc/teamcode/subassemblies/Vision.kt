@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies
 
 import android.util.Size
+import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
@@ -56,9 +57,16 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      * it's pointing straight left, -90 degrees for straight right, etc. You can also set the roll
      * to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
      */
-    @JvmField var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
-    @JvmField var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
-    @JvmField var CAMERA_RESOLUTION = Size(1280, 720)
+
+    @Config
+    companion object {
+        @JvmField var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
+        @JvmField var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
+        @JvmField var CAMERA_RESOLUTION = Size(1280, 720)
+
+        @JvmField var EXPOSURE = 100
+        @JvmField var GAIN = 100
+    }
 
     private val webcam = hardwareMap.get(WebcamName::class.java, "Webcam 1") // for our squirrel overlords
     val dash = DashOpMode.CameraStreamProcessor()
@@ -90,6 +98,13 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 
     init {
         while(visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {}
+
+        val exposureControl = visionPortal.getCameraControl(ExposureControl::class.java)
+//        exposureControl.setExposure()
+        val ptzControl = visionPortal.getCameraControl(PtzControl::class.java)
+        val panTiltHolder = PtzControl.PanTiltHolder()
+
+        FtcDashboard.getInstance().startCameraStream(dash, 0.0)
 
         opMode.log("Vision successfully initialized")
     }

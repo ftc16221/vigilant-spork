@@ -101,6 +101,8 @@ public class Follower extends Subassembly {
 
         vision = new Vision(opMode);
 
+        opModeType = getOpModeType();
+
         if (startingPosition == null) {
             RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
             underglow.setColor(Underglow.Color.YELLOW);
@@ -109,15 +111,7 @@ public class Follower extends Subassembly {
         } else {
             this.startingPosition = startingPosition;
         }
-
-        if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
-            opModeType = OpModeType.AUTONOMOUS;
-        } else if (opMode.getClass().isAnnotationPresent(TeleOp.class)) {
-            opModeType = OpModeType.TELEOP;
-        } else {
-            opModeType = OpModeType.UNKNOWN;
-        }
-
+        getOpModeType();
     }
 
     /**

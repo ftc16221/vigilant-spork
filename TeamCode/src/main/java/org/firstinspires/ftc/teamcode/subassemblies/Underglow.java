@@ -13,26 +13,42 @@ public class Underglow extends Subassembly {
     public Underglow(OpMode opMode) {
         super(opMode,"Underglow");
         underglow = opMode.hardwareMap.get(RevBlinkinLedDriver.class, "underglow");
-        setAlliance(Global.alliance);
+        setColor(Global.alliance);
     }
 
-    public enum Alliance {
-        RED,
-        BLUE,
-        OFF
-    }
-
-    public void setAlliance(Alliance alliance) {
-        switch (alliance) {
-            case RED:
+    public void setColor(Color color) {
+        switch (color) {
+            case RED: // red alliance
                 underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_LAVA_PALETTE);
                 break;
-            case BLUE:
+            case BLUE: // blue alliance
                 underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_OCEAN_PALETTE);
                 break;
-            case OFF:
+            case GREEN: // undefined
+                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_FOREST_PALETTE);
+                break;
+            case YELLOW: // semi-autonomous unavailable
+                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+                break;
+            case WHITE: // autonomous active
+                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
+                break;
+            case RAINBOW: // used for debugging maybe?
+                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_RAINBOW_PALETTE);
+                break;
+            case OFF: // disabled
                 underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
                 break;
         }
+    }
+
+    public enum Color {
+        RED,
+        BLUE,
+        YELLOW,
+        GREEN,
+        WHITE,
+        RAINBOW,
+        OFF
     }
 }

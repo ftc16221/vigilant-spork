@@ -106,13 +106,14 @@ public class FullSpecimenAuto extends LinearOpMode {
                         break;
                 }
             }
+            follower.stop();
         }
     }
 
     private boolean scoreSpecimen() {
         claw.close();
         linearSlide.moveSlide(HIGH_RUNG_POS, 1);
-        if (!linearSlideMotor.isBusy() && !follower.isBusy()) {
+        if (!linearSlideMotor.isBusy() && follower.isNotBusy()) {
             wristServo.setPosition(0.3);
             sleep(500);
             linearSlide.moveSlide(HIGH_RUNG_POS - 3, 1);

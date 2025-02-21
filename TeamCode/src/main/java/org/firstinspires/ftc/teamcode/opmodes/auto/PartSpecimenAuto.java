@@ -48,6 +48,7 @@ public class PartSpecimenAuto extends LinearOpMode {
         waitForStart();
         if (opModeIsActive()) {
             scoreSpecimen(score1Pose);
+            follower.stop();
             requestOpModeStop();
         }
     }

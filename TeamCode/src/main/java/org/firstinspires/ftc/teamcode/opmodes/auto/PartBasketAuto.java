@@ -52,6 +52,7 @@ public class PartBasketAuto extends LinearOpMode {
             // score preloaded sample
             scoreSample();
             ascend();
+            follower.stop();
             requestOpModeStop();
         }
     }

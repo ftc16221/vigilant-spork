@@ -70,6 +70,7 @@ public class FullBasketAuto extends LinearOpMode {
             ascend();
             requestOpModeStop();
         }
+        follower.stop();
     }
 
     private void scoreSample() {

@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.AdvPose;
+import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 import java.util.List;
@@ -47,6 +48,7 @@ public class Follower extends Subassembly {
     private final HardwareMap hardwareMap;
     private final Telemetry telemetry;
     private final MecDriveBase driveBase;
+    private final Underglow underglow;
 
     private final DcMotor leftRear;
     private final DcMotor leftFront;
@@ -83,17 +85,11 @@ public class Follower extends Subassembly {
     public Follower(LinearOpMode opMode, SparkFunOTOS.Pose2D startingPosition) {
         super(opMode, "Follower");
         this.opMode = opMode;
-        if (startingPosition == null) {
-            RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
-            disable();
-            this.startingPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
-        } else {
-            this.startingPosition = startingPosition;
-        }
         hardwareMap = opMode.hardwareMap;
         telemetry = getTelemetry();
 
         driveBase = new MecDriveBase(opMode);
+        underglow = new Underglow(opMode);
 
         leftRear = driveBase.getLeftRear();
         leftFront = driveBase.getLeftFront();
@@ -104,6 +100,15 @@ public class Follower extends Subassembly {
         configureOTOS(startingPosition);
 
         vision = new Vision(opMode);
+
+        if (startingPosition == null) {
+            RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
+            underglow.setColor(Underglow.Color.YELLOW);
+            disable();
+            this.startingPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
+        } else {
+            this.startingPosition = startingPosition;
+        }
 
         if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
             opModeType = OpModeType.AUTONOMOUS;
@@ -166,8 +171,17 @@ public class Follower extends Subassembly {
         return busy;
     }
 
+    public boolean isNotBusy() {
+        return !busy;
+    }
+
     public void setTargetPose(AdvPose targetPose) {
         this.targetPose = targetPose;
+    }
+
+    public SparkFunOTOS.Pose2D getCurrentPose() {
+        updatePose();
+        return currentPose;
     }
 
     public void update() {
@@ -291,6 +305,12 @@ public class Follower extends Subassembly {
         }
         moveRobot(0, 0, 0);
         opMode.sleep(100);
+    }
+
+    public void stop() {
+        disable();
+        updatePose();
+        Global.lastPose = currentPose;
     }
 
     /**

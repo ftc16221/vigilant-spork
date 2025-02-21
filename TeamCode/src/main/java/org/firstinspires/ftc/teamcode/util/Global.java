@@ -7,6 +7,6 @@ import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 
 @Config
 public class Global {
-    public static Underglow.Alliance alliance = Underglow.Alliance.OFF;
+    public static Underglow.Color alliance = Underglow.Color.OFF;
     public static SparkFunOTOS.Pose2D lastPose = null;
 }

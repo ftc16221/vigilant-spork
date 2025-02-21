@@ -9,6 +9,6 @@ import org.firstinspires.ftc.teamcode.util.SetAlliance;
 @TeleOp(name = "Set Alliance Red", group = "Set Alliance")
 public class SetAllianceRed extends SetAlliance {
     SetAllianceRed() {
-        super(Underglow.Alliance.RED);
+        super(Underglow.Color.RED);
     }
 }

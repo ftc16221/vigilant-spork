@@ -5,10 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 
 public abstract class SetAlliance extends LinearOpMode {
-    protected Underglow.Alliance alliance;
+    protected Underglow.Color alliance;
 
-    protected SetAlliance(Underglow.Alliance alliance) {
-        this.alliance = alliance;
+    protected SetAlliance(Underglow.Color color) {
+        this.alliance = color;
     }
 
     @Override

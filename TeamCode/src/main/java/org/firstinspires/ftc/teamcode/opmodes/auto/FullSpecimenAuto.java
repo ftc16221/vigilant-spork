@@ -19,16 +19,16 @@ import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 @Autonomous(group = "full", preselectTeleOp = "Alt Claw TeleOp")
 public class FullSpecimenAuto extends LinearOpMode {
 
-    public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, -36, 0); // starting position
-    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-60, -50, -90); // pickup position
-    public static SparkFunOTOS.Pose2D score1Pose = new SparkFunOTOS.Pose2D(-40, -5, 90); // first scoring position
+    public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-63, -24, 0); // starting position
+    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-60, -50, -90); // TODO: find pickup position
+    public static SparkFunOTOS.Pose2D score1Pose = new SparkFunOTOS.Pose2D(-40, -8, 90); // first scoring position
     public static SparkFunOTOS.Pose2D score2Pose = new SparkFunOTOS.Pose2D(-40, 0, 90); // second scoring position
 
-    public static SparkFunOTOS.Pose2D pushHelperPose = new SparkFunOTOS.Pose2D(-36, -36, 90); // first push position
-    public static SparkFunOTOS.Pose2D push1StartPose = new SparkFunOTOS.Pose2D(-12, -50, 90); // where the robot must start pushing the first sample
-    public static SparkFunOTOS.Pose2D push2StartPose = new SparkFunOTOS.Pose2D(-12, -60, 90); // where the robot must start pushing the second sample
-    public static SparkFunOTOS.Pose2D push1EndPose = new SparkFunOTOS.Pose2D(-60, -50, 90); // where the robot must end pushing the first sample
-    public static SparkFunOTOS.Pose2D push2EndPose = new SparkFunOTOS.Pose2D(-50, -60, 90); // where the robot must end pushing the second sample
+    public static SparkFunOTOS.Pose2D pushHelperPose = new SparkFunOTOS.Pose2D(-40, -26, 90); // first push position
+    public static SparkFunOTOS.Pose2D push1StartPose = new SparkFunOTOS.Pose2D(-6, -48, 90); // where the robot must start pushing the first sample
+    public static SparkFunOTOS.Pose2D push2StartPose = new SparkFunOTOS.Pose2D(-6, -60, 90); // where the robot must start pushing the second sample
+    public static SparkFunOTOS.Pose2D push1EndPose = new SparkFunOTOS.Pose2D(-60, -48, 90); // where the robot must end pushing the first sample
+    public static SparkFunOTOS.Pose2D push2EndPose = new SparkFunOTOS.Pose2D(-55, -60, 90); // where the robot must end pushing the second sample
 
     public static double HIGH_RUNG_POS = 30;
     public static double PICKUP_POS = 6;

@@ -114,6 +114,9 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      * @return ArrayList<AprilTagDetection>? list of valid apriltag detections (null if none)
      */
     fun getDetections(): ArrayList<AprilTagDetection>? {
+        if (aprilTag.freshDetections.isNotEmpty()) {
+            opMode.log("AprilTag detected: ${aprilTag.freshDetections}")
+        }
         val currentDetections = aprilTag.detections
         val validDetections = ArrayList<AprilTagDetection>()
         for (detection in currentDetections) {
@@ -126,10 +129,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         validDetections.ifEmpty { return null }
 
         // Sort detections by distance from robot
-        validDetections.sortBy { detection ->
-            val position = detection.robotPose.position
-            hypot(position.x.pow(2), position.y.pow(2))
-        }
+        validDetections.sortBy { it.ftcPose.range }
 
         return validDetections
     }
@@ -144,24 +144,10 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         val detection = getDetections()?.first()
         detection ?: return null
 
-        val globalTagPosition = detection.metadata.fieldPosition
-        val globalTagOrientation = detection.metadata.fieldOrientation.toOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.RADIANS)
-        val tagX = globalTagPosition[0].toDouble()
-        val tagY = globalTagPosition[1].toDouble()
-        val tagH = globalTagOrientation.thirdAngle.toDouble()
+        val position = detection.robotPose.position
+        val orientation = detection.robotPose.orientation
 
-        detection.metadata.distanceUnit
-        val robotPose = detection.robotPose
-        val robotX = robotPose.position.x
-        val robotY = robotPose.position.y
-        val robotH = robotPose.orientation.yaw
-
-        // Calculate the field-centric position; AI generated, be wary of this
-        val fieldX = tagX + robotX * cos(tagH) - robotY * sin(tagH)
-        val fieldY = tagY + robotX * sin(tagH) + robotY * cos(tagH)
-        val fieldH = tagH.toDegrees() + robotH
-
-        return SparkFunOTOS.Pose2D(fieldX, fieldY, fieldH)
+        return SparkFunOTOS.Pose2D(position.x, position.y, orientation.yaw)
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subassemblies
 
+import com.acmerobotics.dashboard.config.Config
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
@@ -9,10 +10,11 @@ import org.firstinspires.ftc.teamcode.util.Subassembly
 import kotlin.math.PI
 import kotlin.math.roundToInt
 
+@Config
 class LinearSlide(opMode: OpMode): Subassembly(opMode, "Linear Slide") {
 
     @JvmField var HIGH_BASKET_POS = 38.4
-    @JvmField var HIGH_RUNG_POS: Double = 30.0
+    @JvmField var HIGH_RUNG_POS = 30.0
     @JvmField var PICKUP_POS = 3.0
     @JvmField var ASCEND_POS = 20
 

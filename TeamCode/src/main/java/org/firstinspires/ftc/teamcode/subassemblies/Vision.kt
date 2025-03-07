@@ -72,7 +72,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
     val dash = DashOpMode.CameraStreamProcessor()
 
     // http://localhost:63342/RobotController/Vision-9.0.1-javadoc.jar/org/firstinspires/ftc/vision/apriltag/AprilTagProcessor.Builder.html
-    val aprilTag = AprilTagProcessor.Builder()
+    val aprilTag: AprilTagProcessor = AprilTagProcessor.Builder()
         .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
         .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
         .setDrawTagID(true)
@@ -114,9 +114,6 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      * @return ArrayList<AprilTagDetection>? list of valid apriltag detections (null if none)
      */
     fun getDetections(): ArrayList<AprilTagDetection>? {
-        if (aprilTag.freshDetections.isNotEmpty()) {
-            opMode.log("AprilTag detected: ${aprilTag.freshDetections}")
-        }
         val currentDetections = aprilTag.detections
         val validDetections = ArrayList<AprilTagDetection>()
         for (detection in currentDetections) {

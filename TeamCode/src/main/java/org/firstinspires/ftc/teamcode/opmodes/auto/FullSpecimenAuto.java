@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.util.Global;
 
 /**
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
@@ -57,6 +58,7 @@ public class FullSpecimenAuto extends LinearOpMode {
             pickUpSpecimen();
             scoreSpecimen(score2Pose);
         }
+        follower.stop();
     }
 
     private void scoreSpecimen(SparkFunOTOS.Pose2D pose) {

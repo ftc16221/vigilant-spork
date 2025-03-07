@@ -32,11 +32,11 @@ public class SemiAutoTeleOp extends LinearOpMode {
         AltClaw claw = new AltClaw(this);
         Servo wristServo = claw.getRotateServo();
         Follower follower = new Follower(this, Global.lastPose);
+        follower.setLocalizationMode(Follower.LocalizationMode.HYBRID);
         new Underglow(this);
 
         ElapsedTime loopTime = new ElapsedTime();
 
-        boolean autoDrivebase = false;
         boolean autoScoreBasket = false;
         boolean autoScoreSpecimen = false;
 
@@ -44,13 +44,13 @@ public class SemiAutoTeleOp extends LinearOpMode {
         if (opModeIsActive()) {
             while (opModeIsActive()) {
                 loopTime.reset();
+                follower.update();
 
                 if (!gamepad1.atRest()) {
-                    autoDrivebase = false;
+                    follower.disable();
                 }
 
                 if (!gamepad2.atRest()) {
-                    autoScoreBasket = false;
                     autoScoreSpecimen = false;
                     linearSlideMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
                 }
@@ -61,7 +61,7 @@ public class SemiAutoTeleOp extends LinearOpMode {
 
                 // Semi-auto specimen scoring
                 if (gamepad1.x || gamepad2.dpad_right) {
-                    autoDrivebase = true;
+                    follower.enable();
                     autoScoreSpecimen = true;
                     Follower.USE_Y = false;
                     follower.setTargetPose(specimenScorePose);
@@ -85,7 +85,7 @@ public class SemiAutoTeleOp extends LinearOpMode {
 
                 // Semi-auto basket scoring
                 if (gamepad1.y || gamepad2.dpad_left) {
-                    autoDrivebase = true;
+                    follower.enable();
                     autoScoreBasket = true;
                     follower.setTargetPose(basketScorePose);
                     linearSlide.moveSlide(linearSlide.HIGH_BASKET_POS, 1);
@@ -106,10 +106,6 @@ public class SemiAutoTeleOp extends LinearOpMode {
                         linearSlideMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
                         autoScoreBasket = false;
                     }
-                }
-
-                if (autoDrivebase) {
-                    follower.update();
                 }
             }
         }

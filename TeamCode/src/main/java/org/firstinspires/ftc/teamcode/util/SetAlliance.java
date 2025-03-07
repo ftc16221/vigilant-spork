@@ -13,7 +13,7 @@ public abstract class SetAlliance extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        telemetry.addLine("Press START to set alliance to" + alliance.getClass().getName());
+        telemetry.addLine("Press START to set alliance to");
         telemetry.update();
         waitForStart();
         if (opModeIsActive()) {

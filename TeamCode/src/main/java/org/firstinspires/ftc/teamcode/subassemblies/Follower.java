@@ -80,7 +80,7 @@ public class Follower extends Subassembly {
     /**
      * Constructor for Follower
      * @param opMode LinearOpMode object
-     * @param startingPosition The starting position of the robot
+     * @param startingPosition The starting position of the robot (null if unknown)
      */
     public Follower(LinearOpMode opMode, SparkFunOTOS.Pose2D startingPosition) {
         super(opMode, "Follower");
@@ -97,20 +97,25 @@ public class Follower extends Subassembly {
         rightFront = driveBase.getRightFront();
 
         OTOS = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
-        configureOTOS(startingPosition);
 
         vision = new Vision(opMode);
 
         opModeType = getOpModeType();
 
         if (startingPosition == null) {
-            RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
-            underglow.setColor(Underglow.Color.YELLOW);
-            disable();
-            this.startingPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
-        } else {
-            this.startingPosition = startingPosition;
+            if (Global.lastPose != null) {
+                startingPosition = Global.lastPose;
+                RobotLog.i("(Follower) Starting position not set, using last detected position");
+            } else {
+                RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
+                underglow.setColor(Underglow.Color.YELLOW);
+                disable();
+                startingPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
+            }
         }
+        configureOTOS(startingPosition);
+        currentPose = startingPosition;
+
         getOpModeType();
     }
 
@@ -179,10 +184,15 @@ public class Follower extends Subassembly {
     }
 
     public void update() {
+        updatePose();
         if (targetPose == null) {
+            RobotLog.e("Target Pose is null!");
             return;
         }
-        updatePose();
+        if (currentPose == null) {
+            RobotLog.e("Current Pose is null!");
+            return;
+        }
         if (usePaths) {
             if (-1 < pathState && pathState < path.size() - 1) {
                 targetPose = path.get(pathState);
@@ -250,9 +260,14 @@ public class Follower extends Subassembly {
                 break;
             case HYBRID:
                 if (!robotIsMoving() && vision.getPosition() != null) {
-                    OTOS.setPosition(vision.getPosition());
+                    SparkFunOTOS.Pose2D visionPose = vision.getPosition();
+                    OTOS.setPosition(visionPose);
+                    currentPose = visionPose;
+                    RobotLog.i("Updated Position based off AprilTag Detection");
+                } else {
+                    currentPose = OTOS.getPosition();
                 }
-                currentPose = OTOS.getPosition();
+                break;
             case APRILTAG:
                 currentPose = vision.getPosition();
                 break;
@@ -393,9 +408,9 @@ public class Follower extends Subassembly {
 
         velocity = OTOS.getVelocity();
         // Get the x value from the given SparkFunOTOS.Pose2D object.
-        xIsMoving = Math.abs(velocity.x) > 2;
+        xIsMoving = Math.abs(velocity.x) > 0.5;
         // Get the x value from the given SparkFunOTOS.Pose2D object.
-        yIsMoving = Math.abs(velocity.y) > 2;
+        yIsMoving = Math.abs(velocity.y) > 0.5;
         // Get the x value from the given SparkFunOTOS.Pose2D object.
         hIsMoving = Math.abs(velocity.h) > 1;
         return xIsMoving || yIsMoving || hIsMoving;

@@ -350,7 +350,7 @@ public class Follower extends Subassembly {
      * Field Centric Movement
      * see <a href="https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html">...</a>
      */
-    private void moveRobot(double y, double x, double h) {
+    public void moveRobot(double y, double x, double h) {
         double rotX;
         double rotY;
         double max;

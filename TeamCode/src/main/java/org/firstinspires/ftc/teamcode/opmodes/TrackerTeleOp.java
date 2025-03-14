@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -14,22 +15,23 @@ import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;
 
+@Config
 @TeleOp
 public class TrackerTeleOp extends LinearOpMode implements DashOpMode {
 
-    public static SparkFunOTOS.Pose2D starting_pose = new SparkFunOTOS.Pose2D(0, 0, 0);
+    public static SparkFunOTOS.Pose2D startingPose = new SparkFunOTOS.Pose2D(0, 0, 0);
 
     Follower follower;
     MecDriveBase driveBase;
     LinearSlide linearSlide;
     AltClaw claw;
-    SparkFunOTOS.Pose2D current_pose = starting_pose;
+    SparkFunOTOS.Pose2D currentPose = startingPose;
     Telemetry telemetryA;
     TelemetryPacket telemetryPacket;
 
     @Override
     public void runOpMode() {
-        follower = new Follower(this, starting_pose);
+        follower = new Follower(this, startingPose);
         driveBase = new MecDriveBase(this);
         linearSlide = new LinearSlide(this);
         claw = new AltClaw(this);
@@ -45,20 +47,27 @@ public class TrackerTeleOp extends LinearOpMode implements DashOpMode {
 
         waitForStart();
 
-        driveBase.control(gamepad1);
-        linearSlide.control(gamepad2);
-        claw.control(gamepad2);
+        if (opModeIsActive()) {
+            while (opModeIsActive()) {
 
-        follower.telemetry();
-        driveBase.telemetry();
-        linearSlide.telemetry();
-        claw.telemetry();
-        telemetry.update();
+                driveBase.control(gamepad1);
+                linearSlide.control(gamepad2);
+                claw.control(gamepad2);
 
-        telemetryPacket.fieldOverlay()
-                .drawImage("/TeamCode/src/main/res/drawable/cordelia", current_pose.x, current_pose.y, 18, 18) // draw cordelia at her position
-                .drawImage("/TeamCode/src/main/res/drawable/arrow", current_pose.x, current_pose.y, 18, 18, current_pose.h, 0.5, 0, false); // draw an arrow on the robot's position, pointing toward the robot's heading, pivoting off the bottom middle of the image
+                currentPose = follower.getCurrentPose();
 
-        FtcDashboard.getInstance().sendTelemetryPacket(telemetryPacket);
+                follower.telemetry();
+                driveBase.telemetry();
+                linearSlide.telemetry();
+                claw.telemetry();
+                telemetry.update();
+
+                telemetryPacket.fieldOverlay()
+                        .drawImage("/TeamCode/src/main/res/drawable/cordelia", currentPose.x, currentPose.y, 18, 18) // draw cordelia at her position
+                        .drawImage("/TeamCode/src/main/res/drawable/arrow", currentPose.x, currentPose.y, 18, 18, currentPose.h, 0.5, 0, false); // draw an arrow on the robot's position, pointing toward the robot's heading, pivoting off the bottom middle of the image
+
+                FtcDashboard.getInstance().sendTelemetryPacket(telemetryPacket);
+            }
+        }
     }
 }

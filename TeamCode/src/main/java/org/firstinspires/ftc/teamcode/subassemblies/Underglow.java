@@ -17,7 +17,7 @@ public class Underglow extends Subassembly {
     }
 
     public void setColor(Color color) {
-        if (color == null) {
+        if (color == null || Global.alliance == null) {
             underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
             return;
         }
@@ -25,10 +25,10 @@ public class Underglow extends Subassembly {
             case ALLIANCE:
                 switch (Global.alliance) {
                     case RED:
-                        underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+                        underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_LAVA_PALETTE);
                         break;
                     case BLUE:
-                        underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+                        underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_OCEAN_PALETTE);
                         break;
                 }
             case GREEN: // undefined
@@ -56,6 +56,6 @@ public class Underglow extends Subassembly {
 
     public enum Alliance {
         RED,
-        BLUE,
+        BLUE
     }
 }

@@ -187,10 +187,12 @@ public class Follower extends Subassembly {
         updatePose();
         if (targetPose == null) {
             RobotLog.e("Target Pose is null!");
+            underglow.setColor(Underglow.Color.YELLOW);
             return;
         }
         if (currentPose == null) {
             RobotLog.e("Current Pose is null!");
+            underglow.setColor(Underglow.Color.YELLOW);
             return;
         }
         if (usePaths) {
@@ -211,11 +213,14 @@ public class Follower extends Subassembly {
         double hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN); // maybe
 
         if (enabled) {
+            underglow.setColor(Underglow.Color.WHITE);
             moveRobot(
                     USE_Y ? yDrive : 0,
                     USE_X ? xDrive : 0,
                     USE_HEADING ? hDrive : 0
             );
+        } else {
+            underglow.setColor(Underglow.Color.ALLIANCE);
         }
 
         telemetry.addLine("Error values:");

@@ -26,24 +26,21 @@ public class TrackerTeleOp extends LinearOpMode implements DashOpMode {
     LinearSlide linearSlide;
     AltClaw claw;
     SparkFunOTOS.Pose2D currentPose = startingPose;
-    Telemetry telemetryA;
-    TelemetryPacket telemetryPacket;
 
     @Override
     public void runOpMode() {
+        telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         follower = new Follower(this, startingPose);
         driveBase = new MecDriveBase(this);
         linearSlide = new LinearSlide(this);
         claw = new AltClaw(this);
-        telemetryA = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
-        telemetryPacket = new TelemetryPacket();
 
-        telemetryA.addLine("This opmode is used to find robot positions for autonomous. It is not intended" +
-                "for driving the robot, but could be useful for debugging. Currently, the robot's position is purely" +
-                "based off of the set starting position. If the starting position is not 0, 0, 0 (center of the field)" +
-                "then you will need to change it via FTC Dashboard. I recommend 2 tiles left of the origin (-48, 0, 0)," +
+        telemetry.addLine("This opmode is used to find robot positions for autonomous. It is not intended " +
+                "for driving the robot, but may be useful for debugging. Currently, the robot's position is purely " +
+                "based off of the set starting position. If the starting position is not 0, 0, 0 (center of the field) " +
+                "then you will need to change it via FTC Dashboard. I recommend 2 tiles left of the origin (-48, 0, 0), " +
                 "because it is accessible and a good anchor point.");
-        telemetryA.update();
+        telemetry.update();
 
         waitForStart();
 
@@ -62,11 +59,15 @@ public class TrackerTeleOp extends LinearOpMode implements DashOpMode {
                 claw.telemetry();
                 telemetry.update();
 
-                telemetryPacket.fieldOverlay()
-                        .drawImage("/TeamCode/src/main/res/drawable/cordelia", currentPose.x, currentPose.y, 18, 18) // draw cordelia at her position
-                        .drawImage("/TeamCode/src/main/res/drawable/arrow", currentPose.x, currentPose.y, 18, 18, currentPose.h, 0.5, 0, false); // draw an arrow on the robot's position, pointing toward the robot's heading, pivoting off the bottom middle of the image
+                TelemetryPacket packet = new TelemetryPacket(true);
+                packet.fieldOverlay()
+                        .setStroke("#12C600")
+                        .setRotation(Math.toRadians(currentPose.h))
+                        .setTranslation(currentPose.y, -currentPose.x) // x and y are swapped because FTC dash's coordinate system wants to be different
+                        .strokeCircle(0, 0, 9) // draw circle for robot position
+                        .strokeLine(0, 0, 9, 0);
 
-                FtcDashboard.getInstance().sendTelemetryPacket(telemetryPacket);
+                FtcDashboard.getInstance().sendTelemetryPacket(packet);
             }
         }
     }

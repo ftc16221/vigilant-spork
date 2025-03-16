@@ -439,7 +439,7 @@ public class Follower extends Subassembly {
     }
 
     /**
-     * Configures the SparkFun OTOS
+     * Configures the SparkFun OTOS by calibrating the IMU and setting constants
      */
     private void configureOTOS(SparkFunOTOS.Pose2D startingPosition) {
         SparkFunOTOS.Version hwVersion;

@@ -14,7 +14,7 @@ public class SetAllianceRed extends LinearOpMode {
         telemetry.update();
         waitForStart();
         if (opModeIsActive()) {
-            Global.alliance = Underglow.Alliance.RED;
+            Global.alliance = Global.Alliance.RED;
         }
         requestOpModeStop();
     }

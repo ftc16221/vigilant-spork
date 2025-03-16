@@ -7,6 +7,11 @@ import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 
 @Config
 public class Global {
-    public static Underglow.Alliance alliance = null;
+    public static Global.Alliance alliance = null;
     public static SparkFunOTOS.Pose2D lastPose = null;
+
+    public enum Alliance {
+        RED,
+        BLUE
+    }
 }

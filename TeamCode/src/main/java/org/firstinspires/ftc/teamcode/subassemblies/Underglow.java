@@ -31,8 +31,9 @@ public class Underglow extends Subassembly {
                         underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_OCEAN_PALETTE);
                         break;
                 }
+                break;
             case GREEN: // undefined
-                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_FOREST_PALETTE);
+                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
                 break;
             case YELLOW: // semi-autonomous unavailable
                 underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);

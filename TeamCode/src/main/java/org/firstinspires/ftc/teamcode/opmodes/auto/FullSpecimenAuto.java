@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.util.Global;
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
  */
 @Config
-@Autonomous(group = "full", preselectTeleOp = "SimpleTeleOp")
+@Autonomous(group = "full", preselectTeleOp = Global.PRESELECT_TELEOP)
 public class FullSpecimenAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-63, -24, 0); // starting position

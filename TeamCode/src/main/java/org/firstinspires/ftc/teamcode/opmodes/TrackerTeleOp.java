@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;
 
 @Config
-@TeleOp
+@TeleOp(group = "tests")
 public class TrackerTeleOp extends LinearOpMode implements DashOpMode {
 
     public static SparkFunOTOS.Pose2D startingPose = new SparkFunOTOS.Pose2D(0, 0, 0);

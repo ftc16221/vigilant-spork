@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.AdvPose;
 import org.firstinspires.ftc.teamcode.util.Global;
 
 @Config
-@TeleOp(group = "main")
+@TeleOp(group = "!main")
 public class SemiAutoTeleOp extends LinearOpMode {
 
     // TODO: make this stuff global

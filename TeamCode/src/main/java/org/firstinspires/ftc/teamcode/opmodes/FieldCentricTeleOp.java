@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 
-@TeleOp()
+@TeleOp(group = "exploratory")
 public class FieldCentricTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {

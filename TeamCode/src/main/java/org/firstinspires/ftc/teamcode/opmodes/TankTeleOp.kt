@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.TankDriveBase
 import org.firstinspires.ftc.teamcode.util.log
 
 @Disabled
-@TeleOp(name = "Tank TeleOp", group = "special")
+@TeleOp(name = "Tank TeleOp", group = "exploratory")
 class TankTeleOp : LinearOpMode() {
 
     override fun runOpMode() {

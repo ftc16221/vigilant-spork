@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow
 import org.firstinspires.ftc.teamcode.util.log
 
-@TeleOp(group = "main")
+@TeleOp(group = "!main")
 class SimpleTeleOp(): LinearOpMode() {
 
     override fun runOpMode() {

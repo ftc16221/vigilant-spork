@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.util.Subassembly;
 public class Underglow extends Subassembly {
 
     RevBlinkinLedDriver underglow;
+    private Color lastColor;
 
     public Underglow(OpMode opMode) {
         super(opMode,"Underglow");
@@ -17,10 +18,14 @@ public class Underglow extends Subassembly {
     }
 
     public void setColor(Color color) {
+        if (color == lastColor) return; // only set strip color if it has changed
+        lastColor = color;
+
         if (color == null || Global.alliance == null) {
             underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
             return;
         }
+
         switch (color) {
             case ALLIANCE:
                 switch (Global.alliance) {
@@ -53,10 +58,5 @@ public class Underglow extends Subassembly {
         GREEN,
         WHITE,
         RAINBOW
-    }
-
-    public enum Alliance {
-        RED,
-        BLUE
     }
 }

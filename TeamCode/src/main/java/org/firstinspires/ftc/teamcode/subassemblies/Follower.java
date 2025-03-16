@@ -108,13 +108,12 @@ public class Follower extends Subassembly {
                 RobotLog.i("(Follower) Starting position not set, using last detected position");
             } else {
                 RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
-                underglow.setColor(Underglow.Color.YELLOW);
                 disable();
+                underglow.setColor(Underglow.Color.YELLOW);
                 startingPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
             }
         }
         configureOTOS(startingPosition);
-        currentPose = startingPosition;
 
         getOpModeType();
     }
@@ -186,8 +185,10 @@ public class Follower extends Subassembly {
     public void update() {
         updatePose();
         if (targetPose == null) {
-            RobotLog.e("Target Pose is null!");
-            underglow.setColor(Underglow.Color.YELLOW);
+            if(opModeType == OpModeType.AUTONOMOUS) {
+                RobotLog.e("Target Pose is null!");
+                underglow.setColor(Underglow.Color.YELLOW);
+            }
             return;
         }
         if (currentPose == null) {

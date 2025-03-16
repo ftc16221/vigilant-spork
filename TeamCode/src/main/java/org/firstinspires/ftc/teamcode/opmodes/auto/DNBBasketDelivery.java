@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@Autonomous(group = "do not break")
+@Autonomous(group = "do not break", preselectTeleOp = "SimpleTeleOp")
 public class DNBBasketDelivery extends LinearOpMode {
 
 

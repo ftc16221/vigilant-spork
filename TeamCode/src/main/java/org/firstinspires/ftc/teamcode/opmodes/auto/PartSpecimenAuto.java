@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
  */
 @Config
-@Autonomous(group = "part", preselectTeleOp = "Alt Claw TeleOp")
+@Autonomous(group = "part", preselectTeleOp = "SimpleTeleOp")
 public class PartSpecimenAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, -36, 0); // starting position

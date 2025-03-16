@@ -10,8 +10,9 @@ import org.firstinspires.ftc.teamcode.util.Global;
 public class SetAllianceRed extends LinearOpMode {
     @Override
     public void runOpMode() {
-        telemetry.addLine("Press START to set alliance to RED");
+        telemetry.addLine("Press START to set alliance to RED, or press STOP now to disable");
         telemetry.update();
+        Global.alliance = null;
         waitForStart();
         if (opModeIsActive()) {
             Global.alliance = Global.Alliance.RED;

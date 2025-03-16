@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 import java.util.List;
+import com.farthergate.voldemort.PID;
 
 /**
  * Subassembly to autonomously move the drivebase
@@ -37,6 +38,17 @@ public class Follower extends Subassembly {
     public static double TURN_GAIN = 0.04; // Turn Control "Gain". e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
     public static double MAX_AUTO_SPEED = 0.4; // Clip the approach speed to this max value (adjust for your robot)
     public static double MAX_AUTO_TURN = 0.2; // Clip the turn speed to this max value (adjust for your robot)
+
+    static final float PID_KP = 2.0f;
+    static final float PID_KI = 0.5f;
+    static final float PID_KD = 0.25f;
+
+    static final float PID_TAU = 0.02f;
+
+    static final float PID_LIM_MIN_INT = -5.0f;
+    static final float PID_LIM_MAX_INT = 5.0f;
+
+    static final float SAMPLE_TIME_S = 0.01f;
 
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);
     public static double OTOS_LINEAR_SCALAR = 1.01253481894;
@@ -295,25 +307,21 @@ public class Follower extends Subassembly {
         // Get the x value from the given SparkFunOTOS.Pose2D object.
         yError = currentPose.y - targetPose.y;
         hError = (currentPose.h - targetPose.h) * (Math.abs(currentPose.h - targetPose.h) >= 180 ? -1 : 1);
+
+        PID pidX = new PID(PID_KP, PID_KI, PID_KD, PID_TAU, (float)-MAX_AUTO_SPEED, (float)MAX_AUTO_SPEED, PID_LIM_MIN_INT, PID_LIM_MAX_INT, SAMPLE_TIME_S);
+        PID pidY = new PID(PID_KP, PID_KI, PID_KD, PID_TAU, (float)-MAX_AUTO_SPEED, (float)MAX_AUTO_SPEED, PID_LIM_MIN_INT, PID_LIM_MAX_INT, SAMPLE_TIME_S);
+        PID pidH = new PID(PID_KP, PID_KI, PID_KD, PID_TAU, (float)-MAX_AUTO_TURN, (float)MAX_AUTO_TURN, PID_LIM_MIN_INT, PID_LIM_MAX_INT, SAMPLE_TIME_S);
         while ((!robotInTolerance() || (holdEnd && robotIsMoving())) && opMode.opModeIsActive()) {
             currentPose = OTOS.getPosition();
-            // Get the x value from the given SparkFunOTOS.Pose2D object.
-            currentH = currentPose.h;
-            // Determine y, x, and heading error so we can use them to control the robot automatically.
-            // Basic error correction based on just the P of PID
-            xError = currentPose.x - targetPose.x;
-            yError = currentPose.y - targetPose.y;
-            // Reverse the error if needed to allow for wrapping.
-            hError = (currentH - targetPose.h) * (Math.abs(currentH - targetPose.h) >= 180 ? -1 : 1);
-            // Use the speed and turn "gains" to calculate how we want the robot to move. Clip it to the maximum.
-            yDrive = Range.clip(-yError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-            xDrive = Range.clip(-xError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-            hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+
+            pidX.update((float) targetPose.x, (float) currentPose.x);
+            pidY.update((float) targetPose.y, (float) currentPose.y);
+            pidH.update((float) targetPose.h, (float) currentPose.h);
 
             moveRobot(
-                    USE_Y ? yDrive : 0,
-                    USE_X ? xDrive : 0,
-                    USE_HEADING ? hDrive : 0
+                    USE_Y ? pidY.out * DRIVE_GAIN : 0,
+                    USE_X ? pidX.out * DRIVE_GAIN : 0,
+                    USE_HEADING ? pidH.out * DRIVE_GAIN : 0
             );
             callTelemetry();
         }

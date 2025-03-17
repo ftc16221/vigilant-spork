@@ -31,14 +31,16 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import android.util.Size;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.subassemblies.Vision;
 import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.Locale;
@@ -58,16 +60,15 @@ import java.util.Locale;
  */
 
 @TeleOp(name = "Utility: Camera Frame Capture", group = "Utility")
-@Disabled
 public class UtilityCameraFrameCapture extends LinearOpMode
 {
     /*
      * EDIT THESE PARAMETERS AS NEEDED
      */
-    final boolean USING_WEBCAM = false;
+    final boolean USING_WEBCAM = true;
     final BuiltinCameraDirection INTERNAL_CAM_DIR = BuiltinCameraDirection.BACK;
-    final int RESOLUTION_WIDTH = 640;
-    final int RESOLUTION_HEIGHT = 480;
+    final int RESOLUTION_WIDTH = 1280;
+    final int RESOLUTION_HEIGHT = 720;
 
     // Internal state
     boolean lastX;
@@ -78,6 +79,7 @@ public class UtilityCameraFrameCapture extends LinearOpMode
     public void runOpMode()
     {
         VisionPortal portal;
+        Vision vision = new Vision(this);
 
         if (USING_WEBCAM)
         {
@@ -93,6 +95,8 @@ public class UtilityCameraFrameCapture extends LinearOpMode
                     .setCameraResolution(new Size(RESOLUTION_WIDTH, RESOLUTION_HEIGHT))
                     .build();
         }
+
+        FtcDashboard.getInstance().startCameraStream(vision.getDash(), 0.0);
 
         while (!isStopRequested())
         {

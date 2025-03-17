@@ -2,17 +2,29 @@ package org.firstinspires.ftc.teamcode.subassemblies;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.util.AdvPose;
+import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+import java.util.List;
+
+/**
+ * Subassembly to autonomously move the drivebase
+ * <p>
+ * Javadoc comments partially written by Github Copilot, so if they don't make sense \_(ツ)_/ <sub>(thx copilot for that weird face)</sub>
+ */
 @Config
 public class Follower extends Subassembly {
 
@@ -27,23 +39,36 @@ public class Follower extends Subassembly {
     public static double MAX_AUTO_TURN = 0.2; // Clip the turn speed to this max value (adjust for your robot)
 
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);
-    public static double OTOS_LINEAR_SCALAR = 1.01253481894;
-    public static double OTOS_ANGULAR_SCALAR = 1;
+    public static double OTOS_LINEAR_SCALAR = 0.97260274;
+    public static double OTOS_ANGULAR_SCALAR = 0.99913963;
 
-    private LinearOpMode opMode;
-    private HardwareMap hardwareMap;
-    private Telemetry telemetry;
-    private MecDriveBase driveBase;
+    public static LocalizationMode LOCALIZATION_MODE = LocalizationMode.OTOS;
 
-    private DcMotor leftRear;
-    private DcMotor leftFront;
-    private DcMotor rightRear;
-    private DcMotor rightFront;
-    private SparkFunOTOS OTOS; // Optical Tracking Odometry Sensor
+    private final LinearOpMode opMode;
+    private final HardwareMap hardwareMap;
+    private final Telemetry telemetry;
+    private final MecDriveBase driveBase;
+    private final Underglow underglow;
 
+    private final DcMotor leftRear;
+    private final DcMotor leftFront;
+    private final DcMotor rightRear;
+    private final DcMotor rightFront;
+    private final SparkFunOTOS OTOS; // Optical Tracking Odometry Sensor
+    private final Vision vision;
+
+    OpModeType opModeType;
     SparkFunOTOS.Pose2D startingPosition;
     SparkFunOTOS.Pose2D velocity;
     SparkFunOTOS.Pose2D currentPose;
+    AdvPose targetPose;
+    List<AdvPose> path;
+    boolean enabled = true;
+    boolean usePaths = true;
+    double tolerance = 2;
+    int pathState = 0;
+    boolean busy = false;
+
     double currentH;
     double yDrive;
     double xDrive;
@@ -52,14 +77,19 @@ public class Follower extends Subassembly {
     double yError;
     double hError;
 
+    /**
+     * Constructor for Follower
+     * @param opMode LinearOpMode object
+     * @param startingPosition The starting position of the robot (null if unknown)
+     */
     public Follower(LinearOpMode opMode, SparkFunOTOS.Pose2D startingPosition) {
         super(opMode, "Follower");
         this.opMode = opMode;
-        this.startingPosition = startingPosition;
         hardwareMap = opMode.hardwareMap;
         telemetry = getTelemetry();
 
         driveBase = new MecDriveBase(opMode);
+        underglow = new Underglow(opMode);
 
         leftRear = driveBase.getLeftRear();
         leftFront = driveBase.getLeftFront();
@@ -67,64 +97,196 @@ public class Follower extends Subassembly {
         rightFront = driveBase.getRightFront();
 
         OTOS = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
+
+        vision = new Vision(opMode);
+
+        opModeType = getOpModeType();
+
+        if (startingPosition == null) {
+            if (Global.lastPose != null) {
+                startingPosition = Global.lastPose;
+                RobotLog.i("(Follower) Starting position not set, using last detected position");
+            } else {
+                RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
+                underglow.setColor(Underglow.Color.YELLOW);
+                disable();
+                startingPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
+            }
+        }
         configureOTOS(startingPosition);
+        currentPose = startingPosition;
+
+        opModeType = getOpModeType();
     }
 
-
-
+    /**
+     * Enable Autonomous Movement
+     * <p>
+     * Enabled by default
+     */
+    public void enable() {
+        enabled = true;
+    }
 
     /**
-     * v1.3
-     *
-     * Positive y is forward.
-     * Positive x is strafe right.
-     * Positive heading is counter-clockwise.
+     * Disable Autonomous Movement
+     * <p>
+     * Should only be disabled during TeleOp
      */
-    public void driveToPos(double targetX, double targetY, double targetH, double tolerance, boolean holdEnd) {
+    public void disable() {
+        enabled = false;
+    }
 
-        currentPose = OTOS.getPosition();
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        currentH = currentPose.h;
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        xError = currentPose.x - targetX;
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        yError = currentPose.y - targetY;
-        hError = (currentH - targetH) * (Math.abs(currentH - targetH) >= 180 ? -1 : 1);
-        while ((!robotInTolerance(tolerance) || (holdEnd && robotIsMoving())) && opMode.opModeIsActive()) {
-            currentPose = OTOS.getPosition();
-            // Get the x value from the given SparkFunOTOS.Pose2D object.
-            currentH = currentPose.h;
-            // Determine y, x, and heading error so we can use them to control the robot automatically.
-            // Basic error correction based on just the P of PID
-            xError = currentPose.x - targetX;
-            yError = currentPose.y - targetY;
-            // Reverse the error if needed to allow for wrapping.
-            hError = (currentH - targetH) * (Math.abs(currentH - targetH) >= 180 ? -1 : 1);
-            // Use the speed and turn "gains" to calculate how we want the robot to move. Clip it to the maximum.
-            yDrive = Range.clip(-yError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-            xDrive = Range.clip(-xError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-            hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+    /**
+     * Check if Autonomous Movement is enabled
+     * @return if Autonomous Movement is enabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
 
+    /**
+     * Set the method of localization for the robot
+     * <p>
+     * OTOS selected by default
+     */
+    public void setLocalizationMode(LocalizationMode mode) {
+        LOCALIZATION_MODE = mode;
+    }
+
+    public void setPath(List<AdvPose> path) {
+        this.path = path;
+    }
+
+    public int getPathState() {
+        return pathState;
+    }
+
+    public void setPathState(int pathState) {
+        this.pathState = pathState;
+    }
+
+    public boolean isBusy() {
+        return busy;
+    }
+
+    public boolean isNotBusy() {
+        return !busy;
+    }
+
+    public void setTargetPose(AdvPose targetPose) {
+        this.targetPose = targetPose;
+    }
+
+    public SparkFunOTOS.Pose2D getCurrentPose() {
+        updatePose();
+        return currentPose;
+    }
+
+    public void update() {
+        updatePose();
+        if (targetPose == null) {
+            RobotLog.e("Target Pose is null!");
+            underglow.setColor(Underglow.Color.YELLOW);
+            return;
+        }
+        if (currentPose == null) {
+            RobotLog.e("Current Pose is null!");
+            underglow.setColor(Underglow.Color.YELLOW);
+            return;
+        }
+        if (usePaths) {
+            if (-1 < pathState && pathState < path.size() - 1) {
+                targetPose = path.get(pathState);
+            } else {
+                return;
+            }
+        }
+
+        // Get the x value from the given SparkFunOTOS.Pose2D object.
+        double xError = currentPose.x - targetPose.x;
+        double yError = currentPose.y - targetPose.y;
+        double hError = (currentPose.h - targetPose.h) * (Math.abs(currentPose.h - targetPose.h) >= 180 ? -1 : 1);
+
+        double xDrive = Range.clip(-xError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED); // why is this negative error?
+        double yDrive = Range.clip(-yError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED); // eh i mean it works
+        double hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN); // maybe
+
+        if (enabled) {
+            underglow.setColor(Underglow.Color.WHITE);
             moveRobot(
                     USE_Y ? yDrive : 0,
                     USE_X ? xDrive : 0,
                     USE_HEADING ? hDrive : 0
             );
-            callTelemetry();
+        } else {
+            underglow.setColor(Underglow.Color.ALLIANCE);
         }
-        moveRobot(0, 0, 0);
-        opMode.sleep(100);
+
+        telemetry.addLine("Error values:");
+        telemetry.addData("X error", xError);
+        telemetry.addData("Y error", yError);
+        telemetry.addData("H error", hError);
+        telemetry.addLine("Drive values:");
+        telemetry.addData("X drive", xDrive);
+        telemetry.addData("Y drive", yDrive);
+        telemetry.addData("H drive", hDrive);
+        callTelemetry();
+
+        if (!usePaths) {
+            return;
+        }
+
+        if (robotInTolerance() && (!targetPose.stopAtEnd || !robotIsMoving())) {
+            busy = false;
+            moveRobot(0, 0, 0);
+            opMode.sleep(100);
+            if (!targetPose.hold) {
+                // progress through path
+                if (pathState >= path.size() - 1) {
+                    pathState = -1;
+                } else {
+                    pathState++;
+                }
+            }
+        } else {
+            busy = true;
+        }
+
     }
 
     /**
-     * v1.3
-     *
+     * Gets the relevant pose of the robot based off of the localization mode.
+     */
+    public void updatePose() {
+        switch (LOCALIZATION_MODE) {
+            case OTOS:
+                currentPose = OTOS.getPosition();
+                break;
+            case HYBRID:
+                if (!robotIsMoving() && vision.getPosition() != null) {
+                    SparkFunOTOS.Pose2D visionPose = vision.getPosition();
+                    OTOS.setPosition(visionPose);
+                    currentPose = visionPose;
+                    RobotLog.i("Updated Position based off AprilTag Detection");
+                } else {
+                    currentPose = OTOS.getPosition();
+                }
+                break;
+            case APRILTAG:
+                currentPose = vision.getPosition();
+                break;
+        }
+    }
+
+    /**
      * Positive y is forward.
      * Positive x is strafe right.
      * Positive heading is counter-clockwise.
+     * @version 1.3
      */
     public void driveToPose(SparkFunOTOS.Pose2D targetPose, double tolerance, boolean holdEnd) {
-
+        this.tolerance = tolerance;
         currentPose = OTOS.getPosition();
         // Get the x value from the given SparkFunOTOS.Pose2D object.
         currentH = currentPose.h;
@@ -133,7 +295,7 @@ public class Follower extends Subassembly {
         // Get the x value from the given SparkFunOTOS.Pose2D object.
         yError = currentPose.y - targetPose.y;
         hError = (currentPose.h - targetPose.h) * (Math.abs(currentPose.h - targetPose.h) >= 180 ? -1 : 1);
-        while ((!robotInTolerance(tolerance) || (holdEnd && robotIsMoving())) && opMode.opModeIsActive()) {
+        while ((!robotInTolerance() || (holdEnd && robotIsMoving())) && opMode.opModeIsActive()) {
             currentPose = OTOS.getPosition();
             // Get the x value from the given SparkFunOTOS.Pose2D object.
             currentH = currentPose.h;
@@ -159,16 +321,41 @@ public class Follower extends Subassembly {
         opMode.sleep(100);
     }
 
+    public void stop() {
+        disable();
+        updatePose();
+        Global.lastPose = currentPose;
+    }
+
+    /**
+     * Find the type of OpMode that is being run, based off the annotation
+     * <p>
+     * I know there is a reason I wrote this but I forgot
+     * <p>
+     * OHH it's so we don't use paths during teleop
+     * @return type of OpMode (AUTONOMOUS, TELEOP)
+     */
+    private OpModeType getOpModeType() {
+        if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
+            return OpModeType.AUTONOMOUS;
+        } else if (opMode.getClass().isAnnotationPresent(TeleOp.class)) {
+            usePaths = false;
+            return OpModeType.TELEOP;
+        } else {
+            return OpModeType.UNKNOWN;
+        }
+    }
+
     /**
      * Move robot according to desired axes motions.
      * Positive x is forward.
      * Positive y is strafe left.
      * Positive yaw is counter-clockwise.
-     *
+     * <p>
      * Field Centric Movement
-     * see https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
+     * see <a href="https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html">...</a>
      */
-    private void moveRobot(double y, double x, double h) {
+    public void moveRobot(double y, double x, double h) {
         double rotX;
         double rotY;
         double max;
@@ -198,9 +385,10 @@ public class Follower extends Subassembly {
     }
 
     /**
-     * Describe this function...
+     * Check if the robot is within the tolerance of the target position.
+     * @return if robot is within tolerance
      */
-    private boolean robotInTolerance(double tolerance) {
+    private boolean robotInTolerance() {
         boolean xInTolerance;
         boolean yInTolerance;
         boolean hInTolerance;
@@ -215,7 +403,8 @@ public class Follower extends Subassembly {
     }
 
     /**
-     * Describe this function...
+     * Check if the robot is moving.
+     * @return if robot is moving
      */
     private boolean robotIsMoving() {
         boolean xIsMoving;
@@ -224,36 +413,27 @@ public class Follower extends Subassembly {
 
         velocity = OTOS.getVelocity();
         // Get the x value from the given SparkFunOTOS.Pose2D object.
-        xIsMoving = Math.abs(velocity.x) > 2;
+        xIsMoving = Math.abs(velocity.x) > 0.5;
         // Get the x value from the given SparkFunOTOS.Pose2D object.
-        yIsMoving = Math.abs(velocity.y) > 2;
+        yIsMoving = Math.abs(velocity.y) > 0.5;
         // Get the x value from the given SparkFunOTOS.Pose2D object.
         hIsMoving = Math.abs(velocity.h) > 1;
         return xIsMoving || yIsMoving || hIsMoving;
     }
 
-
-
-    /**
-     * Describe this function...
-     */
     private void callTelemetry() {
         telemetry.addData("Auto", "yDrive" + JavaUtil.formatNumber(yDrive, 5, 2) + ", xDrive" + JavaUtil.formatNumber(xDrive, 5, 2) + ", turn" + JavaUtil.formatNumber(hDrive, 5, 2));
         telemetry.addLine("Coordinates:");
         telemetry.addData("X coordinate", JavaUtil.formatNumber(currentPose.x, 2));
         telemetry.addData("Y coordinate", JavaUtil.formatNumber(currentPose.y, 2));
         telemetry.addData("Heading angle", JavaUtil.formatNumber(currentPose.h, 2));
-        telemetry.addLine("Error:");
-        telemetry.addData("X error", JavaUtil.formatNumber(xError, 2));
-        telemetry.addData("Y error", JavaUtil.formatNumber(yError, 2));
-        telemetry.addData("Heading error", JavaUtil.formatNumber(hError, 2));
         telemetry.addData("Robot is moving", robotIsMoving());
         telemetry.addLine("Velocity:");
         velocity = OTOS.getVelocity();
         telemetry.addData("X velocity", JavaUtil.formatNumber(velocity.x, 2));
         telemetry.addData("Y velocity", JavaUtil.formatNumber(velocity.y, 2));
         telemetry.addData("Heading velocity", JavaUtil.formatNumber(velocity.h, 2));
-        telemetry.addData("Robot in tolerance", robotInTolerance(2));
+        telemetry.addData("Robot in tolerance", robotInTolerance());
         // Update the telemetry on the driver station.
         telemetry.update();
     }
@@ -332,8 +512,19 @@ public class Follower extends Subassembly {
         telemetry.addLine("OTOS Firmware Version: v" + fwVersion.major + "." + fwVersion.minor);
         telemetry.update();
     }
-}
 
+    public enum OpModeType {
+        TELEOP,
+        AUTONOMOUS,
+        UNKNOWN
+    }
+
+    public enum LocalizationMode {
+        OTOS,
+        HYBRID,
+        APRILTAG
+    }
+}
 
 
 /*

@@ -16,8 +16,6 @@ class DashboardTeleOp : LinearOpMode(), DashOpMode {
         val driveBase = MecDriveBase(this)
         val vision = Vision(this)
 
-        vision.visionPortal
-
         waitForStart()
 
         FtcDashboard.getInstance().startCameraStream(vision.dash, 0.0)

@@ -1,0 +1,30 @@
+package org.firstinspires.ftc.teamcode.opmodes;
+
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
+import org.firstinspires.ftc.teamcode.subassemblies.Follower;
+import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
+
+@TeleOp()
+public class FieldCentricTeleOp extends LinearOpMode {
+    @Override
+    public void runOpMode() {
+        Follower follower = new Follower(this, new SparkFunOTOS.Pose2D(0, 0, 180));
+        LinearSlide linearSlide = new LinearSlide(this);
+        AltClaw claw = new AltClaw(this);
+
+        follower.disable();
+
+        waitForStart();
+        if (opModeIsActive()) {
+            while (opModeIsActive()) {
+                follower.moveRobot(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+                linearSlide.control(gamepad2);
+                claw.control(gamepad2);
+            }
+        }
+    }
+}

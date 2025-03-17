@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
+import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 
 /**
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
@@ -40,6 +41,7 @@ public class FullBasketAuto extends LinearOpMode {
     @Override
     public void runOpMode() {
         follower = new Follower(this, startPose);
+        new Underglow(this);
 
         linearSlide = new LinearSlide(this);
         linearSlideMotor = linearSlide.getLinearSlide();
@@ -68,13 +70,14 @@ public class FullBasketAuto extends LinearOpMode {
             ascend();
             requestOpModeStop();
         }
+        follower.stop();
     }
 
     private void scoreSample() {
         claw.close();
         wristServo.setPosition(0.7);
         linearSlide.moveSlide(SLIDE_HIGH_BASKET_POS, 1);
-        follower.driveToPose(basketPose2, 3, true);
+        follower.driveToPose(basketPose2, 5, true);
         while (linearSlideMotor.isBusy() && opModeIsActive()) {
             telemetry.addData("linear slide pos", linearSlideMotor.getCurrentPosition());
             telemetry.update();

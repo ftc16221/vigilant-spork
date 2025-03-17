@@ -11,11 +11,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
+import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 
 /**
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
  */
-@Disabled
 @Config
 @Autonomous(group = "part", preselectTeleOp = "Alt Claw TeleOp")
 public class PartSpecimenAuto extends LinearOpMode {
@@ -35,6 +35,7 @@ public class PartSpecimenAuto extends LinearOpMode {
     @Override
     public void runOpMode() {
         follower = new Follower(this, startPose);
+        new Underglow(this);
 
         linearSlide = new LinearSlide(this);
         linearSlideMotor = linearSlide.getLinearSlide();
@@ -46,6 +47,7 @@ public class PartSpecimenAuto extends LinearOpMode {
         waitForStart();
         if (opModeIsActive()) {
             scoreSpecimen(score1Pose);
+            follower.stop();
             requestOpModeStop();
         }
     }

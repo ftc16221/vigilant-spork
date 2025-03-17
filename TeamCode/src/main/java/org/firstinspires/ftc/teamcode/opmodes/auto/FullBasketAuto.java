@@ -11,12 +11,13 @@ import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.util.Global;
 
 /**
  * Loosely based off of <a href="https://pedropathing.com/examples/auto.html">PedroPathing's Example Auto</a>
  */
 @Config
-@Autonomous(group = "full", preselectTeleOp = "Alt Claw TeleOp")
+@Autonomous(group = "full", preselectTeleOp = Global.PRESELECT_TELEOP)
 public class FullBasketAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, 36, 180); // starting position

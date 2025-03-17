@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 
 @Disabled
-@TeleOp(name = "Linear Slide Test")
+@TeleOp(group = "tests)
 class LinearSlideTest: LinearOpMode() {
 
     override fun runOpMode() {

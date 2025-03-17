@@ -2,8 +2,9 @@ package org.firstinspires.ftc.teamcode.opmodes.auto
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import org.firstinspires.ftc.teamcode.util.Global
 
-@Autonomous(name = "Empty Autonomous")
+@Autonomous(name = "Empty Autonomous", preselectTeleOp = Global.PRESELECT_TELEOP)
 class EmptyAuto: LinearOpMode() {
 
     override fun runOpMode() {

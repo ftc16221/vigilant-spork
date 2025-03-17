@@ -39,8 +39,8 @@ public class Follower extends Subassembly {
     public static double MAX_AUTO_TURN = 0.2; // Clip the turn speed to this max value (adjust for your robot)
 
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);
-    public static double OTOS_LINEAR_SCALAR = 1.01253481894;
-    public static double OTOS_ANGULAR_SCALAR = 1;
+    public static double OTOS_LINEAR_SCALAR = 0.97260274;
+    public static double OTOS_ANGULAR_SCALAR = 0.99913963;
 
     public static LocalizationMode LOCALIZATION_MODE = LocalizationMode.OTOS;
 
@@ -116,7 +116,7 @@ public class Follower extends Subassembly {
         configureOTOS(startingPosition);
         currentPose = startingPosition;
 
-        getOpModeType();
+        opModeType = getOpModeType();
     }
 
     /**

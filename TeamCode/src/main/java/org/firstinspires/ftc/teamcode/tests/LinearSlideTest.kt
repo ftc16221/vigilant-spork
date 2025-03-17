@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.tests
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 
-@TeleOp(name = "Linear Slide Test", group = "tests")
+@Disabled
+@TeleOp(group = "tests)
 class LinearSlideTest: LinearOpMode() {
 
     override fun runOpMode() {

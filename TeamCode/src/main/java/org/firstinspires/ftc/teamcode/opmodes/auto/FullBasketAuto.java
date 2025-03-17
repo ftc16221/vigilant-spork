@@ -78,7 +78,7 @@ public class FullBasketAuto extends LinearOpMode {
         claw.close();
         wristServo.setPosition(0.7);
         linearSlide.moveSlide(SLIDE_HIGH_BASKET_POS, 1);
-        follower.driveToPose(basketPose2, 3, true);
+        follower.driveToPose(basketPose2, 5, true);
         while (linearSlideMotor.isBusy() && opModeIsActive()) {
             telemetry.addData("linear slide pos", linearSlideMotor.getCurrentPosition());
             telemetry.update();

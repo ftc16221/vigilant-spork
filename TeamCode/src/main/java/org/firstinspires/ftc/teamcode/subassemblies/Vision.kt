@@ -141,10 +141,10 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         val detection = getDetections()?.first()
         detection ?: return null
 
-        val position = detection.robotPose.position
-        val orientation = detection.robotPose.orientation
+        val pose = detection.ftcPose
+        val y =
 
-        return SparkFunOTOS.Pose2D(position.x, position.y, orientation.yaw)
+        return SparkFunOTOS.Pose2D(-pose.y, -pose.x, -pose.yaw) // swapped because ftc hates standardization
     }
 
     /**

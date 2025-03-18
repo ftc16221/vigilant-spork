@@ -242,7 +242,7 @@ public class Follower extends Subassembly {
             return;
         }
 
-        if (robotInTolerance() && (!targetPose.stopAtEnd || !robotIsMoving())) {
+        if (robotInTolerance() && (!targetPose.stopAtEnd || !isRobotMoving())) {
             busy = false;
             moveRobot(0, 0, 0);
             opMode.sleep(100);
@@ -269,7 +269,7 @@ public class Follower extends Subassembly {
                 currentPose = OTOS.getPosition();
                 break;
             case HYBRID:
-                if (!robotIsMoving() && vision.getPosition() != null && apriltagUpdateDeadline.hasExpired()) {
+                if (!isRobotMoving() && vision.getPosition() != null && apriltagUpdateDeadline.hasExpired()) {
                     apriltagUpdateDeadline.reset();
                     SparkFunOTOS.Pose2D visionPose = vision.getPosition();
                     OTOS.setPosition(visionPose);
@@ -301,7 +301,7 @@ public class Follower extends Subassembly {
         // Get the x value from the given SparkFunOTOS.Pose2D object.
         yError = currentPose.y - targetPose.y;
         hError = (currentPose.h - targetPose.h) * (Math.abs(currentPose.h - targetPose.h) >= 180 ? -1 : 1);
-        while ((!robotInTolerance() || (holdEnd && robotIsMoving())) && opMode.opModeIsActive()) {
+        while ((!robotInTolerance() || (holdEnd && isRobotMoving())) && opMode.opModeIsActive()) {
             currentPose = OTOS.getPosition();
             // Get the x value from the given SparkFunOTOS.Pose2D object.
             currentH = currentPose.h;
@@ -315,6 +315,10 @@ public class Follower extends Subassembly {
             yDrive = Range.clip(-yError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
             xDrive = Range.clip(-xError * DRIVE_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
             hDrive = Range.clip(hError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+
+            telemetry.addData("x drive", "%.2f", xDrive)
+                    .addData("y drive", "%.2f", yDrive)
+                    .addData("h drive", "%.2f", hDrive);
 
             moveRobot(
                     USE_Y ? yDrive : 0,
@@ -412,7 +416,7 @@ public class Follower extends Subassembly {
      * Check if the robot is moving.
      * @return if robot is moving
      */
-    private boolean robotIsMoving() {
+    private boolean isRobotMoving() {
         boolean xIsMoving;
         boolean yIsMoving;
         boolean hIsMoving;
@@ -428,12 +432,10 @@ public class Follower extends Subassembly {
     }
 
     public void telemetry() {
-        telemetry.addData("Auto", "yDrive" + JavaUtil.formatNumber(yDrive, 5, 2) + ", xDrive" + JavaUtil.formatNumber(xDrive, 5, 2) + ", turn" + JavaUtil.formatNumber(hDrive, 5, 2));
-        telemetry.addLine("Coordinates:");
-        telemetry.addData("X coordinate", JavaUtil.formatNumber(currentPose.x, 2));
-        telemetry.addData("Y coordinate", JavaUtil.formatNumber(currentPose.y, 2));
-        telemetry.addData("Heading angle", JavaUtil.formatNumber(currentPose.h, 2));
-        telemetry.addData("Robot is moving", robotIsMoving());
+        telemetry.addData("current x", "%.2f", currentPose.x);
+        telemetry.addData("current y", "%.2f", currentPose.y);
+        telemetry.addData("current h", "%.2f", currentPose.h);
+        telemetry.addData("Robot is moving", isRobotMoving());
         telemetry.addLine("Velocity:");
         velocity = OTOS.getVelocity();
         telemetry.addData("X velocity", JavaUtil.formatNumber(velocity.x, 2));

@@ -57,9 +57,17 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         @JvmField var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
         @JvmField var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
         @JvmField var CAMERA_RESOLUTION = Size(1280, 720)
+
         @JvmField var APRILTAG_RANGE_LIMIT = 60.0; // inches
+
         @JvmField var BLUE_APRILTAG_IDS = listOf(11, 12, 13)
         @JvmField var RED_APRILTAG_IDS = listOf(14, 15, 16)
+
+        // camera calibration values
+        @JvmField var FX = 484.01521684
+        @JvmField var FY = 484.01521684
+        @JvmField var CX = 682.931618492
+        @JvmField var CY = 339.304216996
     }
 
     private val webcam = hardwareMap.get(WebcamName::class.java, "Webcam 1") // for our squirrel overlords
@@ -74,6 +82,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         .setDrawAxes(true)
         .setDrawCubeProjection(true)
         .setCameraPose(CAMERA_POSITION, CAMERA_ORIENTATION)
+        .setLensIntrinsics(FX, FY, CX, CY)
         .build()
 
     val visionPortal = VisionPortal.Builder()
@@ -91,7 +100,9 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 //    val panTiltHolder = PtzControl.PanTiltHolder()
 
     init {
-        while(visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {}
+        while(visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {
+            // intentionally blank
+        }
 
         val exposureControl = visionPortal.getCameraControl(ExposureControl::class.java)
 //        exposureControl.setExposure()
@@ -145,8 +156,17 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 
         val position = detection.robotPose.position
         val orientation = detection.robotPose.orientation
-        // TODO: invert position values when we are in red alliance
-        return SparkFunOTOS.Pose2D(-position.y, position.x, orientation.yaw + 90) // all weird because FTC hates standardization
+
+        // values are all weird because FTC hates standardization
+        val x = -position.y
+        val y = position.x
+        val h = orientation.yaw + 90
+
+        return if(Global.alliance == Global.Alliance.RED) {
+            SparkFunOTOS.Pose2D(-x, -y, h + 180)
+        } else {
+            SparkFunOTOS.Pose2D(x, y, h)
+        }
     }
 
     /**

@@ -9,23 +9,17 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.PtzControl
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Position
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles
 import org.firstinspires.ftc.teamcode.util.DashOpMode
+import org.firstinspires.ftc.teamcode.util.Global
 import org.firstinspires.ftc.teamcode.util.Subassembly
 import org.firstinspires.ftc.teamcode.util.log
-import org.firstinspires.ftc.teamcode.util.toDegrees
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
-import kotlin.math.cos
-import kotlin.math.hypot
-import kotlin.math.pow
-import kotlin.math.sin
 
 /**
  * Vision subassembly for detecting AprilTags and calculating robot position on the field via AprilTags.
@@ -63,9 +57,9 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         @JvmField var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
         @JvmField var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
         @JvmField var CAMERA_RESOLUTION = Size(1280, 720)
-
-        @JvmField var EXPOSURE = 100
-        @JvmField var GAIN = 100
+        @JvmField var APRILTAG_RANGE_LIMIT = 60.0; // inches
+        @JvmField var BLUE_APRILTAG_IDS = listOf(11, 12, 13)
+        @JvmField var RED_APRILTAG_IDS = listOf(14, 15, 16)
     }
 
     private val webcam = hardwareMap.get(WebcamName::class.java, "Webcam 1") // for our squirrel overlords
@@ -113,7 +107,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      * get all valid apriltag detections
      * @return ArrayList<AprilTagDetection>? list of valid apriltag detections (null if none)
      */
-    fun getDetections(): ArrayList<AprilTagDetection>? {
+    fun getValidDetections(): ArrayList<AprilTagDetection>? {
         val currentDetections = aprilTag.detections
         val validDetections = ArrayList<AprilTagDetection>()
         for (detection in currentDetections) {
@@ -123,6 +117,16 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
                 opMode.log("Detected invalid AprilTag, ID: ${detection.id}")
             }
         }
+
+        validDetections.retainAll { it.ftcPose.range < APRILTAG_RANGE_LIMIT }
+
+        // filter out apriltags on opposite alliance. Ideally this wouldn't need to be done, but the robot's position is only ever on the blue alliance (or so it thinks)
+        if (Global.alliance == Global.Alliance.BLUE) {
+            validDetections.retainAll { BLUE_APRILTAG_IDS.contains(it.id) }
+        } else if (Global.alliance == Global.Alliance.RED) {
+            validDetections.retainAll { RED_APRILTAG_IDS.contains(it.id) }
+        }
+
         validDetections.ifEmpty { return null }
 
         // Sort detections by distance from robot
@@ -133,18 +137,16 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 
     /**
      * get the position of the robot on the field via AprilTags
-     *
-     * **be wary of this method, much of the math is AI generated because I no math right now**
      * @return field-centric position of the robot (null if no detections)
      */
     fun getPosition(): SparkFunOTOS.Pose2D? {
-        val detection = getDetections()?.first()
+        val detection = getValidDetections()?.first()
         detection ?: return null
 
-        val pose = detection.ftcPose
-        val y =
-
-        return SparkFunOTOS.Pose2D(-pose.y, -pose.x, -pose.yaw) // swapped because ftc hates standardization
+        val position = detection.robotPose.position
+        val orientation = detection.robotPose.orientation
+        // TODO: invert position values when we are in red alliance
+        return SparkFunOTOS.Pose2D(-position.y, position.x, orientation.yaw + 90) // all weird because FTC hates standardization
     }
 
     /**
@@ -153,7 +155,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      * @return AprilTagDetection? desired apriltag detection (null if not found)
      */
     fun findAprilTag(id: Int): AprilTagDetection? {
-        val detections = getDetections()
+        val detections = getValidDetections()
         return detections?.find { it.id == id }
     }
 }

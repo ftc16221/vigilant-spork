@@ -14,11 +14,13 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.util.AdvPose;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Subassembly to autonomously move the drivebase
@@ -41,6 +43,7 @@ public class Follower extends Subassembly {
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);
     public static double OTOS_LINEAR_SCALAR = 0.97260274;
     public static double OTOS_ANGULAR_SCALAR = 0.99913963;
+    public static int APRILTAG_UPDATE_INTERVAL = 5000; // milliseconds
 
     public static LocalizationMode LOCALIZATION_MODE = LocalizationMode.OTOS;
 
@@ -63,6 +66,7 @@ public class Follower extends Subassembly {
     SparkFunOTOS.Pose2D currentPose;
     AdvPose targetPose;
     List<AdvPose> path;
+    Deadline apriltagUpdateDeadline = new Deadline(APRILTAG_UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
     boolean enabled = true;
     boolean usePaths = true;
     double tolerance = 2;
@@ -232,7 +236,7 @@ public class Follower extends Subassembly {
         telemetry.addData("X drive", xDrive);
         telemetry.addData("Y drive", yDrive);
         telemetry.addData("H drive", hDrive);
-        callTelemetry();
+        telemetry();
 
         if (!usePaths) {
             return;
@@ -265,11 +269,12 @@ public class Follower extends Subassembly {
                 currentPose = OTOS.getPosition();
                 break;
             case HYBRID:
-                if (!robotIsMoving() && vision.getPosition() != null) {
+                if (!robotIsMoving() && vision.getPosition() != null && apriltagUpdateDeadline.hasExpired()) {
+                    apriltagUpdateDeadline.reset();
                     SparkFunOTOS.Pose2D visionPose = vision.getPosition();
                     OTOS.setPosition(visionPose);
                     currentPose = visionPose;
-                    RobotLog.i("Updated Position based off AprilTag Detection");
+                    RobotLog.i("(Follower) Updated Current Position based off AprilTag Detection (ID: " + vision.getValidDetections().get(0).id + ")"); // ignore warning, we checked for null in the if statement
                 } else {
                     currentPose = OTOS.getPosition();
                 }
@@ -316,7 +321,7 @@ public class Follower extends Subassembly {
                     USE_X ? xDrive : 0,
                     USE_HEADING ? hDrive : 0
             );
-            callTelemetry();
+            telemetry();
         }
         moveRobot(0, 0, 0);
         opMode.sleep(100);
@@ -422,7 +427,7 @@ public class Follower extends Subassembly {
         return xIsMoving || yIsMoving || hIsMoving;
     }
 
-    private void callTelemetry() {
+    public void telemetry() {
         telemetry.addData("Auto", "yDrive" + JavaUtil.formatNumber(yDrive, 5, 2) + ", xDrive" + JavaUtil.formatNumber(xDrive, 5, 2) + ", turn" + JavaUtil.formatNumber(hDrive, 5, 2));
         telemetry.addLine("Coordinates:");
         telemetry.addData("X coordinate", JavaUtil.formatNumber(currentPose.x, 2));

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes
 
+import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -16,6 +18,7 @@ class SimpleTeleOp(): LinearOpMode() {
         // init, no movement allowed
         telemetry.isAutoClear = false
 
+        telemetry = MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().telemetry)
         val driveBase = MecDriveBase(this)
         val claw = AltClaw(this)
         val linearSlide = LinearSlide(this)

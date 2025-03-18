@@ -55,8 +55,6 @@ public class TrackerTeleOp extends LinearOpMode implements DashOpMode {
 
                 follower.telemetry();
                 driveBase.telemetry();
-                linearSlide.telemetry();
-                claw.telemetry();
                 telemetry.update();
 
                 TelemetryPacket packet = new TelemetryPacket(true);

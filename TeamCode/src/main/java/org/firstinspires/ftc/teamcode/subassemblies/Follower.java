@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -43,7 +44,7 @@ public class Follower extends Subassembly {
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);
     public static double OTOS_LINEAR_SCALAR = 0.97260274;
     public static double OTOS_ANGULAR_SCALAR = 0.99913963;
-    public static int APRILTAG_UPDATE_INTERVAL = 5000; // milliseconds
+    public static int APRILTAG_UPDATE_INTERVAL = 500; // milliseconds
 
     public static LocalizationMode LOCALIZATION_MODE = LocalizationMode.OTOS;
 
@@ -122,81 +123,17 @@ public class Follower extends Subassembly {
         opModeType = getOpModeType();
     }
 
-    /**
-     * Enable Autonomous Movement
-     * <p>
-     * Enabled by default
-     */
-    public void enable() {
-        enabled = true;
-    }
-
-    /**
-     * Disable Autonomous Movement
-     * <p>
-     * Should only be disabled during TeleOp
-     */
-    public void disable() {
-        enabled = false;
-    }
-
-    /**
-     * Check if Autonomous Movement is enabled
-     * @return if Autonomous Movement is enabled
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Set the method of localization for the robot
-     * <p>
-     * OTOS selected by default
-     */
-    public void setLocalizationMode(LocalizationMode mode) {
-        LOCALIZATION_MODE = mode;
-    }
-
-    public void setPath(List<AdvPose> path) {
-        this.path = path;
-    }
-
-    public int getPathState() {
-        return pathState;
-    }
-
-    public void setPathState(int pathState) {
-        this.pathState = pathState;
-    }
-
-    public boolean isBusy() {
-        return busy;
-    }
-
-    public boolean isNotBusy() {
-        return !busy;
-    }
-
-    public void setTargetPose(AdvPose targetPose) {
-        this.targetPose = targetPose;
-    }
-
-    public SparkFunOTOS.Pose2D getCurrentPose() {
-        updatePose();
-        return currentPose;
-    }
-
     public void update() {
         updatePose();
         if (targetPose == null) {
             if(opModeType == OpModeType.AUTONOMOUS) {
-                RobotLog.e("Target Pose is null!");
+                RobotLog.e("(Follower) Target Pose is null!");
                 underglow.setColor(Underglow.Color.YELLOW);
             }
             return;
         }
         if (currentPose == null) {
-            RobotLog.e("Current Pose is null!");
+            RobotLog.e("(Follower) Current Pose is null!");
             underglow.setColor(Underglow.Color.YELLOW);
             return;
         }
@@ -261,7 +198,7 @@ public class Follower extends Subassembly {
     }
 
     /**
-     * Gets the relevant pose of the robot based off of the localization mode.
+     * Updates the relevant pose of the robot (currentPose) based off of the localization mode.
      */
     public void updatePose() {
         switch (LOCALIZATION_MODE) {
@@ -335,6 +272,70 @@ public class Follower extends Subassembly {
         disable();
         updatePose();
         Global.lastPose = currentPose;
+    }
+
+    /**
+     * Enable Autonomous Movement
+     * <p>
+     * Enabled by default
+     */
+    public void enable() {
+        enabled = true;
+    }
+
+    /**
+     * Disable Autonomous Movement
+     * <p>
+     * Should only be disabled during TeleOp
+     */
+    public void disable() {
+        enabled = false;
+    }
+
+    /**
+     * Check if Autonomous Movement is enabled
+     * @return if Autonomous Movement is enabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Set the method of localization for the robot
+     * <p>
+     * OTOS selected by default
+     */
+    public void setLocalizationMode(LocalizationMode mode) {
+        LOCALIZATION_MODE = mode;
+    }
+
+    public void setPath(List<AdvPose> path) {
+        this.path = path;
+    }
+
+    public int getPathState() {
+        return pathState;
+    }
+
+    public void setPathState(int pathState) {
+        this.pathState = pathState;
+    }
+
+    public boolean isBusy() {
+        return busy;
+    }
+
+    public boolean isNotBusy() {
+        return !busy;
+    }
+
+    public void setTargetPose(AdvPose targetPose) {
+        this.targetPose = targetPose;
+    }
+
+    public SparkFunOTOS.Pose2D getCurrentPose() {
+        updatePose();
+        return currentPose;
     }
 
     /**
@@ -432,9 +433,11 @@ public class Follower extends Subassembly {
     }
 
     public void telemetry() {
-        telemetry.addData("current x", "%.2f", currentPose.x);
-        telemetry.addData("current y", "%.2f", currentPose.y);
-        telemetry.addData("current h", "%.2f", currentPose.h);
+        if (currentPose != null) {
+            telemetry.addData("current x", "%.2f", currentPose.x);
+            telemetry.addData("current y", "%.2f", currentPose.y);
+            telemetry.addData("current h", "%.2f", currentPose.h);
+        }
         telemetry.addData("Robot is moving", isRobotMoving());
         telemetry.addLine("Velocity:");
         velocity = OTOS.getVelocity();

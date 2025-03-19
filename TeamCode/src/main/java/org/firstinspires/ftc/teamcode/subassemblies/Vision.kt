@@ -162,10 +162,15 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         val y = position.x
         val h = orientation.yaw + 90
 
-        return if(Global.alliance == Global.Alliance.RED) {
-            SparkFunOTOS.Pose2D(-x, -y, h + 180)
-        } else {
-            SparkFunOTOS.Pose2D(x, y, h)
+        val rawPose = SparkFunOTOS.Pose2D(x, y, h)
+
+        return when (Global.alliance) {
+            Global.Alliance.BLUE -> rawPose
+            Global.Alliance.RED -> rawPose.invert()
+            null -> {
+                if (RED_APRILTAG_IDS.contains(detection.id)) rawPose.invert()
+                else rawPose
+            }
         }
     }
 
@@ -178,4 +183,6 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         val detections = getValidDetections()
         return detections?.find { it.id == id }
     }
+
+    fun SparkFunOTOS.Pose2D.invert() = SparkFunOTOS.Pose2D(-x, -y, h + 180)
 }

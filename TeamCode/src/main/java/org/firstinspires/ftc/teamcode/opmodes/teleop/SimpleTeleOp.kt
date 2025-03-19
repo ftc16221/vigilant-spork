@@ -16,9 +16,9 @@ class SimpleTeleOp(): LinearOpMode() {
 
     override fun runOpMode() {
         // init, no movement allowed
-        telemetry.isAutoClear = false
-
-        telemetry = MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().telemetry)
+        val dsTelemetry = telemetry;
+        dsTelemetry.isAutoClear = false;
+        telemetry = MultipleTelemetry(dsTelemetry, FtcDashboard.getInstance().telemetry)
         val driveBase = MecDriveBase(this)
         val claw = AltClaw(this)
         val linearSlide = LinearSlide(this)
@@ -33,7 +33,7 @@ class SimpleTeleOp(): LinearOpMode() {
 
         if (opModeIsActive()) {
             log("Starting OpMode loop")
-            telemetry.isAutoClear = true
+            dsTelemetry.isAutoClear = true
             telemetry.clear()
             while (opModeIsActive()) {
                 loopTime.reset()

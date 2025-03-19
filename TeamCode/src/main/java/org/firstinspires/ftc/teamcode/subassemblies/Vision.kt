@@ -131,13 +131,6 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 
         validDetections.retainAll { it.ftcPose.range < APRILTAG_RANGE_LIMIT }
 
-        // filter out apriltags on opposite alliance. Ideally this wouldn't need to be done, but the robot's position is only ever on the blue alliance (or so it thinks)
-        if (Global.alliance == Global.Alliance.BLUE) {
-            validDetections.retainAll { BLUE_APRILTAG_IDS.contains(it.id) }
-        } else if (Global.alliance == Global.Alliance.RED) {
-            validDetections.retainAll { RED_APRILTAG_IDS.contains(it.id) }
-        }
-
         validDetections.ifEmpty { return null }
 
         // Sort detections by distance from robot

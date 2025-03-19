@@ -19,7 +19,7 @@ public class AprilTagTest extends LinearOpMode {
             while (opModeIsActive()) {
 
                 telemetry.addLine("AprilTag Test");
-                telemetry.addData("AprilTags Detected", vision.getDetections() == null ? 0 : vision.getDetections().size());
+                telemetry.addData("AprilTags Detected", vision.getValidDetections() == null ? 0 : vision.getValidDetections().size());
                 telemetry.update();
             }
         }

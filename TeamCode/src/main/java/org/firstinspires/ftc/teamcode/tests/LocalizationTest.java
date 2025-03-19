@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.tests;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -8,7 +8,6 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
@@ -17,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.DashOpMode;
 
 @Config
 @TeleOp(group = "tests")
-public class TrackerTeleOp extends LinearOpMode implements DashOpMode {
+public class LocalizationTest extends LinearOpMode implements DashOpMode {
 
     public static SparkFunOTOS.Pose2D startingPose = new SparkFunOTOS.Pose2D(-48, 0, 0);
 
@@ -55,17 +54,19 @@ public class TrackerTeleOp extends LinearOpMode implements DashOpMode {
 
                 follower.telemetry();
                 driveBase.telemetry();
-                linearSlide.telemetry();
-                claw.telemetry();
                 telemetry.update();
 
                 TelemetryPacket packet = new TelemetryPacket(true);
-                packet.fieldOverlay()
-                        .setStroke("#12C600")
-                        .setRotation(Math.toRadians(currentPose.h))
-                        .setTranslation(currentPose.y, -currentPose.x) // x and y are swapped because FTC dash's coordinate system wants to be different
-                        .strokeCircle(0, 0, 9) // draw circle for robot position
-                        .strokeLine(0, 0, 9, 0);
+                if (currentPose != null) {
+                    packet.fieldOverlay()
+                            .setStroke("#12C600")
+                            .setRotation(Math.toRadians(currentPose.h))
+                            .setTranslation(currentPose.y, -currentPose.x) // x and y are swapped because FTC dash's coordinate system wants to be different
+                            .strokeCircle(0, 0, 9) // draw circle for robot position
+                            .strokeLine(0, 0, 9, 0);
+                } else {
+                    packet.fieldOverlay().clear();
+                }
 
                 FtcDashboard.getInstance().sendTelemetryPacket(packet);
             }

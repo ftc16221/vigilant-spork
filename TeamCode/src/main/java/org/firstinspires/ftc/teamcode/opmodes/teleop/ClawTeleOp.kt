@@ -1,29 +1,29 @@
-package org.firstinspires.ftc.teamcode.opmodes
+package org.firstinspires.ftc.teamcode.opmodes.teleop
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.firstinspires.ftc.teamcode.subassemblies.AltClaw
+import org.firstinspires.ftc.teamcode.subassemblies.Claw
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
-import org.firstinspires.ftc.teamcode.subassemblies.Underglow
 import org.firstinspires.ftc.teamcode.util.log
 
-@TeleOp(group = "!main")
-class SimpleTeleOp(): LinearOpMode() {
+@Disabled
+@TeleOp(name = "Claw TeleOp", group = "!main")
+class ClawTeleOp: LinearOpMode() {
 
     override fun runOpMode() {
         // init, no movement allowed
         telemetry.isAutoClear = false
 
         val driveBase = MecDriveBase(this)
-        val claw = AltClaw(this)
         val linearSlide = LinearSlide(this)
-        Underglow(this)
+        val claw = Claw(this)
         // add other subassemblies here
 
         val loopTime = ElapsedTime()
-//        val subassemblyList = listOf(driveBase)
+        val subassemblyList = listOf(driveBase)
 
         log("OpMode initialized")
         waitForStart()

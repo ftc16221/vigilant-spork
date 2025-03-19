@@ -9,23 +9,17 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.PtzControl
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Position
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles
 import org.firstinspires.ftc.teamcode.util.DashOpMode
+import org.firstinspires.ftc.teamcode.util.Global
 import org.firstinspires.ftc.teamcode.util.Subassembly
 import org.firstinspires.ftc.teamcode.util.log
-import org.firstinspires.ftc.teamcode.util.toDegrees
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
-import kotlin.math.cos
-import kotlin.math.hypot
-import kotlin.math.pow
-import kotlin.math.sin
 
 /**
  * Vision subassembly for detecting AprilTags and calculating robot position on the field via AprilTags.
@@ -64,8 +58,16 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         @JvmField var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
         @JvmField var CAMERA_RESOLUTION = Size(1280, 720)
 
-        @JvmField var EXPOSURE = 100
-        @JvmField var GAIN = 100
+        @JvmField var APRILTAG_RANGE_LIMIT = 60.0; // inches
+
+        @JvmField var BLUE_APRILTAG_IDS = listOf(11, 12, 13)
+        @JvmField var RED_APRILTAG_IDS = listOf(14, 15, 16)
+
+        // camera calibration values
+        @JvmField var FX = 484.01521684
+        @JvmField var FY = 484.01521684
+        @JvmField var CX = 682.931618492
+        @JvmField var CY = 339.304216996
     }
 
     private val webcam = hardwareMap.get(WebcamName::class.java, "Webcam 1") // for our squirrel overlords
@@ -80,6 +82,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         .setDrawAxes(true)
         .setDrawCubeProjection(true)
         .setCameraPose(CAMERA_POSITION, CAMERA_ORIENTATION)
+        .setLensIntrinsics(FX, FY, CX, CY)
         .build()
 
     val visionPortal = VisionPortal.Builder()
@@ -97,7 +100,9 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 //    val panTiltHolder = PtzControl.PanTiltHolder()
 
     init {
-        while(visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {}
+        while(visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {
+            // intentionally blank
+        }
 
         val exposureControl = visionPortal.getCameraControl(ExposureControl::class.java)
 //        exposureControl.setExposure()
@@ -113,7 +118,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      * get all valid apriltag detections
      * @return ArrayList<AprilTagDetection>? list of valid apriltag detections (null if none)
      */
-    fun getDetections(): ArrayList<AprilTagDetection>? {
+    fun getValidDetections(): ArrayList<AprilTagDetection>? {
         val currentDetections = aprilTag.detections
         val validDetections = ArrayList<AprilTagDetection>()
         for (detection in currentDetections) {
@@ -123,6 +128,9 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
                 opMode.log("Detected invalid AprilTag, ID: ${detection.id}")
             }
         }
+
+        validDetections.retainAll { it.ftcPose.range < APRILTAG_RANGE_LIMIT }
+
         validDetections.ifEmpty { return null }
 
         // Sort detections by distance from robot
@@ -133,18 +141,30 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 
     /**
      * get the position of the robot on the field via AprilTags
-     *
-     * **be wary of this method, much of the math is AI generated because I no math right now**
      * @return field-centric position of the robot (null if no detections)
      */
     fun getPosition(): SparkFunOTOS.Pose2D? {
-        val detection = getDetections()?.first()
+        val detection = getValidDetections()?.first()
         detection ?: return null
 
-        val pose = detection.ftcPose
-        val y =
+        val position = detection.robotPose.position
+        val orientation = detection.robotPose.orientation
 
-        return SparkFunOTOS.Pose2D(-pose.y, -pose.x, -pose.yaw) // swapped because ftc hates standardization
+        // values are all weird because FTC hates standardization
+        val x = -position.y
+        val y = position.x
+        val h = orientation.yaw + 90
+
+        val rawPose = SparkFunOTOS.Pose2D(x, y, h)
+
+        return when (Global.alliance) {
+            Global.Alliance.BLUE -> rawPose
+            Global.Alliance.RED -> rawPose.invert()
+            null -> {
+                if (RED_APRILTAG_IDS.contains(detection.id)) rawPose.invert()
+                else rawPose
+            }
+        }
     }
 
     /**
@@ -153,7 +173,9 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
      * @return AprilTagDetection? desired apriltag detection (null if not found)
      */
     fun findAprilTag(id: Int): AprilTagDetection? {
-        val detections = getDetections()
+        val detections = getValidDetections()
         return detections?.find { it.id == id }
     }
+
+    fun SparkFunOTOS.Pose2D.invert() = SparkFunOTOS.Pose2D(-x, -y, h + 180)
 }

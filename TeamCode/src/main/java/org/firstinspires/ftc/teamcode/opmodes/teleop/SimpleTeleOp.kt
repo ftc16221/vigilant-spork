@@ -1,31 +1,39 @@
-package org.firstinspires.ftc.teamcode.opmodes
+package org.firstinspires.ftc.teamcode.opmodes.teleop
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled
+import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.subassemblies.AltClaw
+import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
+import org.firstinspires.ftc.teamcode.subassemblies.Underglow
 import org.firstinspires.ftc.teamcode.util.log
 
-@TeleOp(name = "Drive TeleOp", group = "!main")
-class DriveTeleOp: LinearOpMode() {
+@TeleOp(group = "!main")
+class SimpleTeleOp(): LinearOpMode() {
 
     override fun runOpMode() {
         // init, no movement allowed
-        telemetry.isAutoClear = false
-
+        val dsTelemetry = telemetry;
+        dsTelemetry.isAutoClear = false;
+        telemetry = MultipleTelemetry(dsTelemetry, FtcDashboard.getInstance().telemetry)
         val driveBase = MecDriveBase(this)
+        val claw = AltClaw(this)
+        val linearSlide = LinearSlide(this)
+        Underglow(this)
         // add other subassemblies here
 
         val loopTime = ElapsedTime()
-        val subassemblyList = listOf(driveBase)
+//        val subassemblyList = listOf(driveBase)
 
         log("OpMode initialized")
         waitForStart()
 
         if (opModeIsActive()) {
             log("Starting OpMode loop")
-            telemetry.isAutoClear = true
+            dsTelemetry.isAutoClear = true
             telemetry.clear()
             while (opModeIsActive()) {
                 loopTime.reset()
@@ -36,6 +44,8 @@ class DriveTeleOp: LinearOpMode() {
 
                 // Subassembly control
                 driveBase.control(gamepad1)
+                claw.control(gamepad2)
+                linearSlide.control(gamepad2)
                 // control other subassemblies here
 
                 telemetry.addData("Loop Time", loopTime.time())

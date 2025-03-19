@@ -1,12 +1,16 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+@Config
 public class Underglow extends Subassembly {
+
+    public static boolean enabled = false;
 
     RevBlinkinLedDriver underglow;
     private Color lastColor;
@@ -21,7 +25,7 @@ public class Underglow extends Subassembly {
         if (color == lastColor) return; // only set strip color if it has changed
         lastColor = color;
 
-        if (color == null || Global.alliance == null) {
+        if (!enabled || color == null || Global.alliance == null) {
             underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
             return;
         }

@@ -76,8 +76,7 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
         rightRear.power = rightRearPower
     }
 
-    override fun telemetry() {
-        super.telemetry()
+    fun telemetry() {
         telemetry.addLine()
         telemetry.addLine("surrender your soul to the squirrels")
     }

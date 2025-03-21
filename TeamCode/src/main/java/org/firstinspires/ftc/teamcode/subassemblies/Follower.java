@@ -206,12 +206,13 @@ public class Follower extends Subassembly {
                 currentPose = OTOS.getPosition();
                 break;
             case HYBRID:
-                if (!isRobotMoving() && vision.getPosition() != null && apriltagUpdateDeadline.hasExpired()) {
+                SparkFunOTOS.Pose2D visionPose = vision.getPosition();
+                if (!isRobotMoving() && visionPose != null && apriltagUpdateDeadline.hasExpired()) {
                     apriltagUpdateDeadline.reset();
-                    SparkFunOTOS.Pose2D visionPose = vision.getPosition();
                     OTOS.setPosition(visionPose);
                     currentPose = visionPose;
-                    RobotLog.i("(Follower) Updated Current Position based off AprilTag Detection (ID: " + vision.getValidDetections().get(0).id + ")"); // ignore warning, we checked for null in the if statement
+                    if (vision.getValidDetections() != null)
+                        RobotLog.i("(Follower) Updated Current Position based off AprilTag Detection (ID: " + vision.getValidDetections().get(0).id + ")");
                 } else {
                     currentPose = OTOS.getPosition();
                 }

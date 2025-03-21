@@ -32,7 +32,6 @@ public class PartBasketAuto extends LinearOpMode {
     private Follower follower;
     private LinearSlide linearSlide;
     private DcMotor linearSlideMotor;
-    private Servo pinionServo;
     private AltClaw claw;
     private Servo wristServo;
 
@@ -43,7 +42,6 @@ public class PartBasketAuto extends LinearOpMode {
 
         linearSlide = new LinearSlide(this);
         linearSlideMotor = linearSlide.getLinearSlide();
-        pinionServo = linearSlide.getPinion();
 
         claw = new AltClaw(this);
         wristServo = claw.getRotateServo();

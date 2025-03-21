@@ -28,7 +28,6 @@ public class PartSpecimenAuto extends LinearOpMode {
     private Follower follower;
     private LinearSlide linearSlide;
     private DcMotor linearSlideMotor;
-    private Servo pinionServo;
     private AltClaw claw;
     private Servo wristServo;
 
@@ -39,7 +38,6 @@ public class PartSpecimenAuto extends LinearOpMode {
 
         linearSlide = new LinearSlide(this);
         linearSlideMotor = linearSlide.getLinearSlide();
-        pinionServo = linearSlide.getPinion();
 
         claw = new AltClaw(this);
         wristServo = claw.getRotateServo();
@@ -54,7 +52,6 @@ public class PartSpecimenAuto extends LinearOpMode {
 
     private void scoreSpecimen(SparkFunOTOS.Pose2D pose) {
         claw.close();
-        pinionServo.setPosition(0.2);
         linearSlide.moveSlide(HIGH_RUNG_POS, 1);
         follower.driveToPose(pose, 2.5, true);
         while(linearSlideMotor.isBusy()) {

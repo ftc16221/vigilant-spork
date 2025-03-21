@@ -20,10 +20,10 @@ import org.firstinspires.ftc.teamcode.util.Global;
 @Autonomous(group = "full", preselectTeleOp = Global.PRESELECT_TELEOP)
 public class FullSpecimenAuto extends LinearOpMode {
 
-    public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-63, -24, 0); // starting position
-    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-60, -50, -90); // TODO: find pickup position
-    public static SparkFunOTOS.Pose2D score1Pose = new SparkFunOTOS.Pose2D(-40, -8, 90); // first scoring position
-    public static SparkFunOTOS.Pose2D score2Pose = new SparkFunOTOS.Pose2D(-40, 0, 90); // second scoring position
+    public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-63, -24, 180); // starting position
+    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-60, -50, 90); // TODO: find pickup position
+    public static SparkFunOTOS.Pose2D score1Pose = new SparkFunOTOS.Pose2D(-40, -8, -90); // first scoring position
+    public static SparkFunOTOS.Pose2D score2Pose = new SparkFunOTOS.Pose2D(-40, 0, -90); // second scoring position
 
     public static SparkFunOTOS.Pose2D pushHelperPose = new SparkFunOTOS.Pose2D(-40, -26, 90); // first push position
     public static SparkFunOTOS.Pose2D push1StartPose = new SparkFunOTOS.Pose2D(-6, -48, 90); // where the robot must start pushing the first sample

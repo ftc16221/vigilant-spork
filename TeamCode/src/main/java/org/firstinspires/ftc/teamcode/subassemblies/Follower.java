@@ -39,7 +39,9 @@ public class Follower extends Subassembly {
     public static double DRIVE_GAIN = 0.07; // Forward Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error. (0.50 / 25.0)
     public static double TURN_GAIN = 0.04; // Turn Control "Gain". e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
     public static double MAX_AUTO_SPEED = 0.4; // Clip the approach speed to this max value (adjust for your robot)
-    public static double MAX_AUTO_TURN = 0.2; // Clip the turn speed to this max value (adjust for your robot)
+    public static double MAX_AUTO_TURN = 0.5; // Clip the turn speed to this max value (adjust for your robot)
+
+    public static double VELO_TOLERANCE = 1.0;
 
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);
     public static double OTOS_LINEAR_SCALAR = 0.97260274;
@@ -424,12 +426,10 @@ public class Follower extends Subassembly {
         boolean hIsMoving;
 
         velocity = OTOS.getVelocity();
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        xIsMoving = Math.abs(velocity.x) > 0.5;
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        yIsMoving = Math.abs(velocity.y) > 0.5;
-        // Get the x value from the given SparkFunOTOS.Pose2D object.
-        hIsMoving = Math.abs(velocity.h) > 1;
+        // Get the velocity value from the given SparkFunOTOS.Pose2D object.
+        xIsMoving = Math.abs(velocity.x) > VELO_TOLERANCE;
+        yIsMoving = Math.abs(velocity.y) > VELO_TOLERANCE;
+        hIsMoving = Math.abs(velocity.h) > VELO_TOLERANCE;
         return xIsMoving || yIsMoving || hIsMoving;
     }
 

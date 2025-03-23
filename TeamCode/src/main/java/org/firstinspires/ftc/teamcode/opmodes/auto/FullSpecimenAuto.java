@@ -21,18 +21,20 @@ import org.firstinspires.ftc.teamcode.util.Global;
 public class FullSpecimenAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-63, -24, 180); // starting position
-    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-60, -50, 90); // TODO: find pickup position
+    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-56, -40, 90); // TODO: find pickup position
+    public static SparkFunOTOS.Pose2D scoreHelperPose = new SparkFunOTOS.Pose2D(-48, -24, -90); // helper scoring pose
     public static SparkFunOTOS.Pose2D score1Pose = new SparkFunOTOS.Pose2D(-40, -8, -90); // first scoring position
     public static SparkFunOTOS.Pose2D score2Pose = new SparkFunOTOS.Pose2D(-40, 0, -90); // second scoring position
 
-    public static SparkFunOTOS.Pose2D pushHelperPose = new SparkFunOTOS.Pose2D(-40, -26, 90); // first push position
+    public static SparkFunOTOS.Pose2D pushHelperPose1 = new SparkFunOTOS.Pose2D(-40, -40, 0); // first push position
+    public static SparkFunOTOS.Pose2D pushHelperPose2 = new SparkFunOTOS.Pose2D(-6, -40, 90); // first push position
     public static SparkFunOTOS.Pose2D push1StartPose = new SparkFunOTOS.Pose2D(-6, -48, 90); // where the robot must start pushing the first sample
     public static SparkFunOTOS.Pose2D push2StartPose = new SparkFunOTOS.Pose2D(-6, -60, 90); // where the robot must start pushing the second sample
-    public static SparkFunOTOS.Pose2D push1EndPose = new SparkFunOTOS.Pose2D(-60, -48, 90); // where the robot must end pushing the first sample
+    public static SparkFunOTOS.Pose2D push1EndPose = new SparkFunOTOS.Pose2D(-55, -48, 90); // where the robot must end pushing the first sample
     public static SparkFunOTOS.Pose2D push2EndPose = new SparkFunOTOS.Pose2D(-55, -60, 90); // where the robot must end pushing the second sample
 
     public static double HIGH_RUNG_POS = 30;
-    public static double PICKUP_POS = 6;
+    public static double PICKUP_POS = 5;
 
     private Follower follower;
     private LinearSlide linearSlide;
@@ -56,6 +58,7 @@ public class FullSpecimenAuto extends LinearOpMode {
             scoreSpecimen(score1Pose);
             pushSamples();
             pickUpSpecimen();
+            follower.driveToPose(scoreHelperPose, 10, false);
             scoreSpecimen(score2Pose);
         }
         follower.stop();
@@ -92,11 +95,12 @@ public class FullSpecimenAuto extends LinearOpMode {
     }
 
     private void pushSamples() {
-        follower.driveToPose(pushHelperPose, 5, false);
-        follower.driveToPose(push1StartPose, 3, true);
-        follower.driveToPose(push1EndPose, 3, true);
-        follower.driveToPose(push1StartPose, 3, true);
-        follower.driveToPose(push2StartPose, 3, true);
-        follower.driveToPose(push2EndPose, 3, true);
+        follower.driveToPose(pushHelperPose1, 5, false);
+        follower.driveToPose(pushHelperPose2, 5, false);
+        follower.driveToPose(push1StartPose, 8, true);
+        follower.driveToPose(push1EndPose, 8, true);
+        follower.driveToPose(push1StartPose, 8, true);
+        follower.driveToPose(push2StartPose, 8, true);
+        follower.driveToPose(push2EndPose, 8, true);
     }
 }

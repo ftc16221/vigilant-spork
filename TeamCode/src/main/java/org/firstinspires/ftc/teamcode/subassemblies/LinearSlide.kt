@@ -19,7 +19,7 @@ class LinearSlide(opMode: OpMode): Subassembly(opMode, "Linear Slide") {
     @JvmField var ASCEND_POS = 20
 
     val linearSlide = hardwareMap.dcMotor.get("linear_slide") as DcMotorEx
-    val pinion = hardwareMap.servo.get("carter's_opinion")
+    val pinion = hardwareMap.crservo.get("carter's_opinion")
 
     private var lastPosition = 0.0
 
@@ -35,7 +35,7 @@ class LinearSlide(opMode: OpMode): Subassembly(opMode, "Linear Slide") {
      * Uses the left stick of the provided gamepad
      */
     fun control(gamepad: Gamepad) {
-        pinion.position += gamepad.left_stick_x * servoCoefficient
+        pinion.power = gamepad.left_stick_x.toDouble()
 
         if (gamepad.left_stick_y.toDouble() in -0.05..0.05) {
             yPosition = lastPosition
@@ -46,26 +46,6 @@ class LinearSlide(opMode: OpMode): Subassembly(opMode, "Linear Slide") {
             lastPosition = yPosition
         }
     }
-
-    /**
-     * Sets the position of the claw assembly
-     * the origin of x is the center of the robot
-     * the origin of y is the bottom of the robot
-     *
-     * @param x in mm
-     * @param y in mm
-     */
-    fun setPosition(x: Double, y: Double) {
-        xPosition = x
-        yPosition = y
-    }
-
-    var xPosition = 0.0
-        set(value) {
-            pinion.position = value / (servoGearDiameter * PI) * (360/300)
-            field = value
-        }
-        get() = pinion.position * (300/360) * (servoGearDiameter * PI)
 
     var yPosition
         set(value) {
@@ -84,7 +64,7 @@ class LinearSlide(opMode: OpMode): Subassembly(opMode, "Linear Slide") {
     }
 
     companion object {
-        @JvmField var motorEncoderRes = 1425.1
+        @JvmField var motorEncoderRes = 751.8 // PPR
         @JvmField var motorGearDiameter = 1.54 // in
 
         @JvmField var servoCoefficient = 0.001 // this value should be the highest possible without the pinion overshooting it's controls

@@ -20,7 +20,7 @@ public class DNBBasketDelivery extends LinearOpMode {
     static final boolean USE_Y = true;
     static final boolean USE_HEADING = true;
 
-    static final double SLIDE_ENCODER_RES = 1425.1; // PPR
+    static final double SLIDE_ENCODER_RES = 751.8; // PPR
     static final double SLIDE_GEAR_DIAMETER = 1.54; // in
 
     static final int LOW_BASKET_POS = 42; // in
@@ -33,7 +33,6 @@ public class DNBBasketDelivery extends LinearOpMode {
     private DcMotor linearSlide;
     private Servo altClaw;
     private Servo altRotate;
-    private Servo pinion;
     private SparkFunOTOS OTOS; // Optical Tracking Odometry Sensor
 
     SparkFunOTOS.Pose2D velocity;
@@ -62,7 +61,6 @@ public class DNBBasketDelivery extends LinearOpMode {
         linearSlide = hardwareMap.get(DcMotor.class, "linear_slide");
         altClaw = hardwareMap.get(Servo.class, "alt_claw");
         altRotate = hardwareMap.get(Servo.class, "alt_rotate");
-        pinion = hardwareMap.get(Servo.class, "carter's_opinion");
         OTOS = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
 
         leftRear.setDirection(DcMotor.Direction.FORWARD);
@@ -72,7 +70,6 @@ public class DNBBasketDelivery extends LinearOpMode {
         linearSlide.setDirection(DcMotor.Direction.REVERSE);
         altClaw.setDirection(Servo.Direction.FORWARD);
         altRotate.setDirection(Servo.Direction.FORWARD);
-        pinion.setDirection(Servo.Direction.FORWARD);
 
         configureOTOS(new SparkFunOTOS.Pose2D(-61.8, 36, 180));
         altClaw.scaleRange(0.1, 0.8);
@@ -204,15 +201,12 @@ public class DNBBasketDelivery extends LinearOpMode {
     private boolean robotInTolerance(int tolerance) {
         boolean xInTolerance;
         boolean yInTolerance;
-        boolean hInTolerance;
 
         xInTolerance = USE_X ? Math.abs(xError) < tolerance : true;
         yInTolerance = USE_Y ? Math.abs(yError) < tolerance : true;
-        hInTolerance = USE_HEADING ? Math.abs(hError) < tolerance : true;
         telemetry.addData("X in tolerance", xInTolerance);
         telemetry.addData("Y in tolerance", yInTolerance);
-        telemetry.addData("Heading in tolerance", hInTolerance);
-        return xInTolerance && yInTolerance && hInTolerance;
+        return xInTolerance && yInTolerance;
     }
 
     /**

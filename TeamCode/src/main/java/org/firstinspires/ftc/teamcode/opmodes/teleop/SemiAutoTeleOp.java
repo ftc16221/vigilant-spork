@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
@@ -17,6 +19,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.AdvPose;
 import org.firstinspires.ftc.teamcode.util.Global;
 
+@Disabled
 @Config
 @TeleOp(group = "!main")
 public class SemiAutoTeleOp extends LinearOpMode {
@@ -25,6 +28,8 @@ public class SemiAutoTeleOp extends LinearOpMode {
     public static AdvPose basketScorePose = new AdvPose(-47, 65, 45, 2.5, true);
     public static AdvPose specimenScorePose = new AdvPose(-40, 0, 90, 2.5, true, true); // second scoring position
 
+    public static double HIGH_RUNG_POS = 19;
+    public static double POS_DIFFERENCE = 6;
 
     @Override
     public void runOpMode() {
@@ -34,8 +39,6 @@ public class SemiAutoTeleOp extends LinearOpMode {
         DcMotorEx linearSlideMotor = linearSlide.getLinearSlide();
         AltClaw claw = new AltClaw(this);
         Servo wristServo = claw.getRotateServo();
-        Follower follower = new Follower(this, Global.lastPose);
-        follower.setLocalizationMode(Follower.LocalizationMode.HYBRID);
         new Underglow(this);
 
         ElapsedTime loopTime = new ElapsedTime();
@@ -47,11 +50,6 @@ public class SemiAutoTeleOp extends LinearOpMode {
         if (opModeIsActive()) {
             while (opModeIsActive()) {
                 loopTime.reset();
-                follower.update();
-
-                if (!gamepad1.atRest()) {
-                    follower.disable();
-                }
 
                 if (!gamepad2.atRest()) {
                     autoScoreSpecimen = false;
@@ -59,39 +57,34 @@ public class SemiAutoTeleOp extends LinearOpMode {
                 }
 
                 driveBase.control(gamepad1);
-                linearSlide.control(gamepad2);
-                claw.control(gamepad2);
+                if (!autoScoreBasket && !autoScoreSpecimen) {
+                    linearSlide.control(gamepad2);
+                    claw.control(gamepad2);
+                }
 
                 // Semi-auto specimen scoring
                 if (gamepad1.x || gamepad2.dpad_right) {
-                    follower.enable();
                     autoScoreSpecimen = true;
-                    Follower.USE_Y = false;
-                    follower.setTargetPose(specimenScorePose);
                     linearSlide.moveSlide(linearSlide.HIGH_RUNG_POS, 1);
-                } else {
-                    Follower.USE_Y = true;
                 }
 
                 if (autoScoreSpecimen) {
-                    if (!linearSlideMotor.isBusy() && !follower.isBusy()) {
+                    if (!linearSlideMotor.isBusy()) {
                         wristServo.setPosition(0.3);
-                        sleep(500);
-                        linearSlide.moveSlide(linearSlide.HIGH_RUNG_POS - 3, 1);
+                        sleep(750);
+                        linearSlide.moveSlide(HIGH_RUNG_POS - POS_DIFFERENCE, 1);
                         sleep(500);
                         claw.open();
-                        sleep(500);
+                        sleep(400);
                         wristServo.setPosition(0.8);
-                        autoScoreSpecimen = false;
                     }
                 }
 
                 // Semi-auto basket scoring
                 if (gamepad1.y || gamepad2.dpad_left) {
-                    follower.enable();
                     autoScoreBasket = true;
-                    follower.setTargetPose(basketScorePose);
-                    linearSlide.moveSlide(linearSlide.HIGH_BASKET_POS, 1);
+                    claw.close();
+                    linearSlide.moveSlide(HIGH_RUNG_POS, 1);
                 }
 
 

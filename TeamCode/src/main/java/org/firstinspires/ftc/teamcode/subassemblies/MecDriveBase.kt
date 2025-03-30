@@ -38,7 +38,7 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
      */
     fun control(gamepad: Gamepad) {
 
-        zeroPowerBehavior = ZeroPowerBehavior.FLOAT
+        zeroPowerBehavior = ZeroPowerBehavior.BRAKE
 
         val leftX = powerCurve(gamepad.left_stick_x.toDouble())
         val leftY = powerCurve(-gamepad.left_stick_y.toDouble())

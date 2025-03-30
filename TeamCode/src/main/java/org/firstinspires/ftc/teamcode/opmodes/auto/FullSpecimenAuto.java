@@ -21,13 +21,13 @@ import org.firstinspires.ftc.teamcode.util.Global;
 public class FullSpecimenAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-63, -24, 180); // starting position
-    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-55, -40, 90); // pickup position
+    public static SparkFunOTOS.Pose2D pickupPose = new SparkFunOTOS.Pose2D(-54, -40, 90); // pickup position
     public static SparkFunOTOS.Pose2D scoreHelperPose = new SparkFunOTOS.Pose2D(-48, -24, -90); // helper scoring pose
-    public static SparkFunOTOS.Pose2D score1Pose = new SparkFunOTOS.Pose2D(-40, -8, -90); // first scoring position
-    public static SparkFunOTOS.Pose2D score2Pose = new SparkFunOTOS.Pose2D(-40, -6, -90); // second scoring position
-    public static SparkFunOTOS.Pose2D score3Pose = new SparkFunOTOS.Pose2D(-40, -4, -90); // third scoring position
-    public static SparkFunOTOS.Pose2D score4Pose = new SparkFunOTOS.Pose2D(-40, -2, -90); // fourth scoring position
-
+    public static SparkFunOTOS.Pose2D score1Pose = new SparkFunOTOS.Pose2D(-39, -8, -90); // first scoring position
+    public static SparkFunOTOS.Pose2D score2Pose = new SparkFunOTOS.Pose2D(-39, -6, -90); // second scoring position
+    public static SparkFunOTOS.Pose2D score3Pose = new SparkFunOTOS.Pose2D(-39, -4, -90); // third scoring position
+    public static SparkFunOTOS.Pose2D score4Pose = new SparkFunOTOS.Pose2D(-39, -2, -90); // fourth scoring position
+    public static SparkFunOTOS.Pose2D parkPose = new SparkFunOTOS.Pose2D(-54, -45, -90); // pickup position
 
     public static SparkFunOTOS.Pose2D pushHelperPose1 = new SparkFunOTOS.Pose2D(-40, -40, 0); // first push position
     public static SparkFunOTOS.Pose2D pushHelperPose2 = new SparkFunOTOS.Pose2D(-6, -40, 90); // first push position
@@ -37,6 +37,7 @@ public class FullSpecimenAuto extends LinearOpMode {
     public static SparkFunOTOS.Pose2D push2EndPose = new SparkFunOTOS.Pose2D(-60, -60, 90); // where the robot must end pushing the second sample
 
     public static double HIGH_RUNG_POS = 19;
+    public static double POS_DIFFERENCE = 6;
     public static double PICKUP_POS = 5;
 
     private Follower follower;
@@ -75,8 +76,15 @@ public class FullSpecimenAuto extends LinearOpMode {
             pickUpSpecimen();
             follower.driveToPose(scoreHelperPose, 10, false);
             scoreSpecimen(score4Pose);
+
+            park();
         }
         follower.stop();
+    }
+
+    private void park() {
+        follower.driveToPose(parkPose, 5, true);
+        requestOpModeStop();
     }
 
     private void scoreSpecimen(SparkFunOTOS.Pose2D pose) {
@@ -89,10 +97,10 @@ public class FullSpecimenAuto extends LinearOpMode {
         }
         wristServo.setPosition(0.3);
         sleep(750);
-        linearSlide.moveSlide(HIGH_RUNG_POS - 4, 1);
+        linearSlide.moveSlide(HIGH_RUNG_POS - POS_DIFFERENCE, 1);
         sleep(500);
         claw.open();
-        sleep(500);
+        sleep(400);
         wristServo.setPosition(0.8);
     }
 
@@ -114,6 +122,7 @@ public class FullSpecimenAuto extends LinearOpMode {
     }
 
     private void pushSamples() {
+        linearSlide.moveSlide(0, 1);
         follower.driveToPose(pushHelperPose1, 5, false);
         follower.driveToPose(pushHelperPose2, 5, false);
         follower.driveToPose(push1StartPose, 8, false);

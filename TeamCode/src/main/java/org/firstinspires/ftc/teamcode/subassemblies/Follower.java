@@ -38,7 +38,7 @@ public class Follower extends Subassembly {
 
     public static double DRIVE_GAIN = 0.07; // Forward Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error. (0.50 / 25.0)
     public static double TURN_GAIN = 0.04; // Turn Control "Gain". e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
-    public static double MAX_AUTO_SPEED = 0.4; // Clip the approach speed to this max value (adjust for your robot)
+    public static double MAX_AUTO_SPEED = 0.45; // Clip the approach speed to this max value (adjust for your robot)
     public static double MAX_AUTO_TURN = 0.5; // Clip the turn speed to this max value (adjust for your robot)
 
     public static double VELO_TOLERANCE = 1.0;

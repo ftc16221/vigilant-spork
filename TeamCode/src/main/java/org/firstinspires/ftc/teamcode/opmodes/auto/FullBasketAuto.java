@@ -25,6 +25,7 @@ public class FullBasketAuto extends LinearOpMode {
     public static SparkFunOTOS.Pose2D basketPose2 = new SparkFunOTOS.Pose2D(-43, 63.5, 45); // scoring position
     public static SparkFunOTOS.Pose2D pickup1Pose = new SparkFunOTOS.Pose2D(-34, 42, -90); // first sample pickup
     public static SparkFunOTOS.Pose2D pickup2Pose = new SparkFunOTOS.Pose2D(-34, 53, -90); // second sample pickup
+    public static SparkFunOTOS.Pose2D pickup3Pose = new SparkFunOTOS.Pose2D(-35, 60.5, -90); // third sample pickup
     public static SparkFunOTOS.Pose2D ascendPose1 = new SparkFunOTOS.Pose2D(-12, 43, 180); // first ascension position to avoid hitting submersible
     public static SparkFunOTOS.Pose2D ascendPose2 = new SparkFunOTOS.Pose2D(-12, 21.2, 180); // second and actual ascension position
 
@@ -63,6 +64,10 @@ public class FullBasketAuto extends LinearOpMode {
             scoreSampleHelper();
             // pickup sample again
             pickUpSample(pickup2Pose);
+            // try to score again
+            scoreSampleHelper();
+            // pickup sample again
+            pickUpSample(pickup3Pose);
             // try to score again
             scoreSampleHelper();
             // go in for ascension

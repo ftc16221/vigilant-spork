@@ -41,11 +41,11 @@ public class Follower extends Subassembly {
     public static double MAX_AUTO_SPEED = 0.45; // Clip the approach speed to this max value (adjust for your robot)
     public static double MAX_AUTO_TURN = 0.5; // Clip the turn speed to this max value (adjust for your robot)
 
-    public static double VELO_TOLERANCE = 1.0;
+    public static double VELO_TOLERANCE = 3.0;
 
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);
-    public static double OTOS_LINEAR_SCALAR = 0.97260274;
-    public static double OTOS_ANGULAR_SCALAR = 0.99913963;
+    public static double OTOS_LINEAR_SCALAR = 0.9431;
+    public static double OTOS_ANGULAR_SCALAR = 1.00208768;
     public static int APRILTAG_UPDATE_INTERVAL = 500; // milliseconds
 
     public static LocalizationMode LOCALIZATION_MODE = LocalizationMode.OTOS;

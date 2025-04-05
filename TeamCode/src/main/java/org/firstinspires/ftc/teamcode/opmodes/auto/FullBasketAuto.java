@@ -22,15 +22,14 @@ public class FullBasketAuto extends LinearOpMode {
 
     public static SparkFunOTOS.Pose2D startPose = new SparkFunOTOS.Pose2D(-61.8, 36, 180); // starting position
     public static SparkFunOTOS.Pose2D basketPose1 = new SparkFunOTOS.Pose2D(-43, 60, -135); // scoring position helper
-    public static SparkFunOTOS.Pose2D basketPose2 = new SparkFunOTOS.Pose2D(-43, 63.5, 45); // scoring position
-    public static SparkFunOTOS.Pose2D pickup1Pose = new SparkFunOTOS.Pose2D(-34, 42, -90); // first sample pickup
-    public static SparkFunOTOS.Pose2D pickup2Pose = new SparkFunOTOS.Pose2D(-34, 53, -90); // second sample pickup
-    public static SparkFunOTOS.Pose2D pickup3Pose = new SparkFunOTOS.Pose2D(-35, 60.5, -90); // third sample pickup
+    public static SparkFunOTOS.Pose2D basketPose2 = new SparkFunOTOS.Pose2D(-47, 65, 45); // scoring position
+    public static SparkFunOTOS.Pose2D pickup1Pose = new SparkFunOTOS.Pose2D(-31, 42, -90); // first sample pickup
+    public static SparkFunOTOS.Pose2D pickup2Pose = new SparkFunOTOS.Pose2D(-31, 52, -90); // second sample pickup
     public static SparkFunOTOS.Pose2D ascendPose1 = new SparkFunOTOS.Pose2D(-12, 43, 180); // first ascension position to avoid hitting submersible
     public static SparkFunOTOS.Pose2D ascendPose2 = new SparkFunOTOS.Pose2D(-12, 21.2, 180); // second and actual ascension position
 
     public static double SLIDE_HIGH_BASKET_POS = 38.4;
-    public static double SLIDE_PICKUP_POS = 1;
+    public static double SLIDE_PICKUP_POS = 3;
     public static int SLIDE_ASCEND_POS = 20;
 
     private Follower follower;
@@ -41,14 +40,15 @@ public class FullBasketAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        claw = new AltClaw(this);
+        wristServo = claw.getRotateServo();
+        claw.close();
+
         follower = new Follower(this, startPose);
         new Underglow(this);
 
         linearSlide = new LinearSlide(this);
         linearSlideMotor = linearSlide.getLinearSlide();
-
-        claw = new AltClaw(this);
-        wristServo = claw.getRotateServo();
 
         linearSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sleep(10);
@@ -64,10 +64,6 @@ public class FullBasketAuto extends LinearOpMode {
             scoreSampleHelper();
             // pickup sample again
             pickUpSample(pickup2Pose);
-            // try to score again
-            scoreSampleHelper();
-            // pickup sample again
-            pickUpSample(pickup3Pose);
             // try to score again
             scoreSampleHelper();
             // go in for ascension

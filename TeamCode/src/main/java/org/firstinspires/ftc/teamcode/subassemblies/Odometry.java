@@ -15,7 +15,7 @@ public class Odometry extends Subassembly {
     public static double ODO_ENCODER_RES = 0; // ticks per rev TODO: find val
     public static double ODO_RADIUS = 0; // radius of odometer wheels TODO: find val
 
-    public Pose pose;
+    private Pose pose;
 
     private final LinearOpMode opMode;
     private final HardwareMap hardwareMap;
@@ -57,10 +57,15 @@ public class Odometry extends Subassembly {
 
         // convert lateral and forward robot-centric values to field centric coordinates
         pose.h += headingChange;
+        double hRads = toRadians(pose.h); // radians
+
+        double xChange = lateralChange * cos(hRads) - forwardChange * sin(hRads);
+        double yChange = lateralChange * sin(hRads) + forwardChange * cos(hRads);
+
+        pose.x += xChange;
+        pose.y += yChange;
 
     }
 
-
+    public Pose getPose() { return pose; }
 }
-
-// roationalChange / (TRACK_WIDTH * pi) * 360

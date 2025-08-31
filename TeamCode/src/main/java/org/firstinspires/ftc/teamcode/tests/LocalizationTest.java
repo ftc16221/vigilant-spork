@@ -45,7 +45,6 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
                 currentPose = follower.getCurrentPose();
 
                 follower.telemetry();
-                driveBase.telemetry();
                 telemetry.update();
 
                 TelemetryPacket packet = new TelemetryPacket(true);

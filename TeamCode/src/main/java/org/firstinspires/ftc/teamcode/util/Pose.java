@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
+import javax.annotation.Nullable;
+
 public class Pose {
     public double x, y , h;
 
@@ -11,7 +13,7 @@ public class Pose {
         this.h = h;
     }
 
-    public Pose(SparkFunOTOS.Pose2D sparkFunPose) {
+    public Pose(@Nullable SparkFunOTOS.Pose2D sparkFunPose) {
         this.x = sparkFunPose.x;
         this.y = sparkFunPose.y;
         this.h = sparkFunPose.h;

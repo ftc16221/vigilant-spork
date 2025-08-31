@@ -67,4 +67,11 @@ public class Odometry extends Subassembly {
         pose.x += xChange;
         pose.y += yChange;
     }
+
+    public Pose getPose() {
+        return pose;
+    }
+    public void setPose(Pose pose) {
+        this.pose = pose;
+    }
 }

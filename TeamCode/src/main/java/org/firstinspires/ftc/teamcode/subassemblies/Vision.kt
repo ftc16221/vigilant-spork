@@ -10,10 +10,12 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.PtzControl
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
 import org.firstinspires.ftc.robotcore.external.navigation.Position
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles
 import org.firstinspires.ftc.teamcode.util.DashOpMode
 import org.firstinspires.ftc.teamcode.util.Global
+import org.firstinspires.ftc.teamcode.util.Pose
 import org.firstinspires.ftc.teamcode.util.Subassembly
 import org.firstinspires.ftc.teamcode.util.log
 import org.firstinspires.ftc.vision.VisionPortal
@@ -54,23 +56,34 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 
     @Config
     companion object {
-        @JvmField var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
-        @JvmField var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
-        @JvmField var CAMERA_RESOLUTION = Size(1280, 720)
+        @JvmField
+        var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
+        @JvmField
+        var CAMERA_ORIENTATION = YawPitchRollAngles(AngleUnit.DEGREES, 0.0, -90.0, 0.0, 0)
+        @JvmField
+        var CAMERA_RESOLUTION = Size(1280, 720)
 
-        @JvmField var APRILTAG_RANGE_LIMIT = 60.0; // inches
+        @JvmField
+        var APRILTAG_RANGE_LIMIT = 60.0; // inches
 
-        @JvmField var BLUE_APRILTAG_IDS = listOf(11, 12, 13)
-        @JvmField var RED_APRILTAG_IDS = listOf(14, 15, 16)
+        @JvmField
+        var BLUE_APRILTAG_IDS = listOf(11, 12, 13)
+        @JvmField
+        var RED_APRILTAG_IDS = listOf(14, 15, 16)
 
         // camera calibration values
-        @JvmField var FX = 484.01521684
-        @JvmField var FY = 484.01521684
-        @JvmField var CX = 682.931618492
-        @JvmField var CY = 339.304216996
+        @JvmField
+        var FX = 484.01521684
+        @JvmField
+        var FY = 484.01521684
+        @JvmField
+        var CX = 682.931618492
+        @JvmField
+        var CY = 339.304216996
     }
 
-    private val webcam = hardwareMap.get(WebcamName::class.java, "Webcam 1") // for our squirrel overlords
+    private val webcam =
+        hardwareMap.get(WebcamName::class.java, "Webcam 1") // for our squirrel overlords
     val dash = DashOpMode.CameraStreamProcessor()
 
     // http://localhost:63342/RobotController/Vision-9.0.1-javadoc.jar/org/firstinspires/ftc/vision/apriltag/AprilTagProcessor.Builder.html
@@ -100,7 +113,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 //    val panTiltHolder = PtzControl.PanTiltHolder()
 
     init {
-        while(visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {
+        while (visionPortal.cameraState != VisionPortal.CameraState.STREAMING) {
             // intentionally blank
         }
 
@@ -167,6 +180,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         }
     }
 
+    fun getPose(): Pose { return Pose(getPosition()) }
     /**
      * find and return desired apriltag (based off ID)
      * @param id apriltag ID

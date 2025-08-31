@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.util.MathKt.clamp;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -21,14 +20,14 @@ import java.util.concurrent.TimeUnit;
 @Config
 public class PoseTracker extends Subassembly {
 
-    public static double driveP = 0.0, driveD = 0.0;
-    public static double approachP = 0.0, approachI = 0.0, approachD = 0.0;
-    public static double headingP = 0.0, headingI = 0.0, headingD = 0.0;
-    public static boolean updateGainLive = false;
-    public static double maxPower = 0.8;
-    public static boolean useX = true, useY = true, useH = true;
+    public static double DRIVE_P = 0.0, DRIVE_D = 0.0;
+    public static double APPROACH_P = 0.0, APPROACH_I = 0.0, APPROACH_D = 0.0;
+    public static double HEADING_P = 0.0, HEADING_I = 0.0, HEADING_D = 0.0;
+    public static boolean UPDATE_GAIN_LIVE = false;
+    public static double MAX_POWER = 0.8;
+    public static boolean USE_X = true, USE_Y = true, USE_H = true;
+    public static int APRILTAG_UPDATE_INTERVAL = 500;
     public static LocalizationMode localizationMode = LocalizationMode.HYBRID;
-    public static int apriltagUpdateInterval = 500;
 
     Odometry odometry;
     MecDriveBase driveBase;
@@ -38,13 +37,13 @@ public class PoseTracker extends Subassembly {
     Pose currentPose;
     Pose targetPose;
 
-    PDController xDrivePDController = new PDController(driveP, driveD);
-    PDController yDrivePDController = new PDController(driveP, driveD);
-    PIDController xApproachPIDController = new PIDController(approachP, approachI, approachD);
-    PIDController yApproachPIDController = new PIDController(approachP, approachI, approachD);
-    PIDController headingPIDController = new PIDController(headingP, headingI, headingD);
+    PDController xDrivePDController = new PDController(DRIVE_P, DRIVE_D);
+    PDController yDrivePDController = new PDController(DRIVE_P, DRIVE_D);
+    PIDController xApproachPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
+    PIDController yApproachPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
+    PIDController headingPIDController = new PIDController(HEADING_P, HEADING_I, HEADING_D);
 
-    Deadline apriltagUpdateDeadline = new Deadline(apriltagUpdateInterval, TimeUnit.MILLISECONDS);
+    Deadline apriltagUpdateDeadline = new Deadline(APRILTAG_UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
 
     ControllerType controllerType;
 
@@ -59,17 +58,37 @@ public class PoseTracker extends Subassembly {
     }
 
     public void update() {
-        currentPose = odometry.getPose(); // TODO: support aprilTags
+
+        switch (localizationMode) {
+            case ODOMETRY:
+                currentPose = odometry.getPose();
+                break;
+            case HYBRID:
+                Pose visionPose = vision.getPose();
+                if (!odometry.isRobotMoving() && vision.getPositionIsNotNull() && apriltagUpdateDeadline.hasExpired()) {
+                    apriltagUpdateDeadline.reset();
+                    odometry.setPose(visionPose);
+                    currentPose = visionPose;
+                    if (vision.getValidDetections() != null)
+                        RobotLog.i("(Follower) Updated Current Position based off AprilTag Detection (ID: " + vision.getValidDetections().get(0).id + ")");
+                } else {
+                    currentPose = odometry.getPose();
+                }
+                break;
+            case APRILTAG:
+                currentPose = vision.getPose();
+                break;
+        }
 
         // used for live tuning via FTC dashboard
-        if (updateGainLive) {
-            xDrivePDController.setP(driveP);
-            xDrivePDController.setD(driveD);
-            yDrivePDController.setP(driveP);
-            yDrivePDController.setD(driveD);
-            xApproachPIDController.setPID(approachP, approachI, approachD);
-            yApproachPIDController.setPID(approachP, approachI, approachD);
-            headingPIDController.setPID(headingP, headingI, headingD);
+        if (UPDATE_GAIN_LIVE) {
+            xDrivePDController.setP(DRIVE_P);
+            xDrivePDController.setD(DRIVE_D);
+            yDrivePDController.setP(DRIVE_P);
+            yDrivePDController.setD(DRIVE_D);
+            xApproachPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
+            yApproachPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
+            headingPIDController.setPID(HEADING_P, HEADING_I, HEADING_D);
         }
 
         if (isMovementEnabled) {
@@ -88,14 +107,14 @@ public class PoseTracker extends Subassembly {
             }
             double hPower = headingPIDController.calculate(currentPose.h, targetPose.h);
 
-            xPower = clamp(xPower, -maxPower, maxPower);
-            yPower = clamp(yPower, -maxPower, maxPower); // yPower should in fact be passed in as param x
-            hPower = clamp(hPower, -maxPower, maxPower);
+            xPower = clamp(xPower, -MAX_POWER, MAX_POWER);
+            yPower = clamp(yPower, -MAX_POWER, MAX_POWER); // yPower should in fact be passed in as param x
+            hPower = clamp(hPower, -MAX_POWER, MAX_POWER);
 
             moveRobotFieldCentric(
-                    useX ? xPower : 0,
-                    useY ? yPower : 0,
-                    useH ? hPower : 0
+                    USE_X ? xPower : 0,
+                    USE_Y ? yPower : 0,
+                    USE_H ? hPower : 0
             );
         }
     }

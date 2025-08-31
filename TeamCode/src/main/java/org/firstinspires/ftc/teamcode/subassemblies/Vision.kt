@@ -10,7 +10,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.PtzControl
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
 import org.firstinspires.ftc.robotcore.external.navigation.Position
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles
 import org.firstinspires.ftc.teamcode.util.DashOpMode
@@ -179,6 +178,8 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
             }
         }
     }
+
+    fun getPositionIsNotNull() = getPosition() != null
 
     fun getPose(): Pose { return Pose(getPosition()) }
     /**

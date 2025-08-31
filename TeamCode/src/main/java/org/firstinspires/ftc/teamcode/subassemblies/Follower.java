@@ -450,6 +450,7 @@ public class Follower extends Subassembly {
         telemetry.update();
     }
 
+    @Deprecated
     /**
      * Configures the SparkFun OTOS by calibrating the IMU and setting constants
      */

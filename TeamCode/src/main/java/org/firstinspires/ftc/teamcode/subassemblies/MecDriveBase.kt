@@ -76,22 +76,9 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
         rightRear.power = rightRearPower
     }
 
-    fun telemetry() {
-        telemetry.addLine()
-        telemetry.addLine("surrender your soul to the squirrels")
-    }
-
     var zeroPowerBehavior: ZeroPowerBehavior = ZeroPowerBehavior.UNKNOWN
         set(value) {
             for (motor in motors) motor.zeroPowerBehavior = value
             field = value
         }
-
-    fun updateMaxRPM() {
-        for (motor in motors) {
-            val motorConfigurationType = motor.motorType.clone()
-            motorConfigurationType.achieveableMaxRPMFraction = 1.0
-            motor.motorType = motorConfigurationType
-        }
-    }
 }

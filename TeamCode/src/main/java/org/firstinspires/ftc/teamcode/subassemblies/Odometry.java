@@ -15,7 +15,7 @@ public class Odometry extends Subassembly {
     public static double ODO_ENCODER_RES = 0; // ticks per rev TODO: find val
     public static double ODO_RADIUS = 0; // radius of odometer wheels TODO: find val
 
-    public Pose pose;
+    private Pose pose;
 
     private final LinearOpMode opMode;
     private final HardwareMap hardwareMap;
@@ -23,7 +23,7 @@ public class Odometry extends Subassembly {
     private final DcMotorEx leftOdoPod, centerOdoPod, rightOdoPod; // we use motorEx bc the ftc sdk doesn't have a dedicated Encoder class, but these will only be used for encoder functionality
     private double lastLeftPos, lastRightPos, lastCenterPos;
 
-
+    
     public Odometry(LinearOpMode opMode, Pose startingPose) {
         super(opMode, "Odometry");
         this.opMode = opMode;
@@ -40,7 +40,7 @@ public class Odometry extends Subassembly {
         double leftPos = leftOdoPod.getCurrentPosition() / ODO_ENCODER_RES * ODO_RADIUS;
         double centerPos = centerOdoPod.getCurrentPosition() / ODO_ENCODER_RES * ODO_RADIUS;
         double rightPos = rightOdoPod.getCurrentPosition() / ODO_ENCODER_RES * ODO_RADIUS;
-
+        
         double leftPosChange = leftPos - lastLeftPos;
         double centerPosChange = centerPos - lastCenterPos;
         double rightPosChange = rightPos - lastRightPos;

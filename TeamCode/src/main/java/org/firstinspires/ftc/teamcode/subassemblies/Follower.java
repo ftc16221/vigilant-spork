@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.util.AdvPose;
 import org.firstinspires.ftc.teamcode.util.Global;
+import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 import java.util.List;
@@ -111,7 +112,7 @@ public class Follower extends Subassembly {
 
         if (startingPosition == null) {
             if (Global.lastPose != null) {
-                startingPosition = Global.lastPose;
+                startingPosition = Global.lastPose.toSparkFunPose();
                 RobotLog.i("(Follower) Starting position not set, using last detected position");
             } else {
                 RobotLog.w("(Follower) Starting position not set, disabling autonomous movement");
@@ -274,7 +275,7 @@ public class Follower extends Subassembly {
     public void stop() {
         disable();
         updatePose();
-        Global.lastPose = currentPose;
+        Global.lastPose = new Pose(currentPose);
     }
 
     /**

@@ -2,13 +2,16 @@ package org.firstinspires.ftc.teamcode.subassemblies;
 
 import static org.firstinspires.ftc.teamcode.util.MathKt.clamp;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
@@ -37,6 +40,7 @@ public class PoseTracker extends Subassembly {
     Pose currentPose;
     Pose targetPose;
 
+    // note use of multiple controllers, one is for accuracy (approach), the other for speed (drive)
     PDController xDrivePDController = new PDController(DRIVE_P, DRIVE_D);
     PDController yDrivePDController = new PDController(DRIVE_P, DRIVE_D);
     PIDController xApproachPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
@@ -80,6 +84,8 @@ public class PoseTracker extends Subassembly {
                 break;
         }
 
+        drawFieldPosition();
+
         // used for live tuning via FTC dashboard
         if (UPDATE_GAIN_LIVE) {
             xDrivePDController.setP(DRIVE_P);
@@ -119,6 +125,10 @@ public class PoseTracker extends Subassembly {
         }
     }
 
+    public void stop() {
+        Global.lastPose = currentPose;
+    }
+
     public enum ControllerType {
         DRIVE, APPROACH
     }
@@ -129,7 +139,9 @@ public class PoseTracker extends Subassembly {
         APRILTAG
     }
 
+    /** Set which P(I)D controller to use */
     public void setControllerType(ControllerType controllerType) { this.controllerType = controllerType; }
+    /** Get current P(I)D controller type */
     public ControllerType getControllerType() { return controllerType; }
 
     public void setTargetPose(Pose targetPose) { this.targetPose = targetPose; }
@@ -156,5 +168,22 @@ public class PoseTracker extends Subassembly {
         double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
 
         driveBase.moveRobot(rotX, rotY, h);
+    }
+
+    /** Draws the robot's position onto the field in FTC Dashboard */
+    private void drawFieldPosition() {
+        TelemetryPacket packet = new TelemetryPacket(true);
+        if (currentPose != null) {
+            packet.fieldOverlay()
+                    .setStroke("#12C600")
+                    .setRotation(Math.toRadians(currentPose.h))
+                    .setTranslation(currentPose.y, -currentPose.x) // x and y are swapped because FTC dash's coordinate system wants to be different
+                    .strokeCircle(0, 0, 9) // draw circle for robot position
+                    .strokeLine(0, 0, 9, 0);
+        } else {
+            packet.fieldOverlay().clear();
+        }
+
+        FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 }

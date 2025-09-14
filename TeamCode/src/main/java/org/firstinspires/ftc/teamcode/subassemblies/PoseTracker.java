@@ -10,11 +10,13 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -111,7 +113,10 @@ public class PoseTracker extends Subassembly {
             } else {
                 RobotLog.e("(PoseTracker) Controller Type is null");
             }
-            double hPower = headingPIDController.calculate(currentPose.h, targetPose.h);
+            // for the heading PID, we need to account for the fact that headings wrap around at 180 degrees. There is a great explanation of this at: https://www.ctrlaltftc.com/practical-examples/controlling-heading
+            // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
+            double hError = AngleUnit.normalizeDegrees(currentPose.h - targetPose.h);
+            double hPower = headingPIDController.calculate(hError, 0);
 
             xPower = clamp(xPower, -MAX_POWER, MAX_POWER);
             yPower = clamp(yPower, -MAX_POWER, MAX_POWER); // yPower should in fact be passed in as param x

@@ -1,41 +1,32 @@
-package org.firstinspires.ftc.teamcode.subassemblies;
+package org.firstinspires.ftc.teamcode.subassemblies.odometry;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.toRadians;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
-import org.firstinspires.ftc.teamcode.util.Subassembly;
 
-public class Odometry extends Subassembly {
+@Config
+public class ThreeWheelOdo extends Localizer {
 
     public static double TRACK_WIDTH = 0; // distance between the middle of the wheels TODO: find val
     public static double ODO_ENCODER_RES = 0; // ticks per rev TODO: find val
     public static double ODO_RADIUS = 0; // radius of odometer wheels TODO: find val
-    public static double ROBOT_MOVEMENT_SPEED_THRESHOLD = 3.0;
-
-    private Pose pose;
-    private Pose velocity = new Pose(0,0,0);
-
-    private final LinearOpMode opMode;
-    private final HardwareMap hardwareMap;
 
     private final DcMotorEx leftOdoPod, centerOdoPod, rightOdoPod; // we use motorEx bc the ftc sdk doesn't have a dedicated Encoder class, but these will only be used for encoder functionality
     private double prevLeftPos, prevRightPos, prevCenterPos;
 
-    private long prevTime = 0;
-    
-    public Odometry(LinearOpMode opMode, Pose startingPose) {
-        super(opMode, "Odometry");
-        this.opMode = opMode;
-        hardwareMap = opMode.hardwareMap;
+    private long prevTime;
+
+    public ThreeWheelOdo(LinearOpMode opMode, Pose startingPose) {
+        super(opMode, "Three Wheel Odometry");
 
         this.pose = startingPose;
 
@@ -89,19 +80,5 @@ public class Odometry extends Subassembly {
         velocity.h = hChange / dt;
 
         prevTime = currentTime;
-    }
-
-    public Pose getPose() { return pose; }
-    public void setPose(Pose pose) { this.pose = pose; }
-
-    public Pose getVelocity() { return velocity; }
-    public double getSpeed() { return Math.hypot(velocity.x, velocity.y); }
-    public boolean isRobotMoving() { return getSpeed() > ROBOT_MOVEMENT_SPEED_THRESHOLD; }
-
-    public void runTelemetry() {
-        Telemetry telemetry = getTelemetry();
-        telemetry.addLine("Odometry Data");
-        telemetry.addData("position data","x=%.1f, y=%.1f, h=%.1f", pose.x, pose.y, pose.h);
-        telemetry.addData("velocity data","x=%.1f, y=%.1f, h=%.1f", velocity.x, velocity.y, velocity.h);
     }
 }

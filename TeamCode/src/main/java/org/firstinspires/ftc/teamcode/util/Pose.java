@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+
 import javax.annotation.Nullable;
 
 public class Pose {
@@ -17,6 +21,14 @@ public class Pose {
         this.x = sparkFunPose.x;
         this.y = sparkFunPose.y;
         this.h = sparkFunPose.h;
+    }
+
+    public Pose(@Nullable Pose3D pose3D) {
+        if (pose3D == null) return;
+        Position position = pose3D.getPosition();
+        this.x = position.x;
+        this.y = position.y;
+        this.h = pose3D.getOrientation().getYaw(AngleUnit.DEGREES);
     }
 
     public SparkFunOTOS.Pose2D toSparkFunPose() {

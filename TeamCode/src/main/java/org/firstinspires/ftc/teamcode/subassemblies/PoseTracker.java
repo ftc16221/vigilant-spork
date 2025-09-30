@@ -12,11 +12,11 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.teamcode.subassemblies.odometry.ThreeWheelOdo;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,7 +34,7 @@ public class PoseTracker extends Subassembly {
     public static int APRILTAG_UPDATE_INTERVAL = 500;
     public static LocalizationMode localizationMode = LocalizationMode.HYBRID;
 
-    Odometry odometry;
+    ThreeWheelOdo odometry;
     MecDriveBase driveBase;
     Vision vision;
 
@@ -58,7 +58,7 @@ public class PoseTracker extends Subassembly {
     public PoseTracker(LinearOpMode opMode, Pose startingPose) {
         super(opMode, "PoseTracker");
         this.startingPose = startingPose;
-        odometry = new Odometry(opMode, this.startingPose);
+        odometry = new ThreeWheelOdo(opMode, this.startingPose);
         driveBase = new MecDriveBase(opMode);
         vision = new Vision(opMode);
     }

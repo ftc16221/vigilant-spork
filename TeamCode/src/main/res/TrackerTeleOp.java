@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
-import org.firstinspires.ftc.teamcode.subassemblies.Follower;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;

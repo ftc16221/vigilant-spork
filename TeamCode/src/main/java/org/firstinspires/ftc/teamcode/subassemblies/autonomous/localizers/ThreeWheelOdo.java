@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subassemblies.odometry;
+package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
 @Config

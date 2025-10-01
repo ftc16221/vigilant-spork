@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subassemblies;
+package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 
 import static org.firstinspires.ftc.teamcode.util.MathKt.clamp;
 
@@ -12,7 +12,9 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
-import org.firstinspires.ftc.teamcode.subassemblies.odometry.ThreeWheelOdo;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.ThreeWheelOdo;
+import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
+import org.firstinspires.ftc.teamcode.subassemblies.Vision;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;

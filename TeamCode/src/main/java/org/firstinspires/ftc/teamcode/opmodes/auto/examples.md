@@ -385,7 +385,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
-import org.firstinspires.ftc.teamcode.subassemblies.Follower;
+import org.firstinspires.ftc.teamcode.autonomous.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -512,7 +512,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
-import org.firstinspires.ftc.teamcode.subassemblies.Follower;
+import org.firstinspires.ftc.teamcode.autonomous.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -622,7 +622,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
-import org.firstinspires.ftc.teamcode.subassemblies.Follower;
+import org.firstinspires.ftc.teamcode.autonomous.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -710,7 +710,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
-import org.firstinspires.ftc.teamcode.subassemblies.Follower;
+import org.firstinspires.ftc.teamcode.autonomous.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;

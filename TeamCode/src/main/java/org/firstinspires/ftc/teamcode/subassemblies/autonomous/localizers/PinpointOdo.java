@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.util.Localizer;
+
 public class PinpointOdo extends Localizer {
 
     public PinpointOdo(LinearOpMode opMode) {

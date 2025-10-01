@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
-import org.firstinspires.ftc.teamcode.subassemblies.Vision;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam;
 import org.firstinspires.ftc.teamcode.util.AdvPose;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
@@ -64,7 +64,7 @@ public class Follower extends Subassembly {
     private final DcMotor rightRear;
     private final DcMotor rightFront;
     private final SparkFunOTOS OTOS; // Optical Tracking Odometry Sensor
-    private final Vision vision;
+    private final GenericCam vision;
 
     OpModeType opModeType;
     SparkFunOTOS.Pose2D startingPosition;
@@ -108,7 +108,7 @@ public class Follower extends Subassembly {
 
         OTOS = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
 
-        vision = new Vision(opMode);
+        vision = new GenericCam(opMode);
 
         opModeType = getOpModeType();
 
@@ -211,7 +211,7 @@ public class Follower extends Subassembly {
                 currentPose = OTOS.getPosition();
                 break;
             case HYBRID:
-                SparkFunOTOS.Pose2D visionPose = vision.getPosition();
+                SparkFunOTOS.Pose2D visionPose = vision.getPose().toSparkFunPose();
                 if (!isRobotMoving() && visionPose != null && apriltagUpdateDeadline.hasExpired()) {
                     apriltagUpdateDeadline.reset();
                     OTOS.setPosition(visionPose);
@@ -223,7 +223,7 @@ public class Follower extends Subassembly {
                 }
                 break;
             case APRILTAG:
-                currentPose = vision.getPosition();
+                currentPose = vision.getPose().toSparkFunPose();
                 break;
         }
     }

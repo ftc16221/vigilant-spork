@@ -18,6 +18,7 @@ public class Pose {
     }
 
     public Pose(@Nullable SparkFunOTOS.Pose2D sparkFunPose) {
+        if (sparkFunPose == null) return;
         this.x = sparkFunPose.x;
         this.y = sparkFunPose.y;
         this.h = sparkFunPose.h;
@@ -28,7 +29,7 @@ public class Pose {
         Position position = pose3D.getPosition();
         this.x = position.x;
         this.y = position.y;
-        this.h = pose3D.getOrientation().getYaw(AngleUnit.DEGREES);
+        this.h = pose3D.getOrientation().getYaw(Global.ANGLE_UNIT);
     }
 
     public SparkFunOTOS.Pose2D toSparkFunPose() {

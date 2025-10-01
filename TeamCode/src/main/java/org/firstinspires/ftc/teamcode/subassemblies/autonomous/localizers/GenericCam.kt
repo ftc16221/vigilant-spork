@@ -1,10 +1,9 @@
-package org.firstinspires.ftc.teamcode.subassemblies
+package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers
 
 import android.util.Size
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS
-import com.qualcomm.robotcore.eventloop.opmode.OpMode
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.PtzControl
@@ -14,20 +13,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles
 import org.firstinspires.ftc.teamcode.util.DashOpMode
 import org.firstinspires.ftc.teamcode.util.Global
+import org.firstinspires.ftc.teamcode.util.Localizer
 import org.firstinspires.ftc.teamcode.util.Pose
-import org.firstinspires.ftc.teamcode.util.Subassembly
 import org.firstinspires.ftc.teamcode.util.log
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
+import javax.annotation.CheckForNull
 
 /**
  * Vision subassembly for detecting AprilTags and calculating robot position on the field via AprilTags.
  * Possibly will be used for Machine Learning in future seasons
  */
 @Config
-class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
+class GenericCam(opMode: LinearOpMode): Localizer(opMode, "Vision") {
     /**
      * Variables to store the position and orientation of the camera on the robot. Setting these
      * values requires a definition of the axes of the camera and robot:
@@ -87,7 +87,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
 
     // http://localhost:63342/RobotController/Vision-9.0.1-javadoc.jar/org/firstinspires/ftc/vision/apriltag/AprilTagProcessor.Builder.html
     val aprilTag: AprilTagProcessor = AprilTagProcessor.Builder()
-        .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+        .setOutputUnits(Global.DISTANCE_UNIT, Global.ANGLE_UNIT)
         .setTagLibrary(AprilTagGameDatabase.getCurrentGameTagLibrary())
         .setDrawTagID(true)
         .setDrawTagOutline(true)
@@ -151,11 +151,16 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         return validDetections
     }
 
+    override fun update() {
+        pose = getPose()
+    }
+
     /**
      * get the position of the robot on the field via AprilTags
      * @return field-centric position of the robot (null if no detections)
      */
-    fun getPosition(): SparkFunOTOS.Pose2D? {
+    @CheckForNull
+    override fun getPose(): Pose? {
         val detection = getValidDetections()?.first()
         detection ?: return null
 
@@ -167,7 +172,7 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         val y = position.x
         val h = orientation.yaw + 90
 
-        val rawPose = SparkFunOTOS.Pose2D(x, y, h)
+        val rawPose = Pose(x, y, h)
 
         return when (Global.alliance) {
             Global.Alliance.BLUE -> rawPose
@@ -179,9 +184,8 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         }
     }
 
-    fun getPositionIsNotNull() = getPosition() != null
+    fun getPoseIsNotNull() = getPose() != null
 
-    fun getPose(): Pose { return Pose(getPosition()) }
     /**
      * find and return desired apriltag (based off ID)
      * @param id apriltag ID
@@ -192,5 +196,9 @@ class Vision(opMode: OpMode): Subassembly(opMode, "Vision") {
         return detections?.find { it.id == id }
     }
 
-    fun SparkFunOTOS.Pose2D.invert() = SparkFunOTOS.Pose2D(-x, -y, h + 180)
+    fun Pose.invert() : Pose{
+        if (Global.ANGLE_UNIT == AngleUnit.DEGREES) h = AngleUnit.normalizeDegrees(h + 180)
+        else if (Global.ANGLE_UNIT == AngleUnit.RADIANS) h = AngleUnit.normalizeRadians(h + Math.PI)
+        return Pose(-x, -y, h)
+    }
 }

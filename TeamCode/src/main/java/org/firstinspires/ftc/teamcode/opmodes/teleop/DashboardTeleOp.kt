@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
-import org.firstinspires.ftc.teamcode.subassemblies.Vision
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam
 import org.firstinspires.ftc.teamcode.util.DashOpMode
 
 @Disabled
@@ -14,7 +14,7 @@ class DashboardTeleOp : LinearOpMode(), DashOpMode {
 
     override fun runOpMode() {
         val driveBase = MecDriveBase(this)
-        val vision = Vision(this)
+        val vision = GenericCam(this)
 
         waitForStart()
 

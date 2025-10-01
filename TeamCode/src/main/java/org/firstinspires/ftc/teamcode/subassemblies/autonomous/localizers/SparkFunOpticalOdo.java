@@ -3,8 +3,7 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
@@ -43,8 +42,8 @@ public class SparkFunOpticalOdo extends Localizer {
         // meters or inches for linear, and radians or degrees for angular. If not
         // set, the default is inches and degrees. Note that this setting is not
         // stored in the sensor, so you need to set at the start of all your OpModes.
-        sparkFunOTOS.setLinearUnit(DistanceUnit.INCH);
-        sparkFunOTOS.setAngularUnit(AngleUnit.DEGREES);
+        sparkFunOTOS.setLinearUnit(Global.DISTANCE_UNIT);
+        sparkFunOTOS.setAngularUnit(Global.ANGLE_UNIT);
         // Assuming you've mounted your sensor to a robot and it's not centered,
         // you can specify the offset for the sensor relative to the center of the
         // robot. The units default to inches and degrees, but if you want to use

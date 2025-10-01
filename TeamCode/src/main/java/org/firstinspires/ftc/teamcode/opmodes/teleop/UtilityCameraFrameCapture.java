@@ -41,7 +41,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.subassemblies.Vision;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam;
 import org.firstinspires.ftc.vision.VisionPortal;
 
 import java.util.Locale;
@@ -81,7 +81,7 @@ public class UtilityCameraFrameCapture extends LinearOpMode
     public void runOpMode()
     {
         VisionPortal portal;
-        Vision vision = new Vision(this);
+        GenericCam vision = new GenericCam(this);
 
         if (USING_WEBCAM)
         {

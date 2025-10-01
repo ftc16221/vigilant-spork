@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.ThreeWheelOdo;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
-import org.firstinspires.ftc.teamcode.subassemblies.Vision;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
@@ -38,7 +38,7 @@ public class PoseTracker extends Subassembly {
 
     ThreeWheelOdo odometry;
     MecDriveBase driveBase;
-    Vision vision;
+    GenericCam vision;
 
     final Pose startingPose;
     Pose currentPose;
@@ -62,7 +62,7 @@ public class PoseTracker extends Subassembly {
         this.startingPose = startingPose;
         odometry = new ThreeWheelOdo(opMode, this.startingPose);
         driveBase = new MecDriveBase(opMode);
-        vision = new Vision(opMode);
+        vision = new GenericCam(opMode);
     }
 
     public void update() {
@@ -73,7 +73,7 @@ public class PoseTracker extends Subassembly {
                 break;
             case HYBRID:
                 Pose visionPose = vision.getPose();
-                if (!odometry.isRobotMoving() && vision.getPositionIsNotNull() && apriltagUpdateDeadline.hasExpired()) {
+                if (!odometry.isRobotMoving() && vision.getPoseIsNotNull() && apriltagUpdateDeadline.hasExpired()) {
                     apriltagUpdateDeadline.reset();
                     odometry.setPose(visionPose);
                     currentPose = visionPose;
@@ -169,8 +169,14 @@ public class PoseTracker extends Subassembly {
      * see <a href="https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html">...</a>
      */
     private void moveRobotFieldCentric(double y, double x, double h) {
-        double heading = Math.toRadians(currentPose.h);
-        // Rotate the movement direction counter to the bot's rotation
+        double heading;
+        if (Global.ANGLE_UNIT == AngleUnit.DEGREES) {
+            heading = Math.toRadians(currentPose.h);
+        } else {
+            heading = currentPose.h;
+        }
+
+        // Rotate the movement direction to counter the bot's rotation
         double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
         double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
 

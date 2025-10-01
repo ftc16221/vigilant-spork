@@ -25,6 +25,8 @@ public class LimelightCam extends Localizer {
             if (result.isValid()) {
                 pose = new Pose(result.getBotpose());
             }
+        } else {
+            pose = null;
         }
     }
 }

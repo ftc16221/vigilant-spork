@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.util
 
 import kotlin.math.*
 
-fun clamp(x: Double, lowerBound: Double, upperBound: Double)
-    = max(lowerBound, min(upperBound, x))
+fun clamp(value: Double, lowerBound: Double, upperBound: Double)
+    = max(lowerBound, min(upperBound, value))
 
 fun equalsTolerance(a: Double, b: Double, tolerance: Double)
     = abs(b - a) < tolerance

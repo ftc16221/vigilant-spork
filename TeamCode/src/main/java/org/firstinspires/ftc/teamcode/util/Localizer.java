@@ -12,7 +12,7 @@ public abstract class Localizer extends Subassembly {
     public static double ROBOT_MOVEMENT_SPEED_THRESHOLD = 3.0;
 
     protected Pose pose;
-    protected Pose velocity = new Pose(0,0,0);
+    protected Pose velocity;
 
     protected final LinearOpMode opMode;
     protected final HardwareMap hardwareMap;

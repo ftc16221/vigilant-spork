@@ -41,11 +41,14 @@ public class Underglow extends Subassembly {
                         break;
                 }
                 break;
-            case GREEN: // undefined
-                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+            case ORANGE:
+                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
                 break;
             case YELLOW: // semi-autonomous unavailable
                 underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
+                break;
+            case GREEN: // undefined
+                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
                 break;
             case WHITE: // autonomous active
                 underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
@@ -58,6 +61,7 @@ public class Underglow extends Subassembly {
 
     public enum Color {
         ALLIANCE,
+        ORANGE,
         YELLOW,
         GREEN,
         WHITE,

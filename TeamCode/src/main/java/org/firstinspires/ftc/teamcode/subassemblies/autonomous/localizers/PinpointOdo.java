@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
@@ -20,7 +18,7 @@ public class PinpointOdo extends Localizer {
 
     private final GoBildaPinpointDriver pinpoint;
 
-    public PinpointOdo(LinearOpMode opMode) {
+    public PinpointOdo(LinearOpMode opMode, Pose startingPose) {
         super(opMode, "Pinpoint Odometry");
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint_imu");
@@ -30,6 +28,8 @@ public class PinpointOdo extends Localizer {
         pinpoint.setEncoderDirections(X_DIRECTION, Y_DIRECTION);
 
         pinpoint.resetPosAndIMU();
+
+        setPose(startingPose);
     }
 
     @Override public void update() {

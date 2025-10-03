@@ -76,6 +76,13 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
         rightRear.power = rightRearPower
     }
 
+    fun stopMotors() {
+        leftFront.power = 0.0
+        rightFront.power = 0.0
+        leftRear.power = 0.0
+        rightRear.power = 0.0
+    }
+
     var zeroPowerBehavior: ZeroPowerBehavior = ZeroPowerBehavior.UNKNOWN
         set(value) {
             for (motor in motors) motor.zeroPowerBehavior = value

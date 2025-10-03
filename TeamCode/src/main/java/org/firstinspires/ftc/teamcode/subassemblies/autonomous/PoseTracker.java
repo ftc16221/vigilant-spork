@@ -11,15 +11,19 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.internal.system.Deadline;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.ThreeWheelOdo;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
+import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.Global;
+import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.CheckForNull;
 
 /**
  * This class keeps track of the robot's position and handles all autonomous movement
@@ -33,12 +37,13 @@ public class PoseTracker extends Subassembly {
     public static boolean UPDATE_GAIN_LIVE = false;
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
-    public static int APRILTAG_UPDATE_INTERVAL = 500;
-    public static LocalizationMode localizationMode = LocalizationMode.HYBRID;
 
-    ThreeWheelOdo odometry;
+    PinpointOdo pinpointOdo;
+    GenericCam genericCam;
+    List<Localizer> localizers = new ArrayList<>();
+
     MecDriveBase driveBase;
-    GenericCam vision;
+    Underglow underglow;
 
     final Pose startingPose;
     Pose currentPose;
@@ -51,8 +56,6 @@ public class PoseTracker extends Subassembly {
     PIDController yApproachPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
     PIDController headingPIDController = new PIDController(HEADING_P, HEADING_I, HEADING_D);
 
-    Deadline apriltagUpdateDeadline = new Deadline(APRILTAG_UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
-
     ControllerType controllerType;
 
     boolean isMovementEnabled = false;
@@ -60,32 +63,24 @@ public class PoseTracker extends Subassembly {
     public PoseTracker(LinearOpMode opMode, Pose startingPose) {
         super(opMode, "PoseTracker");
         this.startingPose = startingPose;
-        odometry = new ThreeWheelOdo(opMode, this.startingPose);
+        pinpointOdo = new PinpointOdo(opMode, this.startingPose);
+        genericCam = new GenericCam(opMode);
         driveBase = new MecDriveBase(opMode);
-        vision = new GenericCam(opMode);
+        underglow = new Underglow(opMode);
+
+        // whatever localizer has the lowest index will take precedent
+        localizers.add(1, pinpointOdo);
+        localizers.add(0, genericCam);
     }
 
     public void update() {
 
-        switch (localizationMode) {
-            case ODOMETRY:
-                currentPose = odometry.getPose();
-                break;
-            case HYBRID:
-                Pose visionPose = vision.getPose();
-                if (!odometry.isRobotMoving() && vision.getPoseIsNotNull() && apriltagUpdateDeadline.hasExpired()) {
-                    apriltagUpdateDeadline.reset();
-                    odometry.setPose(visionPose);
-                    currentPose = visionPose;
-                    if (vision.getValidDetections() != null)
-                        RobotLog.i("(Follower) Updated Current Position based off AprilTag Detection (ID: " + vision.getValidDetections().get(0).id + ")");
-                } else {
-                    currentPose = odometry.getPose();
-                }
-                break;
-            case APRILTAG:
-                currentPose = vision.getPose();
-                break;
+        currentPose = getPrioritizedPose();
+        if (currentPose == null && isMovementEnabled) {
+            RobotLog.w("(PoseTracker) currentPose is null, disabling autonomous movement and stopping robot");
+            disableMovement();
+            driveBase.stopMotors();
+            underglow.setColor(Underglow.Color.ORANGE);
         }
 
         drawFieldPosition();
@@ -113,7 +108,9 @@ public class PoseTracker extends Subassembly {
                 yPower = yDrivePDController.calculate(currentPose.y, targetPose.y);
 
             } else {
-                RobotLog.e("(PoseTracker) Controller Type is null");
+                RobotLog.e("(PoseTracker) Controller Type is null, setting it to APPROACH");
+                xPower = 0.0;
+                yPower = 0.0;
             }
             // for the heading PID, we need to account for the fact that headings wrap around at 180 degrees. There is a great explanation of this at: https://www.ctrlaltftc.com/practical-examples/controlling-heading
             // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
@@ -121,7 +118,7 @@ public class PoseTracker extends Subassembly {
             double hPower = headingPIDController.calculate(hError, 0);
 
             xPower = clamp(xPower, -MAX_POWER, MAX_POWER);
-            yPower = clamp(yPower, -MAX_POWER, MAX_POWER); // yPower should in fact be passed in as param x
+            yPower = clamp(yPower, -MAX_POWER, MAX_POWER);
             hPower = clamp(hPower, -MAX_POWER, MAX_POWER);
 
             moveRobotFieldCentric(
@@ -132,18 +129,39 @@ public class PoseTracker extends Subassembly {
         }
     }
 
+    /** this method returns the pose of the earliest nonnull pose value from the localizer list,
+     * used to make sure more accurate or precise sensors are prioritized for localization. it will
+     * also set less accurate sensors to the most prioritized pose*/
+    @CheckForNull
+    public Pose getPrioritizedPose() {
+        for (int i = 0; i < localizers.size() - 1; i++) {
+            localizers.get(i).update();
+        }
+
+        Pose pose = null;
+        for (int i = 0; i < localizers.size() - 1; i++) {
+            Localizer localizer = localizers.get(i);
+            if (localizer.getPose() != null) {
+                pose = localizer.getPose();
+                break;
+            }
+        }
+
+        if (pose != null) {
+            for (int i = 0; i < localizers.size() - 1; i++) {
+                localizers.get(i).setPose(pose);
+            }
+        }
+
+        return pose;
+    }
+
     public void stop() {
         Global.lastPose = currentPose;
     }
 
     public enum ControllerType {
         DRIVE, APPROACH
-    }
-
-    public enum LocalizationMode {
-        ODOMETRY,
-        HYBRID,
-        APRILTAG
     }
 
     /** Set which P(I)D controller to use */

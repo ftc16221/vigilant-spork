@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
@@ -25,6 +26,8 @@ import java.util.List;
 
 import javax.annotation.CheckForNull;
 
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities;
+
 /**
  * This class keeps track of the robot's position and handles all autonomous movement
  */
@@ -38,9 +41,12 @@ public class PoseTracker extends Subassembly {
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
 
+    Telemetry telemetry;
+
     PinpointOdo pinpointOdo;
     GenericCam genericCam;
     List<Localizer> localizers = new ArrayList<>();
+    Localizer activeLocalizer = null;
 
     MecDriveBase driveBase;
     Underglow underglow;
@@ -62,6 +68,7 @@ public class PoseTracker extends Subassembly {
 
     public PoseTracker(LinearOpMode opMode, Pose startingPose) {
         super(opMode, "PoseTracker");
+        telemetry = getTelemetry();
         this.startingPose = startingPose;
         pinpointOdo = new PinpointOdo(opMode, this.startingPose);
         genericCam = new GenericCam(opMode);
@@ -114,7 +121,7 @@ public class PoseTracker extends Subassembly {
             }
             // for the heading PID, we need to account for the fact that headings wrap around at 180 degrees. There is a great explanation of this at: https://www.ctrlaltftc.com/practical-examples/controlling-heading
             // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
-            double hError = AngleUnit.normalizeDegrees(currentPose.h - targetPose.h);
+            double hError = Global.ANGLE_UNIT == AngleUnit.DEGREES ? AngleUnit.normalizeDegrees(currentPose.h - targetPose.h) : AngleUnit.normalizeRadians(currentPose.h - targetPose.h);
             double hPower = headingPIDController.calculate(hError, 0);
 
             xPower = clamp(xPower, -MAX_POWER, MAX_POWER);
@@ -139,13 +146,17 @@ public class PoseTracker extends Subassembly {
         }
 
         Pose pose = null;
+        Localizer newActiveLocalizer = null;
         for (int i = 0; i < localizers.size() - 1; i++) {
             Localizer localizer = localizers.get(i);
             if (localizer.getPose() != null) {
                 pose = localizer.getPose();
+                newActiveLocalizer = localizer;
                 break;
             }
         }
+
+        activeLocalizer = newActiveLocalizer;
 
         if (pose != null) {
             for (int i = 0; i < localizers.size() - 1; i++) {
@@ -154,6 +165,23 @@ public class PoseTracker extends Subassembly {
         }
 
         return pose;
+    }
+
+    public void runTelemetry() {
+        telemetry.addLine("Pose Tracker:");
+        String activeLocalizerString;
+        if (activeLocalizer == null) activeLocalizerString = "NULL";
+        else activeLocalizerString = activeLocalizer.getClass().getName();
+        telemetry.addData("Active Localizer", activeLocalizerString);
+        String currentControllerString;
+        if (controllerType == ControllerType.APPROACH) currentControllerString = "APPROACH";
+        else if (controllerType == ControllerType.DRIVE) currentControllerString = "DRIVE";
+        else currentControllerString = "NULL";
+        telemetry.addData("Current Controller", currentControllerString);
+        telemetry.addData("Is Movement Enabled", isMovementEnabled);
+        telemetry.addData("Current Position", "x=%.0f, y=%.0f, h=%.1f°", currentPose.x, currentPose.y, Global.ANGLE_UNIT == AngleUnit.DEGREES ? currentPose.h : Math.toDegrees(currentPose.h));
+        telemetry.addData("Target Position", "x=%.0f, y=%.0f, h=%.1f°", currentPose.x, currentPose.y, currentPose.h);
+        telemetry.addLine();
     }
 
     public void stop() {
@@ -187,12 +215,7 @@ public class PoseTracker extends Subassembly {
      * see <a href="https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html">...</a>
      */
     private void moveRobotFieldCentric(double y, double x, double h) {
-        double heading;
-        if (Global.ANGLE_UNIT == AngleUnit.DEGREES) {
-            heading = Math.toRadians(currentPose.h);
-        } else {
-            heading = currentPose.h;
-        }
+        double heading = Global.ANGLE_UNIT == AngleUnit.DEGREES ? Math.toRadians(currentPose.h) : currentPose.h;
 
         // Rotate the movement direction to counter the bot's rotation
         double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
@@ -207,7 +230,7 @@ public class PoseTracker extends Subassembly {
         if (currentPose != null) {
             packet.fieldOverlay()
                     .setStroke("#12C600")
-                    .setRotation(Math.toRadians(currentPose.h))
+                    .setRotation(Global.ANGLE_UNIT == AngleUnit.DEGREES ? Math.toRadians(currentPose.h) : currentPose.h)
                     .setTranslation(currentPose.y, -currentPose.x) // x and y are swapped because FTC dash's coordinate system wants to be different
                     .strokeCircle(0, 0, 9) // draw circle for robot position
                     .strokeLine(0, 0, 9, 0);

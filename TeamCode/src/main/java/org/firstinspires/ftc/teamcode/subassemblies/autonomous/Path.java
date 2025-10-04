@@ -6,19 +6,17 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 
 public class Path {
 
-    private final PoseTracker poseTracker;
 
     public int state = 0;
     private int prevState = -1;
     private Pose[] value;
     private boolean isComplete = false;
 
-    public Path(PoseTracker poseTracker, Pose... poses) {
-        this.poseTracker = poseTracker;
+    public Path(Pose... poses) {
         value = poses;
     }
 
-    public boolean execute() {
+    public boolean execute(PoseTracker poseTracker) {
         if (state != prevState) {
             if (isComplete) return true;
             if (state >= value.length) {

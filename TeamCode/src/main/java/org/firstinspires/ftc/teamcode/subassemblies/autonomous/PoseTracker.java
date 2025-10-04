@@ -26,8 +26,6 @@ import java.util.List;
 
 import javax.annotation.CheckForNull;
 
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities;
-
 /**
  * This class keeps track of the robot's position and handles all autonomous movement
  */
@@ -40,6 +38,8 @@ public class PoseTracker extends Subassembly {
     public static boolean UPDATE_GAIN_LIVE = false;
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
+    public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
+    public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
 
     Telemetry telemetry;
 
@@ -182,6 +182,24 @@ public class PoseTracker extends Subassembly {
         telemetry.addData("Current Position", "x=%.0f, y=%.0f, h=%.1f°", currentPose.x, currentPose.y, Global.ANGLE_UNIT == AngleUnit.DEGREES ? currentPose.h : Math.toDegrees(currentPose.h));
         telemetry.addData("Target Position", "x=%.0f, y=%.0f, h=%.1f°", currentPose.x, currentPose.y, currentPose.h);
         telemetry.addLine();
+    }
+
+    boolean isAtTarget() {
+        double xPosError = currentPose.x - targetPose.x;
+        double yPosError = currentPose.y - targetPose.y;
+        double hPosError = currentPose.h - targetPose.h;
+        double linearError = Math.hypot(xPosError, yPosError);
+        double headingError = Math.abs(hPosError);
+        boolean withinTolerance;
+        if (controllerType == ControllerType.APPROACH) {
+            withinTolerance = !activeLocalizer.isRobotMoving() && linearError < LINEAR_APPROACH_TOLERANCE && headingError < HEADING_APPROACH_TOLERANCE;
+        } else if (controllerType == ControllerType.DRIVE) {
+            withinTolerance = linearError < LINEAR_DRIVE_TOLERANCE && headingError < HEADING_DRIVE_TOLERANCE;
+        } else {
+            // uh oh spaghetti-o
+            withinTolerance = false;
+        }
+        return withinTolerance;
     }
 
     public void stop() {

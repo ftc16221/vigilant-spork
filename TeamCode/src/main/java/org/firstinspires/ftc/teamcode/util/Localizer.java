@@ -9,10 +9,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 public abstract class Localizer extends Subassembly {
 
-    public static double ROBOT_MOVEMENT_SPEED_THRESHOLD = 3.0;
+    public static double LINEAR_SPEED_TOLERANCE = 3.0;
+    public static double ANGULAR_SPEED_TOLERANCE = 2.0;
 
     protected Pose pose;
-    protected Pose velocity;
+    protected Pose velocity = new Pose(0, 0, 0);
 
     protected final LinearOpMode opMode;
     protected final HardwareMap hardwareMap;
@@ -28,7 +29,8 @@ public abstract class Localizer extends Subassembly {
     public Pose getPose() { return pose; }
     public void setPose(Pose newPose) { pose = newPose; }
     public Pose getVelocity() { return velocity; }
-    public double getSpeed() { return Math.hypot(velocity.x, velocity.y); }
-    public boolean isRobotMoving() { return getSpeed() > ROBOT_MOVEMENT_SPEED_THRESHOLD; }
+    public double getLinearSpeed() { return Math.hypot(velocity.x, velocity.y); }
+    public double getAngularSpeed() { return Math.abs(velocity.h); }
+    public boolean isRobotMoving() { return getLinearSpeed() > LINEAR_SPEED_TOLERANCE || getAngularSpeed() > ANGULAR_SPEED_TOLERANCE; }
     public abstract void update();
 }

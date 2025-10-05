@@ -6,7 +6,6 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 
 public class Path {
 
-
     public int state = 0;
     private int prevState = -1;
     private Pose[] value;
@@ -39,5 +38,11 @@ public class Path {
     public void set(Pose[] value) { this.value = value; }
     public Pose[] get() { return value; }
     public boolean isComplete() { return isComplete; }
+    /** resets the state to the initial value so that the Path can be executed again */
+    public void reinitialize() {
+        prevState = -1;
+        state = 0;
+        isComplete = false;
+    }
 
 }

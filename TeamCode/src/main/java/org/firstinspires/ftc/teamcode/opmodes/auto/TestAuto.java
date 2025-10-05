@@ -43,7 +43,7 @@ public class TestAuto extends LinearOpMode {
                         PATH_1.reinitialize();
                     }
                 }
-
+                poseTracker.update();
             }
         }
     }

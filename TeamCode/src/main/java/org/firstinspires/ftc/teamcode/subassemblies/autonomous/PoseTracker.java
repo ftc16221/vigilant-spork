@@ -230,8 +230,8 @@ public class PoseTracker extends Subassembly {
      * Positive y is strafe left.
      * Positive yaw is counter-clockwise.
      * <p>
-     * Field Centric Movement
-     * see <a href="https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html">...</a>
+     * see <a href="https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html">Field Centric Movement Breakdown</a>
+     * or <a href="https://ftc-docs.firstinspires.org/en/latest/_images/decode-field.png">Coordinate System Definition</a>
      */
     public void moveRobotFieldCentric(double x, double y, double h) {
         double heading = Global.ANGLE_UNIT == AngleUnit.DEGREES ? Math.toRadians(currentPose.h) : currentPose.h;

@@ -233,12 +233,12 @@ public class PoseTracker extends Subassembly {
      * Field Centric Movement
      * see <a href="https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html">...</a>
      */
-    private void moveRobotFieldCentric(double y, double x, double h) {
+    public void moveRobotFieldCentric(double x, double y, double h) {
         double heading = Global.ANGLE_UNIT == AngleUnit.DEGREES ? Math.toRadians(currentPose.h) : currentPose.h;
 
         // Rotate the movement direction to counter the bot's rotation
-        double rotX = x * Math.cos(-heading) - y * Math.sin(-heading);
-        double rotY = x * Math.sin(-heading) + y * Math.cos(-heading);
+        double rotX = y * Math.cos(-heading) - x * Math.sin(-heading);
+        double rotY = y * Math.sin(-heading) + x * Math.cos(-heading);
 
         driveBase.moveRobot(rotX, rotY, h);
     }

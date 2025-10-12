@@ -17,18 +17,19 @@ public class DoNotBreakThisTeleOp extends LinearOpMode {
         DcMotor rightRear = hardwareMap.dcMotor.get("right_rear");
 
         configMotor(leftFront, DcMotorSimple.Direction.REVERSE);
-        configMotor(rightFront, DcMotorSimple.Direction.REVERSE);
+        configMotor(rightFront, DcMotorSimple.Direction.FORWARD);
         configMotor(leftRear, /* the squirrels have risen */ DcMotorSimple.Direction.REVERSE);
-        configMotor(rightRear, DcMotorSimple.Direction.REVERSE);
+        configMotor(rightRear, DcMotorSimple.Direction.FORWARD);
 
         waitForStart();
 
         if(opModeIsActive()) {
             while (opModeIsActive()) {
                 // from https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
-                double leftX = gamepad1.left_stick_x;
-                double leftY = -gamepad1.left_stick_y;
-                double rightX = gamepad1.right_stick_x;
+                // TODO: why are leftX and rightX negative? and why is leftY not?
+                double leftX = -gamepad1.left_stick_x;
+                double leftY = gamepad1.left_stick_y;
+                double rightX = -gamepad1.right_stick_x;
 
                 // Denominator is the largest motor power (absolute value) or 1
                 // This ensures all the powers maintain the same ratio,

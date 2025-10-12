@@ -8,7 +8,9 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.subassemblies.AltClaw;
 import org.firstinspires.ftc.teamcode.subassemblies.Follower;
+import org.firstinspires.ftc.teamcode.subassemblies.LinearSlide;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;
 
@@ -20,6 +22,8 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
 
     Follower follower;
     MecDriveBase driveBase;
+    LinearSlide linearSlide;
+    AltClaw claw;
     SparkFunOTOS.Pose2D currentPose = startingPose;
 
     @Override
@@ -27,6 +31,8 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
         telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         follower = new Follower(this, startingPose);
         driveBase = new MecDriveBase(this);
+        linearSlide = new LinearSlide(this);
+        claw = new AltClaw(this);
 
         telemetry.addLine("This opmode is used to find robot positions for autonomous. It is not intended " +
                 "for driving the robot, but may be useful for debugging. Currently, the robot's position is purely " +
@@ -41,6 +47,8 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
             while (opModeIsActive()) {
 
                 driveBase.control(gamepad1);
+                linearSlide.control(gamepad2);
+                claw.control(gamepad2);
 
                 currentPose = follower.getCurrentPose();
 

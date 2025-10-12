@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -7,6 +8,7 @@ import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
+@Config
 public class SparkFunOpticalOdo extends Localizer {
 
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);

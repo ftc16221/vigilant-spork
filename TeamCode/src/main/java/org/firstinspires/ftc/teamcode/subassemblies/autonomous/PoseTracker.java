@@ -250,7 +250,7 @@ public class PoseTracker extends Subassembly {
             packet.fieldOverlay()
                     .setStroke("#12C600")
                     .setRotation(Global.ANGLE_UNIT == AngleUnit.DEGREES ? Math.toRadians(currentPose.h) : currentPose.h)
-                    .setTranslation(currentPose.x, -currentPose.y)
+                    .setTranslation(currentPose.x, currentPose.y)
                     .strokeCircle(0, 0, 9) // draw circle for robot position
                     .strokeLine(0, 0, 9, 0);
         } else {

@@ -33,8 +33,8 @@ import javax.annotation.CheckForNull;
 public class PoseTracker extends Subassembly {
 
     public static double DRIVE_P = 0.0, DRIVE_D = 0.0;
-    public static double APPROACH_P = 0.0, APPROACH_I = 0.0, APPROACH_D = 0.0;
-    public static double HEADING_P = 0.0, HEADING_I = 0.0, HEADING_D = 0.0;
+    public static double APPROACH_P = 0.01, APPROACH_I = 0.0, APPROACH_D = 0.0; // TODO: Find the actual coefficients on the proper surface (ie. foam tiles)
+    public static double HEADING_P = -0.01, HEADING_I = 0.0, HEADING_D = 0.0; // TODO: Find actual coeffs and determine why it must be negative
     public static boolean UPDATE_GAIN_LIVE = false;
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
@@ -116,6 +116,7 @@ public class PoseTracker extends Subassembly {
 
             } else {
                 RobotLog.e("(PoseTracker) Controller Type is null, setting it to APPROACH");
+                controllerType = ControllerType.APPROACH;
                 xPower = 0.0;
                 yPower = 0.0;
             }
@@ -130,7 +131,7 @@ public class PoseTracker extends Subassembly {
 
             moveRobotFieldCentric(
                     USE_X ? xPower : 0,
-                    USE_Y ? yPower : 0,
+                    USE_Y ? -yPower : 0, // TODO: negative because of some discrepancy somewhere with the standard field coordinates in moveRobotFieldCentric()
                     USE_H ? hPower : 0
             );
         }

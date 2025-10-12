@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 public class SemiAutoTeleOp extends LinearOpMode {
 
     public static Pose TARGET_POSE = new Pose(0, 0, 0);
+    private boolean autoMovementEnabled = false;
 
     public void runOpMode() {
         MecDriveBase driveBase = new MecDriveBase(this);
@@ -22,16 +23,23 @@ public class SemiAutoTeleOp extends LinearOpMode {
         Underglow underglow = new Underglow(this);
 
         poseTracker.setTargetPose(TARGET_POSE);
+        poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);
+
+        waitForStart();
 
         if (opModeIsActive()) {
             while(opModeIsActive()) {
-                driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
                 if (gamepad1.right_bumper) {
+                    autoMovementEnabled = true;
                     poseTracker.enableMovement();
                     underglow.setColor(Underglow.Color.WHITE);
-                } else if (gamepad1.right_trigger > 0.1) {
+                } else if (!gamepad1.atRest()) {
+                    autoMovementEnabled = false;
                     poseTracker.disableMovement();
                     underglow.setColor(Underglow.Color.ALLIANCE);
+                }
+                if (!autoMovementEnabled) {
+                    driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
                 }
                 poseTracker.update();
             }

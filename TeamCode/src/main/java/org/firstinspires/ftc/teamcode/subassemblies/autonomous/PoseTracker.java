@@ -43,7 +43,7 @@ public class PoseTracker extends Subassembly {
 
     Telemetry telemetry;
 
-    PinpointOdo pinpointOdo;
+    public PinpointOdo pinpointOdo;
     GenericCam genericCam;
     List<Localizer> localizers = new ArrayList<>();
     Localizer activeLocalizer = null;
@@ -71,13 +71,13 @@ public class PoseTracker extends Subassembly {
         telemetry = getTelemetry();
         this.startingPose = startingPose;
         pinpointOdo = new PinpointOdo(opMode, this.startingPose);
-        genericCam = new GenericCam(opMode);
+//        genericCam = new GenericCam(opMode);
         driveBase = new MecDriveBase(opMode);
         underglow = new Underglow(opMode);
 
         // whatever localizer has the lowest index will take precedent
-        localizers.add(1, pinpointOdo);
-        localizers.add(0, genericCam);
+        localizers.add(pinpointOdo);
+//        localizers.add(0, genericCam);
     }
 
     public void update() {
@@ -141,13 +141,13 @@ public class PoseTracker extends Subassembly {
      * also set less accurate sensors to the most prioritized pose*/
     @CheckForNull
     public Pose getPrioritizedPose() {
-        for (int i = 0; i < localizers.size() - 1; i++) {
+        for (int i = 0; i <= localizers.size() - 1; i++) {
             localizers.get(i).update();
         }
 
         Pose pose = null;
         Localizer newActiveLocalizer = null;
-        for (int i = 0; i < localizers.size() - 1; i++) {
+        for (int i = 0; i <= localizers.size() - 1; i++) {
             Localizer localizer = localizers.get(i);
             if (localizer.getPose() != null) {
                 pose = localizer.getPose();
@@ -159,8 +159,9 @@ public class PoseTracker extends Subassembly {
         activeLocalizer = newActiveLocalizer;
 
         if (pose != null) {
-            for (int i = 0; i < localizers.size() - 1; i++) {
-                localizers.get(i).setPose(pose);
+            for (int i = 0; i <= localizers.size() - 1; i++) {
+                Localizer localizer = localizers.get(i);
+                if (localizer != newActiveLocalizer) localizer.setPose(pose);
             }
         }
 
@@ -249,7 +250,7 @@ public class PoseTracker extends Subassembly {
             packet.fieldOverlay()
                     .setStroke("#12C600")
                     .setRotation(Global.ANGLE_UNIT == AngleUnit.DEGREES ? Math.toRadians(currentPose.h) : currentPose.h)
-                    .setTranslation(currentPose.y, -currentPose.x) // x and y are swapped because FTC dash's coordinate system wants to be different
+                    .setTranslation(currentPose.x, -currentPose.y)
                     .strokeCircle(0, 0, 9) // draw circle for robot position
                     .strokeLine(0, 0, 9, 0);
         } else {

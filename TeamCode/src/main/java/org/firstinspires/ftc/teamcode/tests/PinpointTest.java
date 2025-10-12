@@ -3,30 +3,32 @@ package org.firstinspires.ftc.teamcode.tests;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Follower;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;
+import org.firstinspires.ftc.teamcode.util.Global;
+import org.firstinspires.ftc.teamcode.util.Pose;
 
 @Config
 @TeleOp(group = "tests")
-public class LocalizationTest extends LinearOpMode implements DashOpMode {
+public class PinpointTest extends LinearOpMode implements DashOpMode {
 
     public static SparkFunOTOS.Pose2D startingPose = new SparkFunOTOS.Pose2D(-48, 0, 0);
 
-    Follower follower;
     MecDriveBase driveBase;
-    SparkFunOTOS.Pose2D currentPose = startingPose;
+    PinpointOdo pinpointOdo;
 
     @Override
     public void runOpMode() {
         telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
-        follower = new Follower(this, startingPose);
         driveBase = new MecDriveBase(this);
+        pinpointOdo = new PinpointOdo(this, Global.lastPose);
 
         telemetry.addLine("This opmode is used to find robot positions for autonomous. It is not intended " +
                 "for driving the robot, but may be useful for debugging. Currently, the robot's position is purely " +
@@ -39,27 +41,18 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
 
         if (opModeIsActive()) {
             while (opModeIsActive()) {
-
-                driveBase.control(gamepad1);
-
-                currentPose = follower.getCurrentPose();
-
-                follower.telemetry();
+                pinpointOdo.update();
+                Pose currentPose = pinpointOdo.getPose();
+                if (currentPose != null) {
+                    telemetry.addData("x", currentPose.x);
+                    telemetry.addData("y", currentPose.y);
+                    telemetry.addData("h", currentPose.h);
+                } else {
+                    telemetry.addLine("currentPose is NULL");
+                }
                 telemetry.update();
 
-                TelemetryPacket packet = new TelemetryPacket(true);
-                if (currentPose != null) {
-                    packet.fieldOverlay()
-                            .setStroke("#12C600")
-                            .setRotation(Math.toRadians(currentPose.h))
-                            .setTranslation(currentPose.y, -currentPose.x) // x and y are swapped because FTC dash's coordinate system wants to be different
-                            .strokeCircle(0, 0, 9) // draw circle for robot position
-                            .strokeLine(0, 0, 9, 0);
-                } else {
-                    packet.fieldOverlay().clear();
-                }
-
-                FtcDashboard.getInstance().sendTelemetryPacket(packet);
+                driveBase.control(gamepad1);
             }
         }
     }

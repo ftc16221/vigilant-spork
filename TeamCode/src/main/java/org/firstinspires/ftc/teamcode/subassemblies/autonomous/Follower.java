@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  * Javadoc comments partially written by Github Copilot, so if they don't make sense \_(ツ)_/ <sub>(thx copilot for that weird face)</sub>
  */
 @Config
+@Deprecated
 public class Follower extends Subassembly {
 
     // enable or disable position correction: useful for debugging

@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Follower;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 import org.firstinspires.ftc.teamcode.util.Global;
 

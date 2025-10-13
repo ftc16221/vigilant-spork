@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
@@ -82,6 +84,12 @@ public class PoseTracker extends Subassembly {
         // whatever localizer has the lowest index will take precedent
         localizers.add(pinpointOdo);
 //        localizers.add(0, genericCam);
+
+        // we can assume that if the opMode is an Autonomous opMode that we can immediately enable movement. If we can't that should be explicitly disabled.
+        if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
+            RobotLog.i("(PoseTracker) OpMode appears to be Autonomous, automatically enabling movement");
+            enableMovement();
+        }
 
         log(opMode, "PoseTracker successfully initialized with the following Localizers: " + localizers);
     }
@@ -142,7 +150,7 @@ public class PoseTracker extends Subassembly {
             moveRobotFieldCentric(
                     USE_X ? xPower : 0,
                     USE_Y ? -yPower : 0, // TODO: negative because of some discrepancy somewhere with the standard field coordinates in moveRobotFieldCentric()
-                    USE_H ? hPower : 0 // TODO: once again, find the discrepancy that requires us to use this sign
+                    USE_H ? hPower : 0
             );
         }
     }

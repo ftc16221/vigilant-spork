@@ -28,6 +28,8 @@ public class TestAuto extends LinearOpMode {
         PoseTracker poseTracker = new PoseTracker(this, STARTING_POSE);
         int currentPath = 1;
 
+        waitForStart();
+
         if (opModeIsActive()) {
             while (opModeIsActive()) {
                 if (currentPath == 1) {

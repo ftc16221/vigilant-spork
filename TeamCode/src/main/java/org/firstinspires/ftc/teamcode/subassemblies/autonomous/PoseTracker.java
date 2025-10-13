@@ -36,9 +36,11 @@ import javax.annotation.CheckForNull;
 @Config
 public class PoseTracker extends Subassembly {
 
-    public static double DRIVE_P = 0.0, DRIVE_D = 0.0;
-    public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001; // TODO: Find the actual coefficients on the proper surface (ie. foam tiles)
-    public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035; // TODO: Find actual coeffs
+    // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)
+    public static double DRIVE_P = 0.01, DRIVE_D = 0.0001;
+    public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001;
+    public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035;
+
     public static boolean ENABLE_TUNING_MODE = false;
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;

@@ -14,15 +14,15 @@ public class Drawing {
     public static String PATH_COLOR = "blue";
     public static int POSE_RADIUS = 9;
 
-    FtcDashboard dashboard;
-    Canvas canvas;
-    PoseTracker poseTracker;
+    private final FtcDashboard dashboard;
+    private final PoseTracker poseTracker;
+    private Canvas canvas;
 
     Path path;
 
-    boolean enableCurrentPose = true;
-    boolean enableTargetPose = true;
-    boolean enablePath = false;
+    private boolean enableCurrentPose = true;
+    private boolean enableTargetPose = true;
+    private boolean enablePath = false;
 
     public Drawing(PoseTracker poseTracker) {
         this.poseTracker = poseTracker;
@@ -47,7 +47,7 @@ public class Drawing {
         Pose[] poses = path.get();
         for (int i = 0; i < poses.length; i++) {
             Pose pose = poses[i];
-            pose.draw(color, canvas);
+            drawPose(pose, color);
             if (i > 0) {
                 Pose prevPose = poses[i - 1];
                 canvas.strokeLine(prevPose.x, prevPose.y, pose.x, pose.y);

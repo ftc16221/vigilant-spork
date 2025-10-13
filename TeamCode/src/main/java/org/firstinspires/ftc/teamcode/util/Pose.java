@@ -31,19 +31,4 @@ public class Pose {
     public SparkFunOTOS.Pose2D toSparkFunPose() {
         return new SparkFunOTOS.Pose2D(x, y, h);
     }
-
-    /**
-     * Adds drawing of circle w/ line (pose) to a canvas
-     * @param color desired color of pose
-     * @param canvas canvas to apply changes to (generally FtcDashboard.fieldOverlay())
-     */
-    public void draw(String color, Canvas canvas) {
-        double hInRadians = Math.toRadians(h);
-        canvas
-                .setStroke(color)
-                .setRotation(Math.toRadians(hInRadians))
-                .strokeCircle(x, y, 9)
-                .strokeLine(x, y, x + (9 * Math.cos(hInRadians)), y + (9 * Math.sin(hInRadians)));
-    }
-
 }

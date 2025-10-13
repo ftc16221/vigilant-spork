@@ -14,35 +14,32 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 public class TestAuto extends LinearOpMode {
 
     public static Pose STARTING_POSE = new Pose(0, 0, 0);
-    public static Path PATH_1 = new Path(
-            new Pose(0, 0, 0),
-            new Pose(0, 30, 180)
-    );
-    public static Path PATH_2 = new Path(
-            new Pose(0, 30, 180),
-            new Pose (0, 0, 0)
-    );
+    public static Pose POSE_1 = new Pose(0, 0, 0);
+    public static Pose POSE_2 = new Pose(0, 30, 180);
 
     public void runOpMode() {
 
         PoseTracker poseTracker = new PoseTracker(this, STARTING_POSE);
         int currentPath = 1;
 
+        Path path1 = new Path(POSE_1, POSE_2);
+        Path path2 = new Path(POSE_2, POSE_1);
+
         waitForStart();
 
         if (opModeIsActive()) {
             while (opModeIsActive()) {
                 if (currentPath == 1) {
-                    PATH_1.execute(poseTracker);
-                    if (PATH_1.isComplete()) {
+                    path1.execute(poseTracker);
+                    if (path1.isComplete()) {
                         currentPath = 2;
-                        PATH_2.reinitialize();
+                        path2.reinitialize();
                     }
                 } else {
-                    PATH_2.execute(poseTracker);
-                    if (PATH_2.isComplete()) {
+                    path2.execute(poseTracker);
+                    if (path2.isComplete()) {
                         currentPath = 1;
-                        PATH_1.reinitialize();
+                        path1.reinitialize();
                     }
                 }
                 poseTracker.update();

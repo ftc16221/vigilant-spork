@@ -76,6 +76,7 @@ public class PoseTracker extends Subassembly {
         telemetry = getTelemetry();
         dashboard = FtcDashboard.getInstance();
         this.startingPose = startingPose;
+        currentPose = startingPose;
         pinpointOdo = new PinpointOdo(opMode, this.startingPose);
 //        genericCam = new GenericCam(opMode);
         driveBase = new MecDriveBase(opMode);
@@ -97,6 +98,10 @@ public class PoseTracker extends Subassembly {
     public void update() {
 
         currentPose = getPrioritizedPose();
+
+        if (currentPose != null) currentPose.draw("orange");
+        if (targetPose != null) targetPose.draw("yellow");
+
         if (currentPose == null && isMovementEnabled) {
             RobotLog.w("(PoseTracker) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
@@ -104,7 +109,12 @@ public class PoseTracker extends Subassembly {
             underglow.setColor(Underglow.Color.ORANGE);
         }
 
-        drawFieldPosition();
+        if (targetPose == null && isMovementEnabled) {
+            RobotLog.w("(PoseTracker) targetPose is null, disabling autonomous movement and stopping robot");
+            disableMovement();
+            driveBase.stopMotors();
+            underglow.setColor(Underglow.Color.ORANGE);
+        }
 
         // used for live tuning via FTC dashboard
         if (ENABLE_TUNING_MODE) {

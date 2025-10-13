@@ -59,7 +59,7 @@ public class Drawing {
         double hInRadians = Math.toRadians(pose.h);
         canvas
                 .setStroke(color)
-                .setRotation(Math.toRadians(hInRadians))
+                .setRotation(hInRadians)
                 .strokeCircle(pose.x, pose.y, POSE_RADIUS)
                 .strokeLine(pose.x, pose.y, pose.x + (POSE_RADIUS * Math.cos(hInRadians)), pose.y + (POSE_RADIUS * Math.sin(hInRadians)));
     }

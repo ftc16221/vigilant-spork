@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public abstract class Localizer extends Subassembly {
@@ -15,15 +14,15 @@ public abstract class Localizer extends Subassembly {
     protected Pose pose;
     protected Pose velocity = new Pose(0, 0, 0);
 
-    protected final LinearOpMode opMode;
+    protected final OpMode opMode;
     protected final HardwareMap hardwareMap;
-    protected final Telemetry telemetry;
+    protected final MultipleTelemetry telemetry;
 
-    public Localizer(LinearOpMode opMode, String name) {
+    public Localizer(OpMode opMode, String name) {
         super(opMode, name);
         this.opMode = opMode;
         this.hardwareMap = opMode.hardwareMap;
-        this.telemetry = opMode.telemetry;
+        this.telemetry = super.getTelemetry();
     }
 
     public Pose getPose() { return pose; }

@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 
+import static org.firstinspires.ftc.teamcode.util.LoggingKt.log;
 import static org.firstinspires.ftc.teamcode.util.MathKt.clamp;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -33,15 +35,16 @@ import javax.annotation.CheckForNull;
 public class PoseTracker extends Subassembly {
 
     public static double DRIVE_P = 0.0, DRIVE_D = 0.0;
-    public static double APPROACH_P = 0.01, APPROACH_I = 0.0, APPROACH_D = 0.0; // TODO: Find the actual coefficients on the proper surface (ie. foam tiles)
-    public static double HEADING_P = -0.01, HEADING_I = 0.0, HEADING_D = 0.0; // TODO: Find actual coeffs and determine why it must be negative
-    public static boolean UPDATE_GAIN_LIVE = false;
+    public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001; // TODO: Find the actual coefficients on the proper surface (ie. foam tiles)
+    public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035; // TODO: Find actual coeffs
+    public static boolean ENABLE_TUNING_MODE = false;
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
 
-    Telemetry telemetry;
+    MultipleTelemetry telemetry;
+    FtcDashboard dashboard;
 
     public PinpointOdo pinpointOdo;
     GenericCam genericCam;
@@ -66,9 +69,10 @@ public class PoseTracker extends Subassembly {
 
     boolean isMovementEnabled = false;
 
-    public PoseTracker(LinearOpMode opMode, Pose startingPose) {
+    public PoseTracker(OpMode opMode, Pose startingPose) {
         super(opMode, "PoseTracker");
         telemetry = getTelemetry();
+        dashboard = FtcDashboard.getInstance();
         this.startingPose = startingPose;
         pinpointOdo = new PinpointOdo(opMode, this.startingPose);
 //        genericCam = new GenericCam(opMode);
@@ -78,6 +82,8 @@ public class PoseTracker extends Subassembly {
         // whatever localizer has the lowest index will take precedent
         localizers.add(pinpointOdo);
 //        localizers.add(0, genericCam);
+
+        log(opMode, "PoseTracker successfully initialized with the following Localizers: " + localizers);
     }
 
     public void update() {
@@ -93,7 +99,7 @@ public class PoseTracker extends Subassembly {
         drawFieldPosition();
 
         // used for live tuning via FTC dashboard
-        if (UPDATE_GAIN_LIVE) {
+        if (ENABLE_TUNING_MODE) {
             xDrivePDController.setP(DRIVE_P);
             xDrivePDController.setD(DRIVE_D);
             yDrivePDController.setP(DRIVE_P);
@@ -101,19 +107,23 @@ public class PoseTracker extends Subassembly {
             xApproachPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
             yApproachPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
             headingPIDController.setPID(HEADING_P, HEADING_I, HEADING_D);
+
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("xError", targetPose.x - currentPose.x);
+            packet.put("yError", targetPose.y - currentPose.y);
+            packet.put("hError", AngleUnit.normalizeDegrees(targetPose.h - currentPose.h));
+            dashboard.sendTelemetryPacket(packet);
         }
 
         if (isMovementEnabled) {
-            double xPower = 0, yPower = 0;
+            double xPower, yPower;
 
             if (controllerType == ControllerType.APPROACH) {
                 xPower = xApproachPIDController.calculate(currentPose.x, targetPose.x);
                 yPower = yApproachPIDController.calculate(currentPose.y, targetPose.y);
-
             } else if (controllerType == ControllerType.DRIVE) {
                 xPower = xDrivePDController.calculate(currentPose.x, targetPose.x);
                 yPower = yDrivePDController.calculate(currentPose.y, targetPose.y);
-
             } else {
                 RobotLog.e("(PoseTracker) Controller Type is null, setting it to APPROACH");
                 controllerType = ControllerType.APPROACH;
@@ -122,7 +132,7 @@ public class PoseTracker extends Subassembly {
             }
             // for the heading PID, we need to account for the fact that headings wrap around at 180 degrees. There is a great explanation of this at: https://www.ctrlaltftc.com/practical-examples/controlling-heading
             // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
-            double hError = Global.ANGLE_UNIT == AngleUnit.DEGREES ? AngleUnit.normalizeDegrees(currentPose.h - targetPose.h) : AngleUnit.normalizeRadians(currentPose.h - targetPose.h);
+            double hError = Global.ANGLE_UNIT == AngleUnit.DEGREES ? AngleUnit.normalizeDegrees(targetPose.h - currentPose.h) : AngleUnit.normalizeRadians(targetPose.h - currentPose.h);
             double hPower = headingPIDController.calculate(hError, 0);
 
             xPower = clamp(xPower, -MAX_POWER, MAX_POWER);
@@ -132,7 +142,7 @@ public class PoseTracker extends Subassembly {
             moveRobotFieldCentric(
                     USE_X ? xPower : 0,
                     USE_Y ? -yPower : 0, // TODO: negative because of some discrepancy somewhere with the standard field coordinates in moveRobotFieldCentric()
-                    USE_H ? hPower : 0
+                    USE_H ? hPower : 0 // TODO: once again, find the discrepancy that requires us to use this sign
             );
         }
     }
@@ -181,8 +191,8 @@ public class PoseTracker extends Subassembly {
         else currentControllerString = "NULL";
         telemetry.addData("Current Controller", currentControllerString);
         telemetry.addData("Is Movement Enabled", isMovementEnabled);
-        telemetry.addData("Current Position", "x=%.0f, y=%.0f, h=%.1f°", currentPose.x, currentPose.y, Global.ANGLE_UNIT == AngleUnit.DEGREES ? currentPose.h : Math.toDegrees(currentPose.h));
-        telemetry.addData("Target Position", "x=%.0f, y=%.0f, h=%.1f°", currentPose.x, currentPose.y, currentPose.h);
+        telemetry.addData("Current Position", "x=%.1f, y=%.1f, h=%.1f°", currentPose.x, currentPose.y, currentPose.h);
+        telemetry.addData("Target Position", "x=%.1f, y=%.1f, h=%.1f°", targetPose.x, targetPose.y, targetPose.h);
         telemetry.addLine();
     }
 
@@ -198,7 +208,6 @@ public class PoseTracker extends Subassembly {
         } else if (controllerType == ControllerType.DRIVE) {
             withinTolerance = linearError < LINEAR_DRIVE_TOLERANCE && headingError < HEADING_DRIVE_TOLERANCE;
         } else {
-            // uh oh spaghetti-o
             withinTolerance = false;
         }
         return withinTolerance;
@@ -258,6 +267,6 @@ public class PoseTracker extends Subassembly {
             packet.fieldOverlay().clear();
         }
 
-        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+        dashboard.sendTelemetryPacket(packet);
     }
 }

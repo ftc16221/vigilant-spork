@@ -7,12 +7,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
+import org.firstinspires.ftc.teamcode.util.DashOpMode;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
 @TeleOp
 @Config
-public class SemiAutoTeleOp extends LinearOpMode {
+public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
 
     public static Pose TARGET_POSE = new Pose(0, 0, 0);
     private boolean autoMovementEnabled = false;
@@ -25,6 +26,7 @@ public class SemiAutoTeleOp extends LinearOpMode {
         poseTracker.setTargetPose(TARGET_POSE);
         poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);
 
+        telemetry.update();
         waitForStart();
 
         if (opModeIsActive()) {
@@ -42,6 +44,8 @@ public class SemiAutoTeleOp extends LinearOpMode {
                     driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
                 }
                 poseTracker.update();
+                poseTracker.runTelemetry();
+                telemetry.update();
             }
         }
     }

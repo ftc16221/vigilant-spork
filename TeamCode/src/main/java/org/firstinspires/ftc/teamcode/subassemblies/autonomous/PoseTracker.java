@@ -99,9 +99,6 @@ public class PoseTracker extends Subassembly {
 
         currentPose = getPrioritizedPose();
 
-        if (currentPose != null) currentPose.draw("orange");
-        if (targetPose != null) targetPose.draw("yellow");
-
         if (currentPose == null && isMovementEnabled) {
             RobotLog.w("(PoseTracker) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();

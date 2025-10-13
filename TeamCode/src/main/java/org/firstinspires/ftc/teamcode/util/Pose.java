@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.util;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -33,18 +32,18 @@ public class Pose {
         return new SparkFunOTOS.Pose2D(x, y, h);
     }
 
-    public void draw(String color) {
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        TelemetryPacket packet = new TelemetryPacket();
+    /**
+     * Adds drawing of circle w/ line (pose) to a canvas
+     * @param color desired color of pose
+     * @param canvas canvas to apply changes to (generally FtcDashboard.fieldOverlay())
+     */
+    public void draw(String color, Canvas canvas) {
         double hInRadians = Math.toRadians(h);
-
-        packet.fieldOverlay()
+        canvas
                 .setStroke(color)
                 .setRotation(Math.toRadians(hInRadians))
                 .strokeCircle(x, y, 9)
                 .strokeLine(x, y, x + (9 * Math.cos(hInRadians)), y + (9 * Math.sin(hInRadians)));
-
-        dashboard.sendTelemetryPacket(packet);
     }
 
 }

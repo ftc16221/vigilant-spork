@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
@@ -34,9 +36,11 @@ import javax.annotation.CheckForNull;
 @Config
 public class PoseTracker extends Subassembly {
 
-    public static double DRIVE_P = 0.0, DRIVE_D = 0.0;
-    public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001; // TODO: Find the actual coefficients on the proper surface (ie. foam tiles)
-    public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035; // TODO: Find actual coeffs
+    // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)
+    public static double DRIVE_P = 0.01, DRIVE_D = 0.0001;
+    public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001;
+    public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035;
+
     public static boolean ENABLE_TUNING_MODE = false;
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
@@ -74,6 +78,7 @@ public class PoseTracker extends Subassembly {
         telemetry = getTelemetry();
         dashboard = FtcDashboard.getInstance();
         this.startingPose = startingPose;
+        currentPose = startingPose;
         pinpointOdo = new PinpointOdo(opMode, this.startingPose);
 //        genericCam = new GenericCam(opMode);
         driveBase = new MecDriveBase(opMode);
@@ -83,12 +88,19 @@ public class PoseTracker extends Subassembly {
         localizers.add(pinpointOdo);
 //        localizers.add(0, genericCam);
 
+        // we can assume that if the opMode is an Autonomous opMode that we can immediately enable movement. If we can't that should be explicitly disabled.
+        if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
+            RobotLog.i("(PoseTracker) OpMode appears to be Autonomous, automatically enabling movement");
+            enableMovement();
+        }
+
         log(opMode, "PoseTracker successfully initialized with the following Localizers: " + localizers);
     }
 
     public void update() {
 
         currentPose = getPrioritizedPose();
+
         if (currentPose == null && isMovementEnabled) {
             RobotLog.w("(PoseTracker) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
@@ -96,7 +108,12 @@ public class PoseTracker extends Subassembly {
             underglow.setColor(Underglow.Color.ORANGE);
         }
 
-        drawFieldPosition();
+        if (targetPose == null && isMovementEnabled) {
+            RobotLog.w("(PoseTracker) targetPose is null, disabling autonomous movement and stopping robot");
+            disableMovement();
+            driveBase.stopMotors();
+            underglow.setColor(Underglow.Color.ORANGE);
+        }
 
         // used for live tuning via FTC dashboard
         if (ENABLE_TUNING_MODE) {
@@ -142,7 +159,7 @@ public class PoseTracker extends Subassembly {
             moveRobotFieldCentric(
                     USE_X ? xPower : 0,
                     USE_Y ? -yPower : 0, // TODO: negative because of some discrepancy somewhere with the standard field coordinates in moveRobotFieldCentric()
-                    USE_H ? hPower : 0 // TODO: once again, find the discrepancy that requires us to use this sign
+                    USE_H ? hPower : 0
             );
         }
     }

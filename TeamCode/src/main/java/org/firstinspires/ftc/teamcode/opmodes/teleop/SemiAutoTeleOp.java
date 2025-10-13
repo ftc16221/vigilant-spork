@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,6 +11,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;
+import org.firstinspires.ftc.teamcode.util.Drawing;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
@@ -22,6 +26,7 @@ public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
         MecDriveBase driveBase = new MecDriveBase(this);
         PoseTracker poseTracker = new PoseTracker(this, Global.lastPose);
         Underglow underglow = new Underglow(this);
+        Drawing drawing = new Drawing(poseTracker);
 
         poseTracker.setTargetPose(TARGET_POSE);
         poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);
@@ -46,6 +51,7 @@ public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
                 poseTracker.update();
                 poseTracker.runTelemetry();
                 telemetry.update();
+                drawing.update();
             }
         }
     }

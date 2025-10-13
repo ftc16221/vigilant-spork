@@ -22,9 +22,9 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
 
     init {
         // direction = FORWARD by default
-//        leftFront.direction = DcMotorSimple.Direction.REVERSE
+        leftFront.direction = DcMotorSimple.Direction.REVERSE
         rightFront.direction = DcMotorSimple.Direction.REVERSE
-//        leftRear.direction = DcMotorSimple.Direction.REVERSE
+        leftRear.direction = DcMotorSimple.Direction.REVERSE
         rightRear.direction = DcMotorSimple.Direction.REVERSE
 
         opMode.log("DriveBase successfully initialized")
@@ -76,9 +76,11 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
         rightRear.power = rightRearPower
     }
 
-    fun telemetry() {
-        telemetry.addLine()
-        telemetry.addLine("surrender your soul to the squirrels")
+    fun stopMotors() {
+        leftFront.power = 0.0
+        rightFront.power = 0.0
+        leftRear.power = 0.0
+        rightRear.power = 0.0
     }
 
     var zeroPowerBehavior: ZeroPowerBehavior = ZeroPowerBehavior.UNKNOWN
@@ -86,12 +88,4 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
             for (motor in motors) motor.zeroPowerBehavior = value
             field = value
         }
-
-    fun updateMaxRPM() {
-        for (motor in motors) {
-            val motorConfigurationType = motor.motorType.clone()
-            motorConfigurationType.achieveableMaxRPMFraction = 1.0
-            motor.motorType = motorConfigurationType
-        }
-    }
 }

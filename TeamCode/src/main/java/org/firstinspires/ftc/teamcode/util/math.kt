@@ -1,10 +1,11 @@
 @file:Suppress("unused")
 package org.firstinspires.ftc.teamcode.util
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import kotlin.math.*
 
-fun clamp(x: Double, lowerBound: Double, upperBound: Double)
-    = max(lowerBound, min(upperBound, x))
+fun clamp(value: Double, lowerBound: Double, upperBound: Double)
+    = max(lowerBound, min(upperBound, value))
 
 fun equalsTolerance(a: Double, b: Double, tolerance: Double)
     = abs(b - a) < tolerance
@@ -26,12 +27,13 @@ fun Double.toDegrees() = this * 180 / PI
 /** **degrees** to radians */
 fun Double.toRadians() = this * PI / 180
 
+fun normalize(angle: Double) =
+    if (Global.ANGLE_UNIT == AngleUnit.DEGREES) AngleUnit.normalizeDegrees(angle)
+    else AngleUnit.normalizeRadians(angle)
+
 /** **centimeters** to inches */
 fun Double.toInches() = this * 2.54
 /** **inches** to centimeters */
 fun Double.toCentimeters() = this / 2.54
 
-fun powerCurve(value: Double) =
-    value.pow(3)
-//    if (value > 0) value.pow(2) // positive
-//    else -value.pow(2) // negative
+fun powerCurve(value: Double) = value.pow(2).withSign(value)

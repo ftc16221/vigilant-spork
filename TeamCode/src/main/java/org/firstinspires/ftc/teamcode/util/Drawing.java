@@ -2,17 +2,23 @@ package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Path;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 
+@Config
 public class Drawing {
 
     public static String CURRENT_POSE_COLOR = "yellow";
     public static String TARGET_POSE_COLOR = "green";
     public static String PATH_COLOR = "blue";
-    public static int POSE_RADIUS = 9;
+    public static int POSE_RADIUS = 30;
+    public static int STROKE_WIDTH = 5;
+
+    public final double INCH_PER_CM = 0.393701;
 
     private final FtcDashboard dashboard;
     private final PoseTracker poseTracker;
@@ -32,6 +38,8 @@ public class Drawing {
     public void update() {
         TelemetryPacket packet = new TelemetryPacket();
         canvas = packet.fieldOverlay();
+        canvas.setScale(INCH_PER_CM, INCH_PER_CM);
+        canvas.setStrokeWidth(STROKE_WIDTH);
 
         if (enablePath && path != null)
             drawPath(path, PATH_COLOR);

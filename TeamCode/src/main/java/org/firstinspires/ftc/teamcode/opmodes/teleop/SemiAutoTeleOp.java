@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
@@ -24,6 +22,7 @@ public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
 
     public void runOpMode() {
         MecDriveBase driveBase = new MecDriveBase(this);
+        Intake intake = new Intake(this);
         PoseTracker poseTracker = new PoseTracker(this, Global.lastPose);
         Underglow underglow = new Underglow(this);
         Drawing drawing = new Drawing(poseTracker);
@@ -36,6 +35,15 @@ public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
 
         if (opModeIsActive()) {
             while(opModeIsActive()) {
+                // INTAKE
+                if (gamepad1.dpad_up || gamepad2.a) {
+                    intake.run(Intake.Direction.IN);
+                } else if (gamepad1.dpad_down || gamepad2.y) {
+                    intake.run(Intake.Direction.OUT);
+                } else if (gamepad1.dpad_left || gamepad1.dpad_right || gamepad2.b) {
+                    intake.stop();
+                }
+                // ALL DRIVEBASE MOVEMENT (SEMI-AUTO OR TELEOP)
                 if (gamepad1.right_bumper) {
                     autoMovementEnabled = true;
                     poseTracker.enableMovement();
@@ -46,13 +54,15 @@ public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
                     underglow.setColor(Underglow.Color.ALLIANCE);
                 }
                 if (!autoMovementEnabled) {
-                    driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
+                    driveBase.control(gamepad1);
                 }
+                // UPDATES
                 poseTracker.update();
                 poseTracker.runTelemetry();
                 telemetry.update();
                 drawing.update();
             }
         }
+
     }
 }

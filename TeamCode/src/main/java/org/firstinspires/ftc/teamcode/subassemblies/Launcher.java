@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
-import com.acmerobotics.dashboard.FtcDashboard;
+import static org.firstinspires.ftc.teamcode.util.MathKt.toRPM;
+import static org.firstinspires.ftc.teamcode.util.MathKt.toTicksPerSec;
+
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -57,11 +58,9 @@ public class Launcher extends Subassembly {
 
     /** gets current RPM of flywheel launcher */
     public double getCurrentRPM() {
-        double currentRPM = flywheelMotor.getVelocity() / ENCODER_RES;
-        TelemetryPacket packet = new TelemetryPacket();
-        packet.put("current flywheel RPM", currentRPM);
-        FtcDashboard.getInstance().sendTelemetryPacket(packet);
-        return flywheelMotor.getVelocity() / ENCODER_RES;
+        double currentRPM = toRPM(flywheelMotor.getVelocity(), ENCODER_RES);
+        sendData("current flywheel RPM", currentRPM);
+        return currentRPM;
     }
 
     /** sets target RPM of the flywheel launcher */
@@ -69,7 +68,7 @@ public class Launcher extends Subassembly {
         if (ENABLE_TUNING_MODE) {
             flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PIDF_COEFFICIENTS);
         }
-        flywheelMotor.setVelocity(targetRPM * ENCODER_RES);
+        flywheelMotor.setVelocity(toTicksPerSec(targetRPM, ENCODER_RES));
         sendData("target flywheel RPM", targetRPM);
     }
 }

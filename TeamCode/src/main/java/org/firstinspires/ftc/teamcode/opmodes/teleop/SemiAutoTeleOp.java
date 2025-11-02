@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
@@ -26,6 +27,8 @@ public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
         PoseTracker poseTracker = new PoseTracker(this, Global.lastPose);
         Underglow underglow = new Underglow(this);
         Drawing drawing = new Drawing(poseTracker);
+
+        driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         poseTracker.setTargetPose(TARGET_POSE);
         poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);

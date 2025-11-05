@@ -6,8 +6,12 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
 
 import java.util.Objects;
 
@@ -33,10 +37,17 @@ public class Pose {
         this.h = pose3D.getOrientation().getYaw(Global.ANGLE_UNIT);
     }
 
-    public Pose(VectorF vectorF, double heading) {
-        this.x = vectorF.get(0);
-        this.y = vectorF.get(1);
-        this.h = heading;
+    // The absolute stupidest of conversion, to try and deal with the fact apriltag metadata positions use different units than literally everything else in the SDK and even other aprilTag stuff :)
+    public Pose(VectorF positionVectorF, Quaternion orientationQuaternion) {
+        this.x = Global.DISTANCE_UNIT.fromInches(positionVectorF.get(0));
+        this.y = Global.DISTANCE_UNIT.fromInches(positionVectorF.get(1));
+        Orientation orientation = Orientation.getOrientation(
+                orientationQuaternion.toMatrix(),
+                AxesReference.INTRINSIC,
+                AxesOrder.XYZ,
+                Global.ANGLE_UNIT
+        );
+        this.h = orientation.thirdAngle; // third angle is z axis, which is yaw/heading
     }
 
     public SparkFunOTOS.Pose2D toSparkFunPose() {
@@ -44,8 +55,10 @@ public class Pose {
     }
 
     @NonNull
+    @Override
     public String toString() { return String.format("Pose(x=%.2f, y=%.2f, h=%.2f", x, y, h); }
 
+    @Override
     public int hashCode() { return Objects.hash(x, y, h); }
 
     public boolean equals(Pose pose) { return this.hashCode() == pose.hashCode(); }

@@ -4,10 +4,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -42,9 +38,7 @@ public class LimelightCam extends Localizer {
 
     public Pose getPoseOfTag(int aprilTagId) {
         AprilTagMetadata tagMetadata = tagLibrary.lookupTag(aprilTagId);
-        Orientation tagOrientation = Orientation.getOrientation(tagMetadata.fieldOrientation.toMatrix(), AxesReference.INTRINSIC, AxesOrder.XYZ, Global.ANGLE_UNIT);
-        double heading = tagOrientation.thirdAngle; // third angle is Z, yaw/heading
-        return new Pose(tagMetadata.fieldPosition, heading);
+        return new Pose(tagMetadata.fieldPosition, tagMetadata.fieldOrientation);
     }
 
     public double getDistanceFromTag(int aprilTagId) {

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -30,6 +31,12 @@ public class Pose {
         this.x = position.x;
         this.y = position.y;
         this.h = pose3D.getOrientation().getYaw(Global.ANGLE_UNIT);
+    }
+
+    public Pose(VectorF vectorF, double heading) {
+        this.x = vectorF.get(0);
+        this.y = vectorF.get(1);
+        this.h = heading;
     }
 
     public SparkFunOTOS.Pose2D toSparkFunPose() {
@@ -75,9 +82,9 @@ public class Pose {
         );
     }
 
-    public double distanceFromOrigin() { return Math.hypot(x, y); }
+    public double getDistanceFromOrigin() { return Math.hypot(x, y); }
 
-    public double distanceFrom(Pose pose) { return subtract(pose).distanceFromOrigin(); }
+    public double getDistanceFromPose(Pose pose) { return subtract(pose).getDistanceFromOrigin(); }
 
     public Pose rotate(double angle) {
         double rotatedX = x * Math.cos(angle) - y * Math.sin(angle);

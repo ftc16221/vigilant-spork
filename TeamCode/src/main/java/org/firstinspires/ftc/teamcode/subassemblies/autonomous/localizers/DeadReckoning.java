@@ -5,9 +5,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.ImuOrientationOnRobot;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
@@ -23,13 +21,17 @@ public class DeadReckoning extends Localizer {
     public static double TRACK_WIDTH = 0.0;
     public static RevHubOrientationOnRobot.LogoFacingDirection HUB_LOGO_FACING_DIRECTION = RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD;
     public static RevHubOrientationOnRobot.UsbFacingDirection HUB_USB_FACING_DIRECTION = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+    // scalars to account for imperfect traction because mecanum wheels have very little surface contact
+    public static double FORWARD_SCALAR = 1.0;
+    public static double STRAFE_SCALAR = 1.0;
+    public static double ROTATION_SCALAR = 1.0;
 
     private final DcMotor leftFront, rightFront, leftRear, rightRear;
     private final IMU imu;
     private final Pose startingPose;
 
     private double prevTime = 0;
-    private DcMotor[] motors;
+    private final DcMotor[] motors;
 
     private ArrayList<Integer> previousPositions = new ArrayList<>();
 
@@ -59,8 +61,6 @@ public class DeadReckoning extends Localizer {
     public void update() {
         double time = opMode.time;
 
-        double imuHeading = imu.getRobotYawPitchRollAngles().getYaw(Global.ANGLE_UNIT) + startingPose.h;
-
         Pose fieldCentricChange = getRelativeChange().toFieldCentric(pose.h);
         pose = pose.add(fieldCentricChange);
 
@@ -68,6 +68,10 @@ public class DeadReckoning extends Localizer {
         velocity = fieldCentricChange.divideBy(deltaTime);
 
         prevTime = time;
+    }
+
+    private double getImuHeading() {
+        return imu.getRobotYawPitchRollAngles().getYaw(Global.ANGLE_UNIT) + startingPose.h;
     }
 
     /** @return x is forward, y is lateral, and h is rotational */
@@ -90,9 +94,9 @@ public class DeadReckoning extends Localizer {
         double deltaRR = toCM(positionDelta.get(3)); // rightRear
 
         // math is according to gm0's forward kinematics: https://gm0.org/en/latest/docs/software/concepts/kinematics.html
-        double deltaX = (deltaLF + deltaRF + deltaLR + deltaRR) / 4; // forward
-        double deltaY = (deltaRF + deltaLR - deltaLF - deltaRR) / 4; // strafe
-        double deltaH = (deltaRF + deltaRR - deltaLF - deltaLR) / (4 * TRACK_WIDTH); // rotation
+        double deltaX = (deltaLF + deltaRF + deltaLR + deltaRR) / 4 * FORWARD_SCALAR; // forward
+        double deltaY = (deltaRF + deltaLR - deltaLF - deltaRR) / 4 * STRAFE_SCALAR; // strafe
+        double deltaH = (deltaRF + deltaRR - deltaLF - deltaLR) / (4 * TRACK_WIDTH) * ROTATION_SCALAR; // rotation
 
         previousPositions = currentPositions;
         return new Pose(deltaX, deltaY, deltaH);

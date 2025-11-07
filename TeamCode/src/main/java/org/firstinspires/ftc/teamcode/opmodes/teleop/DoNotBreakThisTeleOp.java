@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "Do Not Break This TeleOp", group = "do not break")
+@TeleOp(group = "do not break")
 public class DoNotBreakThisTeleOp extends LinearOpMode {
 
     @Override

@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.TankDriveBase
 import org.firstinspires.ftc.teamcode.util.log
 
 @Disabled
-@TeleOp(name = "Tank TeleOp", group = "exploratory")
+@TeleOp(group = "exploratory")
 class TankTeleOp : LinearOpMode() {
 
     override fun runOpMode() {
@@ -19,7 +19,6 @@ class TankTeleOp : LinearOpMode() {
         // add other subassemblies here
 
         val loopTime = ElapsedTime()
-        val subassemblyList = listOf(driveBase)
 
         log("OpMode initialized")
         waitForStart()

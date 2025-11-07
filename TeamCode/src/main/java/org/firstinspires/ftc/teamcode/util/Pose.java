@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
 import java.util.Objects;
 
 public class Pose {
-    public double x, y , h;
+    public double x, y, h;
 
     public Pose(double x, double y, double h) {
         this.x = x;

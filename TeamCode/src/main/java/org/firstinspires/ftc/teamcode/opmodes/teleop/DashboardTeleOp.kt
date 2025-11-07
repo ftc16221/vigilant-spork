@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.Generi
 import org.firstinspires.ftc.teamcode.util.DashOpMode
 
 @Disabled
-@TeleOp(name = "Dash Camera", group = "exploratory")
+@TeleOp(group = "exploratory")
 class DashboardTeleOp : LinearOpMode(), DashOpMode {
 
     override fun runOpMode() {

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tests;
+package org.firstinspires.ftc.teamcode.opmodes.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam;
 
 @Disabled
-@TeleOp(name = "AprilTag Test", group = "tests")
+@TeleOp(group = "tests")
 public class AprilTagTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

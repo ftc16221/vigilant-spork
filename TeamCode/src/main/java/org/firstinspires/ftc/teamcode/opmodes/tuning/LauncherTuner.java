@@ -23,6 +23,8 @@ public class LauncherTuner extends OpMode {
     private double prevTargetRPM = 0;
     private final boolean useLimelight = USE_LIMELIGHT;
 
+    private boolean dpadWasPressed = false;
+
     Launcher launcher;
     LimelightCam limelightCam;
 
@@ -53,17 +55,18 @@ public class LauncherTuner extends OpMode {
 
     @Override
     public void loop() {
-        if (gamepad1.dpadUpWasPressed()) TARGET_RPM += 100;
-        if (gamepad1.dpadDownWasPressed()) TARGET_RPM -= 100;
-        if (gamepad1.dpadRightWasPressed()) TARGET_RPM += 10;
-        if (gamepad1.dpadLeftWasPressed()) TARGET_RPM -= 10;
+        if (gamepad1.dpad_up && !dpadWasPressed) TARGET_RPM += 100;
+        else if (gamepad1.dpad_down && !dpadWasPressed) TARGET_RPM -= 100;
+        else if (gamepad1.dpad_right && !dpadWasPressed) TARGET_RPM += 10;
+        else if (gamepad1.dpad_left && !dpadWasPressed) TARGET_RPM -= 10;
+
+        dpadWasPressed = gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_right || gamepad1.dpad_left;
 
         MathKt.clamp(TARGET_RPM, -MAX_RPM, MAX_RPM);
         if (TARGET_RPM != prevTargetRPM) {
             launcher.setTargetRPM(TARGET_RPM);
         }
         prevTargetRPM = TARGET_RPM;
-
 
         telemetryA.addData("Max RPM", MAX_RPM);
         telemetryA.addData("Target RPM", TARGET_RPM);

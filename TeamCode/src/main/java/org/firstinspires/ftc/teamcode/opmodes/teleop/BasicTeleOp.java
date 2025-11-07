@@ -24,11 +24,11 @@ public class BasicTeleOp extends LinearOpMode {
                 // DRIVEBASE
                 driveBase.control(gamepad1);
                 // INTAKE
-                if (gamepad1.dpad_up || gamepad2.a) {
+                if (gamepad1.dpadUpWasPressed() || gamepad2.aWasPressed()) {
                     intake.run(Intake.Direction.IN);
-                } else if (gamepad1.dpad_down || gamepad2.y) {
+                } else if (gamepad1.dpadDownWasPressed() || gamepad2.yWasPressed()) {
                     intake.run(Intake.Direction.OUT);
-                } else if (gamepad1.dpad_left || gamepad1.dpad_right || gamepad2.b) {
+                } else if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed() || gamepad2.bWasPressed()) {
                     intake.stop(); 
                 }
                 // UPDATES

@@ -15,17 +15,21 @@ public class UnderglowTest extends OpMode {
     Underglow.Color[] colors = {null, Underglow.Color.ALLIANCE, Underglow.Color.YELLOW, Underglow.Color.GREEN, Underglow.Color.WHITE, Underglow.Color.RAINBOW};
     int colorIndex = 0;
 
+    boolean dpadWasPressed = false;
+
     public void init() {
         underglow = new Underglow(this);
         callTelemetry();
     }
 
     public void loop() {
-        if (gamepad1.bWasPressed()) Global.alliance = Global.Alliance.RED;
-        if (gamepad1.xWasPressed()) Global.alliance = Global.Alliance.BLUE;
-        if (gamepad1.yWasPressed()) Global.alliance = null;
-        if (gamepad1.dpadUpWasPressed()) colorIndex++;
-        if (gamepad1.dpadDownWasPressed()) colorIndex--;
+        if (gamepad1.b) Global.alliance = Global.Alliance.RED;
+        if (gamepad1.x) Global.alliance = Global.Alliance.BLUE;
+        if (gamepad1.y) Global.alliance = null;
+        if (gamepad1.dpad_up && !dpadWasPressed) colorIndex++;
+        if (gamepad1.dpad_down && !dpadWasPressed) colorIndex--;
+
+        dpadWasPressed = gamepad1.dpad_up || gamepad1.dpad_down;
 
         if (colorIndex < 0) colorIndex = colors.length - 1;
         if (colorIndex >= colors.length) colorIndex = 0;

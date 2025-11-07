@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.util.DashOpMode;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
-@TeleOp(group = "tests")
+@TeleOp(group = Global.OpModeGroup.TEST)
 public class PinpointTest extends LinearOpMode implements DashOpMode {
 
     MecDriveBase driveBase;

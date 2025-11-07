@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(group = "do not break")
+import org.firstinspires.ftc.teamcode.util.Global;
+
+@TeleOp(group = Global.OpModeGroup.DO_NOT_BREAK)
 public class DoNotBreakThisTeleOp extends LinearOpMode {
 
     @Override

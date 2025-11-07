@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.util.Drawing;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
-@TeleOp
+@TeleOp(group = Global.OpModeGroup.MAIN)
 @Config
 public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
 

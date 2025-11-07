@@ -6,10 +6,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.DeadReckoning;
+import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
 @Disabled
-@TeleOp(group = "tuner")
+@TeleOp(group = Global.OpModeGroup.TUNER)
 public class DeadReckoningTuner extends OpMode {
 
     MecDriveBase driveBase;

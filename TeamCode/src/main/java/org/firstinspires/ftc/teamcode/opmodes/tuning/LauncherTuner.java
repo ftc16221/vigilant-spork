@@ -8,9 +8,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
+import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathKt;
 
-@TeleOp(group = "tuner")
+@TeleOp(group = Global.OpModeGroup.TUNER)
 @Config
 public class LauncherTuner extends OpMode {
 

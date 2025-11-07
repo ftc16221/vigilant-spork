@@ -6,8 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.util.Global;
 
-@TeleOp
+@TeleOp(group = Global.OpModeGroup.MAIN)
 public class BasicTeleOp extends LinearOpMode {
 
     public void runOpMode() {

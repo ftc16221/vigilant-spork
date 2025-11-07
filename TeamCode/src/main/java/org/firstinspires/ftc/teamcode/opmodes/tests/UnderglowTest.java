@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@TeleOp(group = "tests")
+@TeleOp(group = Global.OpModeGroup.TEST)
 public class UnderglowTest extends OpMode {
 
     Underglow underglow;

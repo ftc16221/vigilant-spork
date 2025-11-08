@@ -18,6 +18,10 @@ buildscript {
             url "https://plugins.gradle.org/m2/"
         }
     }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
 }
 
 apply from: '../build.common.gradle'
@@ -26,6 +30,9 @@ apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
 
     packagingOptions {
         jniLibs.useLegacyPackaging true

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
+import static java.lang.Double.NaN;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -43,6 +45,7 @@ public class LimelightCam extends Localizer {
 
     public double getDistanceFromTag(int aprilTagId) {
         Pose tagPose = getPoseOfTag(aprilTagId);
+        if (pose == null) return NaN;
         return pose.getDistanceFromPose(tagPose);
     }
 }

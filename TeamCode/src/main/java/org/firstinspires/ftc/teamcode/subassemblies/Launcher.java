@@ -32,7 +32,6 @@ public class Launcher extends Subassembly {
         super (opMode, "Launcher");
         flywheelMotor = (DcMotorEx) opMode.hardwareMap.dcMotor.get("launcher");
         flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        flywheelMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PIDF_COEFFICIENTS);
     }
 
     public void launch() {

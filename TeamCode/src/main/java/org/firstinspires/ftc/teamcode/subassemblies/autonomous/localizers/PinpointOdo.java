@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.util.drivers.GoBildaPinpointDriver;
 public class PinpointOdo extends Localizer {
 
     // Both of these offsets are in CM. The tracking point of the robot is the center of the wheelbase
-    public static double X_OFFSET = 3.5;
-    public static double Y_OFFSET = -15.5;
+    public static double X_OFFSET = 10.8;
+    public static double Y_OFFSET = -4.8;
     public static GoBildaPinpointDriver.GoBildaOdometryPods POD_TYPE = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
     public static GoBildaPinpointDriver.EncoderDirection X_DIRECTION = GoBildaPinpointDriver.EncoderDirection.FORWARD;
     public static GoBildaPinpointDriver.EncoderDirection Y_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED;

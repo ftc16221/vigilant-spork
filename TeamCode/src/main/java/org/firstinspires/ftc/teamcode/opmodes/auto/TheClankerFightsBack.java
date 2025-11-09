@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -29,12 +30,14 @@ public class TheClankerFightsBack extends OpMode {
     public static double DETECTION_TIME_OUT = 0.5;
     public static double MAX_POWER = 0.4;
     public static double AREA_SETPOINT = 0.90;
+    public static int AVERAGING_SIZE = 10;
+    public static int PIPELINE_INDEX = 9;
 
     Limelight3A limelight;
     MecDriveBase driveBase;
 
-    RollingAverage txAvg = new RollingAverage(50);
-    RollingAverage taAvg = new RollingAverage(50);
+    RollingAverage txAvg = new RollingAverage(AVERAGING_SIZE);
+    RollingAverage taAvg = new RollingAverage(AVERAGING_SIZE);
 
 
     PIDController xPidController = new PIDController(X_P, X_I, X_D);
@@ -49,7 +52,7 @@ public class TheClankerFightsBack extends OpMode {
         driveBase = new MecDriveBase(this);
         xPidController.setSetPoint(0);
         aPidController.setSetPoint(AREA_SETPOINT);
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(PIPELINE_INDEX);
         limelight.setPollRateHz(100);
         limelight.start();
 
@@ -65,10 +68,19 @@ public class TheClankerFightsBack extends OpMode {
             aPidController.setSetPoint(AREA_SETPOINT);
         }
 
-        List<LLResultTypes.DetectorResult> detections = limelight.getLatestResult().getDetectorResults();
-        for (LLResultTypes.DetectorResult detection : detections) {
-            txAvg.addValue(detection.getTargetXDegrees());
-            taAvg.addValue(detection.getTargetArea());
+        LLResult result = limelight.getLatestResult();
+
+        List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
+        for (LLResultTypes.DetectorResult detectorResult : detectorResults) {
+            txAvg.addValue(detectorResult.getTargetXDegrees());
+            taAvg.addValue(detectorResult.getTargetArea());
+            detectionTimer.reset();
+        }
+
+        List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
+        for (LLResultTypes.ColorResult colorResult : colorResults) {
+            txAvg.addValue(colorResult.getTargetXDegrees());
+            taAvg.addValue(colorResult.getTargetArea());
             detectionTimer.reset();
         }
 
@@ -79,9 +91,9 @@ public class TheClankerFightsBack extends OpMode {
         double hPower = xPidController.calculate(txAvg.getAverage());
         hPower = MathKt.clamp(hPower, -MAX_POWER, MAX_POWER);
         double yPower = aPidController.calculate(taAvg.getAverage());
-        driveBase.moveRobot(0, 0, hPower);
+        driveBase.moveRobot(0, yPower, hPower);
 
-        telemetry.addData("num of detections", detections.size());
+        telemetry.addData("num of detections", detectorResults.size());
         telemetry.addData("time since last detection", detectionTimer.seconds());
         telemetry.addData("txAvg", txAvg.getAverage());
         telemetry.addData("taAvg", taAvg.getAverage());

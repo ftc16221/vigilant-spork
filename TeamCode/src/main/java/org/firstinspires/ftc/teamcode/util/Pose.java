@@ -100,10 +100,19 @@ public class Pose {
     public double getDistanceFromPose(Pose pose) { return subtract(pose).getDistanceFromOrigin(); }
 
     public Pose rotate(double angle) {
-        double rotatedX = x * Math.cos(angle) - y * Math.sin(angle);
-        double rotatedY = x * Math.sin(angle) + y * Math.cos(angle);
+        double angleInRads = Global.ANGLE_UNIT.toRadians(angle);
+        double rotatedX = x * Math.cos(angleInRads) - y * Math.sin(angleInRads);
+        double rotatedY = x * Math.sin(angleInRads) + y * Math.cos(angleInRads);
         double rotatedH = AngleUnit.normalizeDegrees(h + angle);
         return new Pose(rotatedX, rotatedY, rotatedH);
+    }
+
+    public Pose invert() {
+        return rotate(180);
+    }
+
+    public Pose mirror() {
+        return new Pose(x, -y, h);
     }
 
     public Pose toFieldCentric(double currentHeading) { return rotate(currentHeading); }

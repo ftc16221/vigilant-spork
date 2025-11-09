@@ -19,7 +19,14 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
 
     public static Pose TARGET_POSE = new Pose(0, 0, 0);
+    public static Pose TRACKING_POINT = new Pose(0, 0, 0);
+
+    public static Underglow.Color IDLE_COLOR = Underglow.Color.ALLIANCE;
+    public static Underglow.Color GOAL_TRACKING_COLOR = Underglow.Color.GREEN;
+    public static Underglow.Color AUTO_MOVEMENT_COLOR = Underglow.Color.WHITE;
+
     private boolean autoMovementEnabled = false;
+    private boolean goalTrackingEnabled = false;
 
     public void runOpMode() {
         MecDriveBase driveBase = new MecDriveBase(this);
@@ -31,6 +38,7 @@ public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
         driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         poseTracker.setTargetPose(TARGET_POSE);
+        poseTracker.setTrackingPoint(TRACKING_POINT);
         poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);
 
         telemetry.update();
@@ -46,19 +54,33 @@ public class SemiAutoTeleOp extends LinearOpMode implements DashOpMode {
                 } else if (gamepad1.dpad_left || gamepad1.dpad_right || gamepad2.b) {
                     intake.stop();
                 }
+
                 // ALL DRIVEBASE MOVEMENT (SEMI-AUTO OR TELEOP)
-                if (gamepad1.right_bumper) {
+                if (gamepad1.right_bumper) { // start auto movement
                     autoMovementEnabled = true;
                     poseTracker.enableMovement();
-                    underglow.setColor(Underglow.Color.WHITE);
-                } else if (!gamepad1.atRest()) {
+                    underglow.setColor(AUTO_MOVEMENT_COLOR);
+                } else if (!gamepad1.atRest() && autoMovementEnabled) { // cancel auto movement
                     autoMovementEnabled = false;
                     poseTracker.disableMovement();
-                    underglow.setColor(Underglow.Color.ALLIANCE);
+                    underglow.setColor(IDLE_COLOR);
+                } else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
+                    goalTrackingEnabled = true;
+                    poseTracker.enablePointTracking();
+                    underglow.setColor(GOAL_TRACKING_COLOR);
+                } else if (gamepad1.right_stick_x != 0 && goalTrackingEnabled) { // cancel goal tracking
+                    goalTrackingEnabled = false;
+                    poseTracker.disablePointTracking();
+                    underglow.setColor(IDLE_COLOR);
                 }
-                if (!autoMovementEnabled) {
+
+                if (goalTrackingEnabled) {
+                    driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, poseTracker.getTrackingPower());
+                }
+                if (!autoMovementEnabled && !goalTrackingEnabled) {
                     driveBase.control(gamepad1);
                 }
+
                 // UPDATES
                 poseTracker.update();
                 poseTracker.runTelemetry();

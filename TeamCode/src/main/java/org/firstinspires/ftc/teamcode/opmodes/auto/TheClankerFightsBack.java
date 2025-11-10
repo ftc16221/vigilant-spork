@@ -23,11 +23,12 @@ public class TheClankerFightsBack extends OpMode {
     public static double X_P = -0.01;
     public static double X_I = 0;
     public static double X_D = 0;
-    public static double A_P = -0.01;
+    public static double A_P = 0.5;
     public static double A_I = 0;
     public static double A_D = 0;
     public static boolean ENABLE_TUNING_MODE = false;
     public static double DETECTION_TIME_OUT = 0.5;
+    public static double SCANNING_POWER = 0.2;
     public static double MAX_POWER = 0.4;
     public static double AREA_SETPOINT = 0.90;
     public static int AVERAGING_SIZE = 10;
@@ -84,13 +85,19 @@ public class TheClankerFightsBack extends OpMode {
             detectionTimer.reset();
         }
 
+        double hPower = xPidController.calculate(txAvg.getAverage());
+        double yPower = aPidController.calculate(taAvg.getAverage());
+
         if (detectionTimer.seconds() > DETECTION_TIME_OUT) {
             txAvg.reset();
+            taAvg.reset();
+            hPower = SCANNING_POWER;
+            yPower = 0;
         }
 
-        double hPower = xPidController.calculate(txAvg.getAverage());
+
         hPower = MathKt.clamp(hPower, -MAX_POWER, MAX_POWER);
-        double yPower = aPidController.calculate(taAvg.getAverage());
+        yPower = MathKt.clamp(yPower, -MAX_POWER, MAX_POWER);
         driveBase.moveRobot(0, yPower, hPower);
 
         telemetry.addData("num of detections", detectorResults.size());

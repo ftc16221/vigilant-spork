@@ -8,6 +8,7 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -40,7 +41,9 @@ public class LimelightCam extends Localizer {
         result = limelight3A.getLatestResult();
         if (result != null) {
             if (result.isValid()) {
-                pose = new Pose(result.getBotpose());
+                pose = new Pose(result.getBotpose(), DistanceUnit.METER);
+            } else {
+                pose = null;
             }
         } else {
             pose = null;

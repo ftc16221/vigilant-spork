@@ -5,29 +5,28 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 @Config
 public class Intake extends Subassembly {
 
-    public static double POWER = 0.8;
-
-    private final CRServo intakeServo;
+    private final Servo intakeServo;
 
     public Intake(OpMode opMode) {
         super(opMode, "Intake");
         HardwareMap hardwareMap = opMode.hardwareMap;
-        intakeServo = hardwareMap.crservo.get("intake");
+        intakeServo = hardwareMap.servo.get("intake");
     }
 
     public void run(Direction direction) {
-        if (direction == Direction.IN) intakeServo.setPower(POWER);
-        else if (direction == Direction.OUT) intakeServo.setPower(-POWER);
+        if (direction == Direction.IN) intakeServo.setPosition(1);
+        else if (direction == Direction.OUT) intakeServo.setPosition(0);
     }
 
     public void stop() {
-        intakeServo.setPower(0);
+        intakeServo.setPosition(0.5);
     }
 
     public enum Direction {

@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -30,10 +31,10 @@ public class Pose {
         this.h = sparkFunPose.h;
     }
 
-    public Pose(Pose3D pose3D) {
+    public Pose(Pose3D pose3D, DistanceUnit distanceUnit) {
         Position position = pose3D.getPosition();
-        this.x = position.x;
-        this.y = position.y;
+        this.x = distanceUnit.toCm(position.x);
+        this.y = distanceUnit.toCm(position.y);
         this.h = pose3D.getOrientation().getYaw(Global.ANGLE_UNIT);
     }
 

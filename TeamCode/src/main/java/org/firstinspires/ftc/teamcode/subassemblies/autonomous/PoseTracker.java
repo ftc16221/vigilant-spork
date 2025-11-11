@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
@@ -50,7 +50,7 @@ public class PoseTracker extends Subassembly {
     FtcDashboard dashboard;
 
     public PinpointOdo pinpointOdo;
-    GenericCam genericCam;
+    LimelightCam limelightCam;
     List<Localizer> localizers = new ArrayList<>();
     Localizer activeLocalizer = null;
 
@@ -83,13 +83,13 @@ public class PoseTracker extends Subassembly {
         this.startingPose = startingPose;
         currentPose = startingPose;
         pinpointOdo = new PinpointOdo(opMode, this.startingPose);
-//        genericCam = new GenericCam(opMode);
+        limelightCam = new LimelightCam(opMode);
         driveBase = new MecDriveBase(opMode);
         underglow = new Underglow(opMode);
 
         // whatever localizer has the lowest index will take precedent
+        localizers.add(limelightCam);
         localizers.add(pinpointOdo);
-//        localizers.add(0, genericCam);
 
         // we can assume that if the opMode is an Autonomous opMode that we can immediately enable movement. If we can't that should be explicitly disabled.
         Class<? extends OpMode> opModeClass = opMode.getClass();

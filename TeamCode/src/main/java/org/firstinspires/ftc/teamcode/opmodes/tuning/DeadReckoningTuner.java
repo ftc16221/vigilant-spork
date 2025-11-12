@@ -25,7 +25,7 @@ public class DeadReckoningTuner extends OpMode {
                         "To find the scalar, divide actual distance moved by reported distance.\n" +
                         "For example, if the robot is moved 100 cm, but reports 90 cm, then the scalar is 90/100 or 0.9.\n" +
                         "Alternatively, you can moved the robot until it reports 100 cm, then report the actual value.\n" +
-                        "In this case, assuming the robot reported 111.1 cm, we would find the scalar to be 100/110 (~0.9)." +
+                        "In this case, assuming the robot reported 111.1 cm, we would find the scalar to be 100/111.1 (~0.9)." +
                         "Do this for each direction - forward, lateral, rotational - then record the scalars to add permanently to DeadReckoning.java"
         );
     }

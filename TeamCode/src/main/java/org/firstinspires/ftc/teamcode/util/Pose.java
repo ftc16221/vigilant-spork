@@ -57,7 +57,7 @@ public class Pose {
 
     @NonNull
     @Override
-    public String toString() { return String.format("Pose(x=%.2f, y=%.2f, h=%.2f", x, y, h); }
+    public String toString() { return String.format("Pose(x=%.2f, y=%.2f, h=%.2f)", x, y, h); }
 
     @Override
     public int hashCode() { return Objects.hash(x, y, h); }

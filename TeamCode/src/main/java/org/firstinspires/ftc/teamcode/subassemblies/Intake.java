@@ -1,31 +1,32 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+@Config
 public class Intake extends Subassembly {
 
-    public static double POWER = 0.8;
-
-    private final DcMotor intakeMotor;
-
+    private final Servo intakeServo;
 
     public Intake(OpMode opMode) {
         super(opMode, "Intake");
         HardwareMap hardwareMap = opMode.hardwareMap;
-        intakeMotor = hardwareMap.dcMotor.get("intake");
+        intakeServo = hardwareMap.servo.get("intake");
     }
 
     public void run(Direction direction) {
-        if (direction == Direction.IN) intakeMotor.setPower(POWER);
-        else if (direction == Direction.OUT) intakeMotor.setPower(-POWER);
+        if (direction == Direction.IN) intakeServo.setPosition(1);
+        else if (direction == Direction.OUT) intakeServo.setPosition(0);
     }
 
     public void stop() {
-        intakeMotor.setPower(0);
+        intakeServo.setPosition(0.5);
     }
 
     public enum Direction {

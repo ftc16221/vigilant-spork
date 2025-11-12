@@ -1,12 +1,13 @@
-package org.firstinspires.ftc.teamcode.tests
+package org.firstinspires.ftc.teamcode.opmodes.tests
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase
 import org.firstinspires.ftc.teamcode.util.DashOpMode
+import org.firstinspires.ftc.teamcode.util.Global
 
-@Autonomous(name = "Motor Configuration Test", group = "tests")
+@TeleOp(group = Global.OpModeGroup.TEST)
 class MotorConfigTest : LinearOpMode(), DashOpMode {
 
     override fun runOpMode() {

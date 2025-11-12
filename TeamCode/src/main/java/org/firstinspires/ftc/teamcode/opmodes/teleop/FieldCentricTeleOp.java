@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@TeleOp(group = "exploratory")
+@TeleOp(group = Global.OpModeGroup.EXPLORATORY)
 public class FieldCentricTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() {

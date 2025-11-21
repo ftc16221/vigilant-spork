@@ -11,9 +11,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
+import org.firstinspires.ftc.teamcode.util.CircularDoubleArray;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathKt;
-import org.firstinspires.ftc.teamcode.util.RollingAverage;
 
 import java.util.List;
 
@@ -37,8 +37,8 @@ public class TheClankerFightsBack extends OpMode {
     Limelight3A limelight;
     MecDriveBase driveBase;
 
-    RollingAverage txAvg = new RollingAverage(AVERAGING_SIZE);
-    RollingAverage taAvg = new RollingAverage(AVERAGING_SIZE);
+    CircularDoubleArray txAvg = new CircularDoubleArray(AVERAGING_SIZE);
+    CircularDoubleArray taAvg = new CircularDoubleArray(AVERAGING_SIZE);
 
 
     PIDController xPidController = new PIDController(X_P, X_I, X_D);

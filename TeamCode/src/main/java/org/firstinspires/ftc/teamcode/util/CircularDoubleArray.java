@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.util;
 
-public class RollingAverage {
+public class CircularDoubleArray {
     private final double[] values;
     private int index = 0;
     private int count = 0;
     private double sum = 0;
 
-    public RollingAverage(int size) {
+    public CircularDoubleArray(int size) {
         values = new double[size];
     }
 

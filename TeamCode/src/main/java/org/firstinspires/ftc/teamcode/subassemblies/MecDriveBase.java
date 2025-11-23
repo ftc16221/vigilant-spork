@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.util.MathKt;
+import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 public class MecDriveBase extends Subassembly {
@@ -41,8 +41,8 @@ public class MecDriveBase extends Subassembly {
      * @param gamepad the gamepad used to move the driveBase, usually gamepad1
      */
     public void control(Gamepad gamepad) {
-        double leftX = MathKt.powerCurve(gamepad.left_stick_x);
-        double leftY = MathKt.powerCurve(-gamepad.left_stick_y);
+        double leftX = MathEx.powerCurve(gamepad.left_stick_x);
+        double leftY = MathEx.powerCurve(-gamepad.left_stick_y);
         double rightX = gamepad.right_stick_x;
 
         moveRobot(leftX, leftY, rightX);

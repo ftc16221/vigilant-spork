@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
-import org.firstinspires.ftc.teamcode.util.MathKt;
+import org.firstinspires.ftc.teamcode.util.MathEx;
 
 @TeleOp(group = Global.OpModeGroup.MAIN)
 public class BasicTeleOp extends OpMode {
@@ -54,7 +54,7 @@ public class BasicTeleOp extends OpMode {
 
         dpadWasPressed = gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.dpad_right || gamepad2.dpad_left;
 
-        targetRPM = MathKt.clamp(targetRPM, -MAX_RPM, MAX_RPM);
+        targetRPM = MathEx.clamp(targetRPM, -MAX_RPM, MAX_RPM);
         if (targetRPM != prevTargetRPM) {
             launcher.setTargetVelocity(targetRPM);
         }

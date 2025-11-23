@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
-import static org.firstinspires.ftc.teamcode.util.MathKt.toRPM;
-import static org.firstinspires.ftc.teamcode.util.MathKt.toTicksPerSec;
+import static org.firstinspires.ftc.teamcode.util.MathEx.toRPM;
+import static org.firstinspires.ftc.teamcode.util.MathEx.toTicksPerSec;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;

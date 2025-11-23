@@ -1,12 +1,11 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
-import static org.firstinspires.ftc.teamcode.util.MathKt.normalize;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
+import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.drivers.GoBildaPinpointDriver;
 
@@ -44,7 +43,7 @@ public class PinpointOdo extends Localizer {
         pose = new Pose(
                 pinpoint.getPosX(Global.DISTANCE_UNIT),
                 pinpoint.getPosY(Global.DISTANCE_UNIT),
-                normalize(pinpoint.getHeading(Global.UNNORMALIZED_ANGLE_UNIT)) // i'm not sure why, but when a normalized angle unit is used instead the value outputs as degrees but normalizes to the same range as radians
+                MathEx.normalize(pinpoint.getHeading(Global.UNNORMALIZED_ANGLE_UNIT)) // i'm not sure why, but when a normalized angle unit is used instead the value outputs as degrees but normalizes to the same range as radians
         );
         velocity = new Pose(
                 pinpoint.getVelX(Global.DISTANCE_UNIT),

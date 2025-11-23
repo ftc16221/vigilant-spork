@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.util.Global;
-import org.firstinspires.ftc.teamcode.util.MathKt;
+import org.firstinspires.ftc.teamcode.util.MathEx;
 
 @TeleOp(group = Global.OpModeGroup.TUNER)
 @Config
@@ -68,7 +68,7 @@ public class LauncherTuner extends OpMode {
 
         dpadWasPressed = gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_right || gamepad1.dpad_left;
 
-        TARGET_RPM = MathKt.clamp(TARGET_RPM, -MAX_RPM, MAX_RPM);
+        TARGET_RPM = MathEx.clamp(TARGET_RPM, -MAX_RPM, MAX_RPM);
         if (TARGET_RPM != prevTargetRPM) {
             launcher.setTargetVelocity(TARGET_RPM);
         }

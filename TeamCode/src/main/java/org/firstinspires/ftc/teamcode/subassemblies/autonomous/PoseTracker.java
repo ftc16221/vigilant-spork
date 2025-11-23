@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 
 import static org.firstinspires.ftc.teamcode.util.LoggingKt.log;
-import static org.firstinspires.ftc.teamcode.util.MathKt.clamp;
+import static org.firstinspires.ftc.teamcode.util.MathEx.clamp;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 
 @TeleOp(group = Global.OpModeGroup.MAIN)
 @Config
+@Configurable
 public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     public static Pose TARGET_POSE = new Pose(0, 0, 0);

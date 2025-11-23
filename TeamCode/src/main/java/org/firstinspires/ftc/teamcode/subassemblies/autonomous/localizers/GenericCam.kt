@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers
 import android.util.Size
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
+import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
@@ -27,6 +28,7 @@ import javax.annotation.CheckForNull
  * Possibly will be used for Machine Learning in future seasons
  */
 @Config
+@Configurable
 class GenericCam(opMode: LinearOpMode): Localizer(opMode, "Vision") {
     /**
      * Variables to store the position and orientation of the camera on the robot. Setting these

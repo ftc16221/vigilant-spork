@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.util.MathKt.toRPM;
 import static org.firstinspires.ftc.teamcode.util.MathKt.toTicksPerSec;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -12,6 +13,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 @Config
+@Configurable
 public class Launcher extends Subassembly {
 
     // quadratic coefficients for power calculation function (Ax² + Bx + C)

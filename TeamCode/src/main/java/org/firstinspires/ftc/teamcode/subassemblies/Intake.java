@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
 @Config
+@Configurable
 public class Intake extends Subassembly {
 
     private final Servo intakeServo;

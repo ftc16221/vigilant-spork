@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 import static org.firstinspires.ftc.teamcode.util.MathKt.normalize;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.util.drivers.GoBildaPinpointDriver;
 
 /** <a href="https://www.gobilda.com/content/user_manuals/3110-0002-0001%20User%20Guide.pdf">User Guide</a> */
 @Config
+@Configurable
 public class PinpointOdo extends Localizer {
 
     // Both of these offsets are in CM. The tracking point of the robot is the center of the wheelbase

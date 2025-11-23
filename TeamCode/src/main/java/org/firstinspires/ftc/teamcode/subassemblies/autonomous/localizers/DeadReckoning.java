@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 import java.util.ArrayList;
 
 @Config
+@Configurable
 public class DeadReckoning extends Localizer {
 
     public static double CM_PER_REVOLUTION = 0;

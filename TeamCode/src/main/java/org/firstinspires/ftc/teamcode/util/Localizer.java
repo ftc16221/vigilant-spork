@@ -2,10 +2,12 @@ package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @Config
+@Configurable
 public abstract class Localizer extends Subassembly {
 
     public static double LINEAR_SPEED_TOLERANCE = 3.0;

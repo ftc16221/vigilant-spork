@@ -6,6 +6,7 @@ import static java.lang.Math.sin;
 import static java.lang.Math.toRadians;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
 @Config
+@Configurable
 public class ThreeWheelOdo extends Localizer {
 
     public static double TRACK_WIDTH = 0; // distance between the middle of the wheels TODO: find val

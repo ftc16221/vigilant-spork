@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -33,6 +34,7 @@ import javax.annotation.CheckForNull;
  * This class keeps track of the robot's position and handles all autonomous movement
  */
 @Config
+@Configurable
 public class PoseTracker extends Subassembly {
 
     // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)

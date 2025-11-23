@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Autonomous(group = Global.OpModeGroup.EXPLORATORY)
 @Config
+@Configurable
 public class TheClankerFightsBack extends OpMode {
     public static double X_P = -0.01;
     public static double X_I = 0;

@@ -19,10 +19,10 @@ public class MotorConfigTest extends LinearOpMode {
     public void runOpMode() {
         MecDriveBase driveBase = new MecDriveBase(this);
 
-        DcMotor leftFront = driveBase.getLeftFront();
-        DcMotor rightFront = driveBase.getRightFront();
-        DcMotor leftRear = driveBase.getLeftRear();
-        DcMotor rightRear = driveBase.getRightRear();
+        DcMotor leftFront = driveBase.leftFront;
+        DcMotor rightFront = driveBase.rightFront;
+        DcMotor leftRear = driveBase.leftRear;
+        DcMotor rightRear = driveBase.rightRear;
 
         DcMotor[] motors = new DcMotor[]{ leftFront, rightFront, leftRear, rightRear };
 

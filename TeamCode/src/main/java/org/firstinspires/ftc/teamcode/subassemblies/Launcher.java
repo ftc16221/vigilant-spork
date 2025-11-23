@@ -12,8 +12,11 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.CircularDoubleArray;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
+
+import java.util.ArrayList;
 
 @Config
 public class Launcher extends Subassembly {
@@ -27,30 +30,22 @@ public class Launcher extends Subassembly {
     public static PIDFCoefficients PIDF_COEFFICIENTS = new PIDFCoefficients(0.0, 0.0, 0.0, 0.0);
 
     public static Boolean ENABLE_TUNING_MODE = false;
-    public static Boolean ENABLE_BALANCING = true;
 
     public static double ENCODER_RES = 28.0; // PPR
     public static int NUM_OF_VELOCITY_SAMPLES = 5;
 
-    public static double BALANCE_THRESHOLD = 100.0; // max difference in flywheel velocity (RPM) before balancing
-    public static double PLATEAU_THRESHOLD = 10.0; // max acceleration (RPM/sec (cursed unit i know)) for a flywheel to be considered spinning up
-
     public static DcMotorSimple.Direction LEFT_FLYWHEEL_DIRECTION = DcMotorSimple.Direction.REVERSE;
     public static DcMotorSimple.Direction RIGHT_FLYWHEEL_DIRECTION = DcMotorSimple.Direction.FORWARD;
+
+    public static double LR_DIFF_WARNING_THRESHOLD = 50.0;
+    public static double TARGET_DIFF_WARNING_THRESHOLD = 100.0;
 
     private final DcMotorEx leftFlywheel;
     private final DcMotorEx rightFlywheel;
 
+    private Double targetVel = 0.0;
     private final CircularDoubleArray leftVelArray;
     private final CircularDoubleArray rightVelArray;
-
-    private double targetVel = 0;
-    private double prevLeftVel = 0;
-    private double prevRightVel = 0;
-    private double leftAccel = 0;
-    private double rightAccel = 0;
-
-    private final ElapsedTime timer;
 
     public Launcher(OpMode opMode) {
         super (opMode, "Launcher");
@@ -64,57 +59,49 @@ public class Launcher extends Subassembly {
 
         leftVelArray = new CircularDoubleArray(NUM_OF_VELOCITY_SAMPLES);
         rightVelArray = new CircularDoubleArray(NUM_OF_VELOCITY_SAMPLES);
-
-        timer = new ElapsedTime();
     }
 
     public void update() {
-        double dt = timer.seconds(); // change in time
-        timer.reset();
 
         // update flywheel velocities
         leftVelArray.addValue(toRPM(leftFlywheel.getVelocity(), ENCODER_RES));
         rightVelArray.addValue(toRPM(rightFlywheel.getVelocity(), ENCODER_RES));
 
-        double currentLeftVel = getLeftVelocity();
-        double currentRightVel = getRightVelocity();
+        broadcastWarnings();
+    }
 
-        if (dt > 0) { // avoid unlikely divide by zero
-            leftAccel = Math.abs((currentLeftVel - prevLeftVel) / dt);
-            rightAccel = Math.abs((currentRightVel - prevRightVel) / dt);
+    private void broadcastWarnings() {
+
+        double currentLeftVel = leftVelArray.getAverage();
+        double currentRightVel = rightVelArray.getAverage();
+
+        double flywheelLRVelDiff = currentLeftVel - currentRightVel;
+        if (Math.abs(flywheelLRVelDiff) > LR_DIFF_WARNING_THRESHOLD) {
+            String fasterFlywheel;
+            if (flywheelLRVelDiff > 0) {
+                fasterFlywheel = "left";
+            } else {
+                fasterFlywheel = "right";
+            }
+            String trendDirection;
+            if (fasterFlywheel.equals("left")) {
+                trendDirection = "left";
+            } else {
+                trendDirection = "right";
+            }
+            double absVelDiff = Math.abs(flywheelLRVelDiff);
+            telemetry.addData("Warning", "%s flywheel is %.0f RPM faster that the other. Artifacts launched may trend %s", fasterFlywheel, absVelDiff, trendDirection);
         }
 
-        prevLeftVel = currentLeftVel;
-        prevRightVel = currentRightVel;
-
-        if (targetVel != 0 && ENABLE_BALANCING) {
-            balanceVel();
+        double flywheelTargetVelDiff = targetVel - getAverageVelocity();
+        if (Math.abs(flywheelTargetVelDiff) > flywheelLRVelDiff) {
+            int diffPercent = Math.toIntExact(Math.round((getAverageVelocity() / targetVel) * 100));
+            telemetry.addData("Warning", "current velocity is %.0f% of target");
         }
     }
 
     public void launch() {
         // TODO
-    }
-
-    /** balances flywheel speeds so if one cannot reach max velocity it will bring the other's down to match the slower velocity */
-    private void balanceVel() {
-        double leftVel = Math.abs(getLeftVelocity());
-        double rightVel = Math.abs(getRightVelocity());
-        double difference = Math.abs(leftVel - rightVel);
-        if (difference < BALANCE_THRESHOLD) {
-            return; // not necessary to correct
-        }
-
-        boolean leftPlateaued = getLeftAcceleration() < PLATEAU_THRESHOLD;
-        boolean rightPlateaued = getRightAcceleration() < PLATEAU_THRESHOLD;
-
-        if (!leftPlateaued || !rightPlateaued) { // left or right have not plateaued in acceleration don't bother balancing
-            return;
-        }
-
-        double slowerVel = Math.min(leftVel, rightVel);
-        setTargetVelocity(slowerVel);
-        RobotLog.w("(Launcher) Substantial difference in flywheel velocity detected (L: %.0f, R: %.0f). Setting both flywheels to %.0f", leftVel, rightVel, slowerVel);
     }
 
     /** Spins up the flywheel launcher to the RPMs necessary to go the specified distance */
@@ -135,43 +122,10 @@ public class Launcher extends Subassembly {
     }
 
     /** gets current velocity in RPM of right flywheel */
-    public double getLeftVelocity() {
-        double leftRPM = leftVelArray.getAverage();
-        sendData("left flywheel velocity (RPM)", leftRPM);
-        return leftRPM;
-    }
-
-    /** gets current velocity in RPM of right flywheel */
-    public double getRightVelocity() {
-        double rightRPM = rightVelArray.getAverage();
-        sendData("right flywheel velocity (RPM)", rightRPM);
-        return rightRPM;
-    }
-
-    /** gets current velocity in RPM of both flywheels (averaged) */
     public double getAverageVelocity() {
-        double avgVel = (Math.abs(getLeftVelocity()) + Math.abs(getRightVelocity())) / 2;
-        sendData("current flywheel RPM", avgVel);
+        double avgVel = (leftVelArray.getAverage() + rightVelArray.getAverage()) / 2;
+        sendData("average flywheel velocity (RPM)", avgVel);
         return avgVel;
-    }
-
-    /** gets current acceleration in RPM of left flywheel */
-    public double getLeftAcceleration() {
-        sendData("left flywheel acceleration (RPM/s)", leftAccel);
-        return leftAccel;
-    }
-
-    /** gets current acceleration in RPM of right flywheel */
-    public double getRightAcceleration() {
-        sendData("right flywheel acceleration (RPM/s)", rightAccel);
-        return rightAccel;
-    }
-
-    /** gets current acceleration in RPM of both flywheels */
-    public double getAverageAcceleration() {
-        double avgAccel = (Math.abs(getLeftAcceleration() + Math.abs(getRightAcceleration())) / 2);
-        sendData("current flywheel acceleration (RPM/s)", avgAccel);
-        return avgAccel;
     }
 
     /** sets target RPM of the flywheel launcher */

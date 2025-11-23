@@ -11,9 +11,11 @@ import org.firstinspires.ftc.teamcode.util.Subassembly;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Config
@@ -31,6 +33,12 @@ public class Watchdog {
 
     private final MultipleTelemetry telemetry;
 
+    /** creates a watchdog object with the subassembly fields (public or private) automatically detected within opMode */
+    public Watchdog(OpMode opMode) {
+        this(opMode, findSubassemblies(opMode));
+    }
+
+    /** creates a watchdog object with the supplied subassemblies. Use if subassemblies are not declared as a field, or a subassembly should be excluded */
     public Watchdog(OpMode opMode, Subassembly... subassemblies) {
         this.opMode = opMode;
         this.subassemblies = subassemblies;
@@ -82,6 +90,24 @@ public class Watchdog {
             }
             return !stillActive;
         });
+    }
+
+    private static Subassembly[] findSubassemblies(OpMode opMode) {
+        List<Subassembly> subassemblies = new ArrayList<>();
+
+        for (Field field : opMode.getClass().getDeclaredFields()) {
+            if (Subassembly.class.isAssignableFrom(field.getType())) { // find fields that inherit subassembly
+                field.setAccessible(true); // allow access to both private and public fields
+                try {
+                    Object value = field.get(opMode); // gets the value of the field (ie. MecDriveBase instance or null if it hasn't been initialized)
+                    if (value != null) {
+                        subassemblies.add((Subassembly) value);
+                    }
+                } catch (IllegalAccessException ignored) {}
+            }
+        }
+
+        return subassemblies.toArray(new Subassembly[0]);
     }
 
     public void log(String message) {

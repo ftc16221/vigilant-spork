@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
@@ -35,6 +36,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     PinpointOdo pinpointOdo;
     Drawing drawing;
 
+    Watchdog watchdog;
+
     private boolean autoMovementEnabled = false;
     private boolean goalTrackingEnabled = false;
 
@@ -47,6 +50,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         poseTracker = new PoseTracker(this, Global.lastPose);
         underglow = new Underglow(this);
         drawing = new Drawing(poseTracker);
+
+        watchdog = new Watchdog(this);
 
         driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 

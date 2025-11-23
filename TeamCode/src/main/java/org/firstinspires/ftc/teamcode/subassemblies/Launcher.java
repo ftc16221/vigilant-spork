@@ -9,14 +9,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.CircularDoubleArray;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
-
-import java.util.ArrayList;
 
 @Config
 public class Launcher extends Subassembly {
@@ -85,31 +80,35 @@ public class Launcher extends Subassembly {
             }
             String trendDirection;
             if (fasterFlywheel.equals("left")) {
-                trendDirection = "left";
-            } else {
                 trendDirection = "right";
+            } else {
+                trendDirection = "left";
             }
             double absVelDiff = Math.abs(flywheelLRVelDiff);
-            telemetry.addData("Warning", "%s flywheel is %.0f RPM faster that the other. Artifacts launched may trend %s", fasterFlywheel, absVelDiff, trendDirection);
+            telemetry.addData("Warning", "%s flywheel is %.0f RPM faster than the other. Artifacts launched may trend %s", fasterFlywheel, absVelDiff, trendDirection);
         }
 
+        /* TODO: test this code so it can be uncommented in main branch
         double flywheelTargetVelDiff = targetVel - getAverageVelocity();
-        if (Math.abs(flywheelTargetVelDiff) > flywheelLRVelDiff) {
-            int diffPercent = Math.toIntExact(Math.round((getAverageVelocity() / targetVel) * 100));
-            telemetry.addData("Warning", "current velocity is %.0f% of target");
+        if (Math.abs(flywheelTargetVelDiff) > TARGET_DIFF_WARNING_THRESHOLD) {
+            if (targetVel != 0) {
+                int diffPercent = Math.toIntExact(Math.round((getAverageVelocity() / targetVel) * 100));
+                telemetry.addData("Warning", "current velocity is %.0f% of target", diffPercent);
+            }
         }
+        */
     }
 
     public void launch() {
         // TODO
     }
 
-    /** Spins up the flywheel launcher to the RPMs necessary to go the specified distance */
+    /** spins up the flywheel launcher to the RPMs necessary to go the specified distance */
     public void spinUp(Double distanceCM) {
         setTargetVelocity(calculateTargetVelocity(distanceCM));
     }
 
-    /** Spins down the flywheel launcher */
+    /** spins down the flywheel launcher */
     public void spinDown() {
         setTargetVelocity(0);
     }
@@ -121,7 +120,7 @@ public class Launcher extends Subassembly {
         return calculatedVel;
     }
 
-    /** gets current velocity in RPM of right flywheel */
+    /** gets the current average velocity in RPM of both left and flywheels */
     public double getAverageVelocity() {
         double avgVel = (leftVelArray.getAverage() + rightVelArray.getAverage()) / 2;
         sendData("average flywheel velocity (RPM)", avgVel);

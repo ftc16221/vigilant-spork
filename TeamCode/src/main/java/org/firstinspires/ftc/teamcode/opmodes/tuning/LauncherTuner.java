@@ -70,7 +70,7 @@ public class LauncherTuner extends OpMode {
 
         TARGET_RPM = MathKt.clamp(TARGET_RPM, -MAX_RPM, MAX_RPM);
         if (TARGET_RPM != prevTargetRPM) {
-            launcher.setTargetRPM(TARGET_RPM);
+            launcher.setTargetVelocity(TARGET_RPM);
         }
         prevTargetRPM = TARGET_RPM;
 
@@ -81,7 +81,7 @@ public class LauncherTuner extends OpMode {
 
         telemetryA.addData("Max RPM", MAX_RPM);
         telemetryA.addData("Target RPM", TARGET_RPM);
-        telemetryA.addData("Actual RPM", launcher.getCurrentRPM());
+        telemetryA.addData("Actual RPM", launcher.getAverageVelocity());
         if (useLimelight) {
             limelightCam.update();
             telemetryA.addData("Distance from goal", limelightCam.getDistanceFromTag(GOAL_APRILTAG_ID));

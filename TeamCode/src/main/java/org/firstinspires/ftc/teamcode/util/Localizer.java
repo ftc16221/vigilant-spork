@@ -16,13 +16,11 @@ public abstract class Localizer extends Subassembly {
 
     protected final OpMode opMode;
     protected final HardwareMap hardwareMap;
-    protected final MultipleTelemetry telemetry;
 
     public Localizer(OpMode opMode, String name) {
         super(opMode, name);
         this.opMode = opMode;
         this.hardwareMap = opMode.hardwareMap;
-        this.telemetry = super.getTelemetry();
     }
 
     public Pose getPose() { return pose; }

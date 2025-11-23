@@ -78,7 +78,6 @@ public class PoseTracker extends Subassembly {
 
     public PoseTracker(OpMode opMode, Pose startingPose) {
         super(opMode, "PoseTracker");
-        telemetry = getTelemetry();
         dashboard = FtcDashboard.getInstance();
         this.startingPose = startingPose;
         currentPose = startingPose;

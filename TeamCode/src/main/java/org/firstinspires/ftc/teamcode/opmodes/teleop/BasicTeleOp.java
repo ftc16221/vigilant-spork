@@ -56,13 +56,15 @@ public class BasicTeleOp extends OpMode {
 
         targetRPM = MathKt.clamp(targetRPM, -MAX_RPM, MAX_RPM);
         if (targetRPM != prevTargetRPM) {
-            launcher.setTargetRPM(targetRPM);
+            launcher.setTargetVelocity(targetRPM);
         }
         prevTargetRPM = targetRPM;
 
+        launcher.update();
+
         telemetry.addData("Max RPM", MAX_RPM);
         telemetry.addData("Target RPM", targetRPM);
-        telemetry.addData("Actual RPM", launcher.getCurrentRPM());
+        telemetry.addData("Actual RPM", launcher.getAverageVelocity());
         // UPDATES
         telemetry.update();
     }

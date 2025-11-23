@@ -32,7 +32,7 @@ public class Launcher extends Subassembly {
     public static double ENCODER_RES = 28.0; // PPR
     public static int NUM_OF_VELOCITY_SAMPLES = 5;
 
-    public static double BALANCE_THRESHOLD = 20.0; // max difference in flywheel velocity (RPM) before balancing
+    public static double BALANCE_THRESHOLD = 100.0; // max difference in flywheel velocity (RPM) before balancing
     public static double PLATEAU_THRESHOLD = 10.0; // max acceleration (RPM/sec (cursed unit i know)) for a flywheel to be considered spinning up
 
     public static DcMotorSimple.Direction LEFT_FLYWHEEL_DIRECTION = DcMotorSimple.Direction.REVERSE;
@@ -56,7 +56,7 @@ public class Launcher extends Subassembly {
         super (opMode, "Launcher");
 
         leftFlywheel = (DcMotorEx) opMode.hardwareMap.dcMotor.get("left_flywheel");
-        rightFlywheel = (DcMotorEx) opMode.hardwareMap.dcMotor.get("left_flywheel");
+        rightFlywheel = (DcMotorEx) opMode.hardwareMap.dcMotor.get("right_flywheel");
         leftFlywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFlywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftFlywheel.setDirection(LEFT_FLYWHEEL_DIRECTION);
@@ -179,8 +179,10 @@ public class Launcher extends Subassembly {
         this.targetVel = targetVel;
         if (ENABLE_TUNING_MODE) {
             leftFlywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PIDF_COEFFICIENTS);
+            rightFlywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, PIDF_COEFFICIENTS);
         }
         leftFlywheel.setVelocity(toTicksPerSec(targetVel, ENCODER_RES));
+        rightFlywheel.setVelocity(toTicksPerSec(targetVel, ENCODER_RES));
         sendData("target flywheel velocity (RPM)", targetVel);
     }
 }

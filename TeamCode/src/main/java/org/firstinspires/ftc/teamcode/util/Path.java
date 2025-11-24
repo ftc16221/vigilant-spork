@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
+package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.util.Pose;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 
 public class Path {
 

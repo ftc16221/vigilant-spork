@@ -5,8 +5,6 @@ import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Path;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 
 @Config

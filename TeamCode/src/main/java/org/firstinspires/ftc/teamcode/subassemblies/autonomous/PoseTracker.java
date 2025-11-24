@@ -245,7 +245,7 @@ public class PoseTracker extends Subassembly {
         telemetry.addLine();
     }
 
-    boolean isAtTarget() {
+    public boolean isAtTarget() {
         double xPosError = currentPose.x - targetPose.x;
         double yPosError = currentPose.y - targetPose.y;
         double hPosError = currentPose.h - targetPose.h;

@@ -13,6 +13,9 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.util.CircularDoubleArray;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Config
 public class Launcher extends Subassembly {
 
@@ -57,15 +60,14 @@ public class Launcher extends Subassembly {
     }
 
     public void update() {
-
         // update flywheel velocities
         leftVelArray.addValue(toRPM(leftFlywheel.getVelocity(), ENCODER_RES));
         rightVelArray.addValue(toRPM(rightFlywheel.getVelocity(), ENCODER_RES));
-
-        broadcastWarnings();
     }
 
-    private void broadcastWarnings() {
+    @Override
+    public List<String> findIssues() {
+        List<String> issues = new ArrayList<>();
 
         double currentLeftVel = leftVelArray.getAverage();
         double currentRightVel = rightVelArray.getAverage();
@@ -85,18 +87,18 @@ public class Launcher extends Subassembly {
                 trendDirection = "left";
             }
             double absVelDiff = Math.abs(flywheelLRVelDiff);
-            telemetry.addData("Warning", "%s flywheel is %.0f RPM faster than the other. Artifacts launched may trend %s", fasterFlywheel, absVelDiff, trendDirection);
+            issues.add(String.format("%s flywheel is %.0f RPM faster than the other. Artifacts launched may trend %s", fasterFlywheel, absVelDiff, trendDirection));
         }
 
-        /* TODO: test this code so it can be uncommented in main branch
         double flywheelTargetVelDiff = targetVel - getAverageVelocity();
         if (Math.abs(flywheelTargetVelDiff) > TARGET_DIFF_WARNING_THRESHOLD) {
             if (targetVel != 0) {
                 int diffPercent = Math.toIntExact(Math.round((getAverageVelocity() / targetVel) * 100));
-                telemetry.addData("Warning", "current velocity is %.0f% of target", diffPercent);
+                issues.add(String.format("current velocity is %d%% of target", diffPercent));
             }
         }
-        */
+
+        return issues;
     }
 
     public void launch() {
@@ -112,6 +114,8 @@ public class Launcher extends Subassembly {
     public void spinDown() {
         setTargetVelocity(0);
     }
+
+    public void stop() { spinDown(); }
 
     /** returns the necessary velocity in RPM to launch the specified distance */
     public double calculateTargetVelocity(double distanceCM) {

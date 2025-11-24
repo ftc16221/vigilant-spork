@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import java.util.Set;
+import java.util.List;
 
 public abstract class Subassembly {
 
@@ -35,7 +35,7 @@ public abstract class Subassembly {
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
-    public Set<String> checkIssues() {
+    public List<String> findIssues() {
         return null;
     }
 }

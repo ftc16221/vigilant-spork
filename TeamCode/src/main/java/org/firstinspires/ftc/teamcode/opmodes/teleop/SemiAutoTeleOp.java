@@ -104,4 +104,10 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         telemetry.update();
         drawing.update();
     }
+
+    @Override
+    public void stop() {
+        poseTracker.stop();
+        watchdog.stop();
+    }
 }

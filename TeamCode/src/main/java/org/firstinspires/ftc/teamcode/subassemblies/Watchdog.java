@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.subassemblies;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.util.Subassembly;
@@ -25,7 +27,7 @@ public class Watchdog {
 
     public static boolean WRITE_TO_LOG_FILE = false;
     public static String LOG_FILE_PATHNAME = ""; // TODO: find spot for log file
-    public static String LOG_FILE_NAME = "watchdog.log";
+    public static String LOG_FILE_NAME = "watchdog";
 
     private final File logFile;
     private FileWriter logWriter = null;
@@ -48,7 +50,7 @@ public class Watchdog {
         this.subassemblies = subassemblies;
 
         if (WRITE_TO_LOG_FILE) {
-            logFile = new File(LOG_FILE_PATHNAME + LOG_FILE_NAME); // create reference to target file
+            logFile = new File(LOG_FILE_PATHNAME + generateFileName()); // create reference to target file
             if (logFile.getParentFile() != null) logFile.getParentFile().mkdirs(); // ensure parent directories are existent
 
             try {
@@ -66,7 +68,7 @@ public class Watchdog {
         for (Subassembly subassembly : subassemblies) {
             subassemblyStrings.add(subassembly.getClass().getTypeName());
         }
-        log("Watchdog initialized with the following subassembly types: " + subassemblyStrings);
+        logInfo("Watchdog initialized with the following subassembly types: " + subassemblyStrings);
     }
 
     public void update() {
@@ -89,7 +91,7 @@ public class Watchdog {
             // add new issues
             if (!prevNormalizedIssues.contains(normalizedIssue)) {
                 prevNormalizedIssues.add(normalizedIssue);
-                log("ISSUE DISCOVERED: " + issue);
+                logError("ISSUE DISCOVERED: " + issue);
             }
 
             // add all issues to telemetry
@@ -100,7 +102,7 @@ public class Watchdog {
         prevNormalizedIssues.removeIf(i -> {
             boolean stillActive = normalizedIssues.contains(i); // check if our tracked issues were polled this cycle
             if (!stillActive) {
-                log("ISSUE RESOLVED: " + i);
+                logError("ISSUE RESOLVED: " + i);
             }
             return !stillActive;
         });
@@ -124,8 +126,20 @@ public class Watchdog {
         return subassemblies.toArray(new Subassembly[0]);
     }
 
+    private String generateFileName() {
+        String logFilePrefix;
+        if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
+            logFilePrefix = "auto";
+        } else if (opMode.getClass().isAnnotationPresent(TeleOp.class)) {
+            logFilePrefix = "teleop";
+        } else {
+            logFilePrefix = "opmode";
+        }
+
+        return LOG_FILE_NAME + "_" + logFilePrefix + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date()) + ".log";
+    }
+
     public void log(String message) {
-        RobotLog.e(message);
         if (logWriter != null) {
             try {
                 logWriter.write(dateFormat.format(new Date()) + " " + message + "\n");
@@ -134,6 +148,16 @@ public class Watchdog {
                 RobotLog.e("Failed writing to log: ", e);
             }
         }
+    }
+
+    public void logError(String message) {
+        RobotLog.e(message);
+        log(message);
+    }
+
+    public void logInfo(String message) {
+        RobotLog.i(message);
+        log(message);
     }
 
     public void stop() {

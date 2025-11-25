@@ -102,8 +102,4 @@ public class LimelightCam extends Localizer {
     public List<LLResultTypes.FiducialResult> getFiducialResults() {
         return result.getFiducialResults();
     }
-
-    public enum Mode {
-        APRILTAG, ARTIFACT_DETECTOR, PERSON_DETECTOR
-    }
 }

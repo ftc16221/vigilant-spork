@@ -30,9 +30,9 @@ public class Watchdog {
     public static String LOG_FILE_NAME = "watchdog";
 
     private final File logFile;
-    private FileWriter logWriter = null;
+    private static FileWriter logWriter = null;
     private final Set<String> prevNormalizedIssues = new HashSet<>();
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 
     private final OpMode opMode;
     private final Subassembly[] subassemblies;
@@ -51,7 +51,7 @@ public class Watchdog {
 
         if (WRITE_TO_LOG_FILE) {
             logFile = new File(LOG_FILE_PATHNAME + generateFileName()); // create reference to target file
-            if (logFile.getParentFile() != null) logFile.getParentFile().mkdirs(); // ensure parent directories are existent
+            if (logFile.getParentFile() != null) logFile.getParentFile().mkdirs(); // ensure parent directories exist
 
             try {
                 logWriter = new FileWriter(logFile, true);
@@ -139,7 +139,7 @@ public class Watchdog {
         return LOG_FILE_NAME + "_" + logFilePrefix + "_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date()) + ".log";
     }
 
-    public void log(String message) {
+    public static void log(String message) {
         if (logWriter != null) {
             try {
                 logWriter.write(dateFormat.format(new Date()) + " " + message + "\n");
@@ -150,12 +150,12 @@ public class Watchdog {
         }
     }
 
-    public void logError(String message) {
+    public static void logError(String message) {
         RobotLog.e(message);
         log(message);
     }
 
-    public void logInfo(String message) {
+    public static void logInfo(String message) {
         RobotLog.i(message);
         log(message);
     }
@@ -167,6 +167,7 @@ public class Watchdog {
             } catch (IOException e) {
                 RobotLog.e("Failed closing log file", e);
             }
+            logWriter = null;
         }
     }
 

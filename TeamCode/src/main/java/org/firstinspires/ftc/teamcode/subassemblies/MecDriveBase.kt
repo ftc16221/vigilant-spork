@@ -5,10 +5,12 @@ import com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.Gamepad
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit
 import org.firstinspires.ftc.teamcode.util.Subassembly
 import org.firstinspires.ftc.teamcode.util.log
 import org.firstinspires.ftc.teamcode.util.powerCurve
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.max
 
 class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
@@ -45,6 +47,30 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
         val rightX = gamepad.right_stick_x.toDouble()
 
         moveRobot(leftX, leftY, rightX)
+    }
+
+    override fun findIssues(): List<String> {
+        val issues = mutableListOf<String>()
+
+        val motorCurrents = ArrayList<Double>();
+        var sum = 0.0
+        for (motor in motors) {
+            val current = motor.getCurrent(CurrentUnit.AMPS)
+            motorCurrents.add(current)
+            sum += current
+        }
+        val avgCurrent = sum / motorCurrents.size
+        for (i in 0..<motors.size) {
+            val deviation = motorCurrents[i] - avgCurrent
+            if (deviation.absoluteValue < 3) break
+            val motorName = motors[i].deviceName
+            if (deviation > 0) {
+                issues.add("$motorName driveBase motor has a current ${deviation.absoluteValue} amps higher than other motors, and is possibly stalled")
+            } else {
+                issues.add("$motorName driveBase motor has a current ${deviation.absoluteValue} amps lower than other motors, and may be disconnected (physically or electronically)")
+            }
+        }
+        return issues
     }
 
     /**

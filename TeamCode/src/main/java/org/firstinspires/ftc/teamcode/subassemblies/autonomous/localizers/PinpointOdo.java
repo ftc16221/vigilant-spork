@@ -3,12 +3,15 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 import static org.firstinspires.ftc.teamcode.util.MathKt.normalize;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
-import org.firstinspires.ftc.teamcode.util.drivers.GoBildaPinpointDriver;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** <a href="https://www.gobilda.com/content/user_manuals/3110-0002-0001%20User%20Guide.pdf">User Guide</a> */
 @Config
@@ -20,7 +23,6 @@ public class PinpointOdo extends Localizer {
     public static GoBildaPinpointDriver.GoBildaOdometryPods POD_TYPE = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
     public static GoBildaPinpointDriver.EncoderDirection X_DIRECTION = GoBildaPinpointDriver.EncoderDirection.FORWARD;
     public static GoBildaPinpointDriver.EncoderDirection Y_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED;
-
 
     public final GoBildaPinpointDriver pinpoint;
 
@@ -58,6 +60,15 @@ public class PinpointOdo extends Localizer {
         pinpoint.setPosX(newPose.x, Global.DISTANCE_UNIT);
         pinpoint.setPosY(newPose.y, Global.DISTANCE_UNIT);
         pinpoint.setHeading(newPose.h, Global.ANGLE_UNIT);
+    }
+
+    @Override public List<String> findIssues() {
+        List<String> issues = new ArrayList<>();
+        GoBildaPinpointDriver.DeviceStatus status = pinpoint.getDeviceStatus();
+        if (status != GoBildaPinpointDriver.DeviceStatus.READY) {
+            issues.add("Pinpoint status is " + status.name() + ", odometry functionality is likely very limited");
+        }
+        return issues;
     }
 
     public void recalibrate() {

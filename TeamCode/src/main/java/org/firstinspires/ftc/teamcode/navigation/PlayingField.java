@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.navigation;
 
-import static org.firstinspires.ftc.teamcode.util.Conversions.mmPerInch;
-
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 
 import java.util.Date;
 import java.util.List;
+
+import static org.firstinspires.ftc.teamcode.util.Conversions.mmPerInch;
 
 public class PlayingField {
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.

@@ -34,25 +34,26 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-/*
- * This OpMode illustrates various ways in which telemetry can be
+/**
+ * {@link ConceptTelemetry} illustrates various ways in which telemetry can be
  * transmitted from the robot controller to the driver station. The sample illustrates
  * numeric and text data, formatted output, and optimized evaluation of expensive-to-acquire
- * information. The telemetry log is illustrated by scrolling a poem
+ * information. The telemetry {@link Telemetry#log() log} is illustrated by scrolling a poem
  * to the driver station.
  *
- * Also see the Telemetry javadocs.
+ * @see Telemetry
  */
 @TeleOp(name = "Concept: Telemetry", group = "Concept")
 @Disabled
 public class ConceptTelemetry extends LinearOpMode  {
-    /** Keeps track of the line of the poem which is to be emitted next */
+    /** keeps track of the line of the poem which is to be emitted next */
     int poemLine = 0;
 
-    /** Keeps track of how long it's been since we last emitted a line of poetry */
+    /** keeps track of how long it's been since we last emitted a line of poetry */
     ElapsedTime poemElapsed = new ElapsedTime();
 
     static final String[] poem = new String[] {
@@ -93,10 +94,10 @@ public class ConceptTelemetry extends LinearOpMode  {
         // The interval between lines of poetry, in seconds
         double sPoemInterval = 0.6;
 
-        /*
+        /**
          * Wait until we've been given the ok to go. For something to do, we emit the
          * elapsed time as we sit here and wait. If we didn't want to do anything while
-         * we waited, we would just call waitForStart().
+         * we waited, we would just call {@link #waitForStart()}.
          */
         while (!isStarted()) {
             telemetry.addData("time", "%.1f seconds", opmodeRunTime.seconds());
@@ -106,10 +107,10 @@ public class ConceptTelemetry extends LinearOpMode  {
 
         // Ok, we've been given the ok to go
 
-        /*
+        /**
          * As an illustration, the first line on our telemetry display will display the battery voltage.
          * The idea here is that it's expensive to compute the voltage (at least for purposes of illustration)
-         * so you don't want to do it unless the data is _actually_ going to make it to the
+         * so you don't want to do it unless the data is <em>actually</em> going to make it to the
          * driver station (recall that telemetry transmission is throttled to reduce bandwidth use.
          * Note that getBatteryVoltage() below returns 'Infinity' if there's no voltage sensor attached.
          *
@@ -121,7 +122,7 @@ public class ConceptTelemetry extends LinearOpMode  {
             }
             });
 
-        // Reset to keep some timing stats for the post-'start' part of the OpMode
+        // Reset to keep some timing stats for the post-'start' part of the opmode
         opmodeRunTime.reset();
         int loopCount = 1;
 
@@ -145,13 +146,13 @@ public class ConceptTelemetry extends LinearOpMode  {
                     .addData("x", gamepad1.right_stick_x)
                     .addData("y", gamepad1.right_stick_y);
 
-            /*
+            /**
              * Transmit the telemetry to the driver station, subject to throttling.
-             * See the documentation for Telemetry.getMsTransmissionInterval() for more information.
+             * @see Telemetry#getMsTransmissionInterval()
              */
             telemetry.update();
 
-            // Update loop info
+            /** Update loop info and play nice with the rest of the {@link Thread}s in the system */
             loopCount++;
         }
     }

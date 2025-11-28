@@ -1,4 +1,4 @@
-/* Copyright (c) 2024 FIRST. All rights reserved.
+/* Copyright (c) 2017 FIRST. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted (subject to the limitations in the disclaimer below) provided that
@@ -35,41 +35,51 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 /*
- * This OpMode demonstrates how to use a digital channel.
+ * This is an example LinearOpMode that shows how to use
+ * a REV Robotics Touch Sensor.
  *
- * The OpMode assumes that the digital channel is configured with a name of "digitalTouch".
+ * It assumes that the touch sensor is configured with a name of "sensor_digital".
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
+ * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list.
  */
-@TeleOp(name = "Sensor: digital channel", group = "Sensor")
+@TeleOp(name = "Sensor: Digital touch", group = "Sensor")
 @Disabled
 public class SensorDigitalTouch extends LinearOpMode {
-    DigitalChannel digitalTouch;  // Digital channel Object
+    /**
+     * The REV Robotics Touch Sensor
+     * is treated as a digital channel.  It is HIGH if the button is unpressed.
+     * It pulls LOW if the button is pressed.
+     *
+     * Also, when you connect a REV Robotics Touch Sensor to the digital I/O port on the
+     * Expansion Hub using a 4-wire JST cable, the second pin gets connected to the Touch Sensor.
+     * The lower (first) pin stays unconnected.*
+     */
+
+    DigitalChannel digitalTouch;  // Hardware Device Object
 
     @Override
     public void runOpMode() {
 
-        // get a reference to our touchSensor object.
-        digitalTouch = hardwareMap.get(DigitalChannel.class, "digitalTouch");
+        // get a reference to our digitalTouch object.
+        digitalTouch = hardwareMap.get(DigitalChannel.class, "sensor_digital");
 
+        // set the digital channel to input.
         digitalTouch.setMode(DigitalChannel.Mode.INPUT);
-        telemetry.addData("DigitalTouchSensorExample", "Press start to continue...");
-        telemetry.update();
 
         // wait for the start button to be pressed.
         waitForStart();
 
-        // while the OpMode is active, loop and read the digital channel.
+        // while the op mode is active, loop and read the light levels.
         // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
         while (opModeIsActive()) {
 
-            // button is pressed if value returned is LOW or false.
             // send the info back to driver station using telemetry function.
-            if (digitalTouch.getState() == false) {
-                telemetry.addData("Button", "PRESSED");
+            // if the digital channel returns true it's HIGH and the button is unpressed.
+            if (digitalTouch.getState() == true) {
+                telemetry.addData("Digital Touch", "Is Not Pressed");
             } else {
-                telemetry.addData("Button", "NOT PRESSED");
+                telemetry.addData("Digital Touch", "Is Pressed");
             }
 
             telemetry.update();

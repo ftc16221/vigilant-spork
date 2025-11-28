@@ -1,9 +1,0 @@
-{
-    "image": "ghcr.io/manchestermachinemakers/android-devcontainer:main",
-    "runArgs": [ "--init" ],
-    "extensions": [
-		"vscjava.vscode-java-pack",
-		"fwcd.kotlin",
-		"github.vscode-github-actions"
-	],
-}

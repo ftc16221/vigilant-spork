@@ -21,7 +21,7 @@ apply plugin: 'com.android.application'
 
 android {
 
-    compileSdkVersion 30
+    compileSdkVersion 29
 
     signingConfigs {
         release {
@@ -47,11 +47,14 @@ android {
         }
     }
 
+    aaptOptions {
+        noCompress "tflite"
+    }
+
     defaultConfig {
         signingConfig signingConfigs.debug
         applicationId 'com.qualcomm.ftcrobotcontroller'
-        minSdkVersion 24
-        //noinspection ExpiredTargetSdkVersion
+        minSdkVersion 23
         targetSdkVersion 28
 
         /**
@@ -83,6 +86,7 @@ android {
         versionName vName
     }
 
+    // Advanced user code might just want to use Vuforia directly, so we set up the libs as needed
     // http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html
     buildTypes {
         release {
@@ -95,6 +99,7 @@ android {
         debug {
             debuggable true
             jniDebuggable true
+            renderscriptDebuggable true
             ndk {
                 abiFilters "armeabi-v7a", "arm64-v8a"
             }
@@ -102,13 +107,10 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 
-    packagingOptions {
-        pickFirst '**/*.so'
-    }
     sourceSets.main {
         jni.srcDirs = []
         jniLibs.srcDir rootProject.file('libs')
@@ -117,4 +119,8 @@ android {
 }
 
 repositories {
+    flatDir {
+        dirs rootProject.file('libs')
+    }
 }
+

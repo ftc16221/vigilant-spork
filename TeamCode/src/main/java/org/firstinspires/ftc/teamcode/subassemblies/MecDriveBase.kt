@@ -60,7 +60,7 @@ class MecDriveBase(opMode: OpMode) : Subassembly(opMode, "Mecanum Drive Base") {
             sum += current
         }
         val avgCurrent = sum / motorCurrents.size
-        for (i in 0..<motors.size) {
+        for (i in 0..3) { // TODO: make this correctly iterate assuming motor.size can change
             val deviation = motorCurrents[i] - avgCurrent
             if (deviation.absoluteValue < 3) break
             val motorName = motors[i].deviceName

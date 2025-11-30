@@ -66,7 +66,7 @@ public class Watchdog {
 
         ArrayList<String> subassemblyStrings = new ArrayList<>();
         for (Subassembly subassembly : subassemblies) {
-            subassemblyStrings.add(subassembly.getClass().getTypeName());
+            subassemblyStrings.add(subassembly.getClass().getSimpleName());
         }
         logInfo("Watchdog initialized with the following subassembly types: " + subassemblyStrings);
     }

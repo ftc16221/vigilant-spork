@@ -135,8 +135,9 @@ public class PoseTracker extends Subassembly {
             if (tagIds.contains(21)) artifactPattern = ArtifactPattern.GPP;
             else if (tagIds.contains(22)) artifactPattern = ArtifactPattern.PGP;
             else if (tagIds.contains(23)) artifactPattern = ArtifactPattern.PPG;
-            Watchdog.logInfo(String.format("Pattern %s detected via obelisk apriltag", artifactPattern.name()));
-        }
+            if (artifactPattern != ArtifactPattern.UNKNOWN) {
+                Watchdog.logInfo(String.format("Pattern %s detected via obelisk apriltag", artifactPattern.name()));
+            }}
 
         // used for live tuning via FTC dashboard
         if (ENABLE_TUNING_MODE) {

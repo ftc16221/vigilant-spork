@@ -51,7 +51,7 @@ public class LimelightCam extends Localizer {
     public void update() {
         result = limelight3A.getLatestResult();
         if (result != null) {
-            if (result.isValid()) {
+            if (result.isValid() && !getDetectedTagIds().isEmpty()) {
                 // check if the new pose is close to the last ones, and if so use it, otherwise set pose to null
                 Pose newPose = new Pose(result.getBotpose(), DistanceUnit.METER);
                 poseArray.add(newPose);

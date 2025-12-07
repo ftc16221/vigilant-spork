@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathKt;
@@ -31,6 +32,7 @@ public class LauncherTuner extends OpMode {
     Launcher launcher;
     LimelightCam limelightCam;
     Servo intakeServo;
+    Watchdog watchdog;
 
     MultipleTelemetry telemetryA;
 
@@ -44,6 +46,8 @@ public class LauncherTuner extends OpMode {
         if (useLimelight) {
             limelightCam = new LimelightCam(this);
         }
+
+        watchdog = new Watchdog(this);
 
         telemetryA = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 

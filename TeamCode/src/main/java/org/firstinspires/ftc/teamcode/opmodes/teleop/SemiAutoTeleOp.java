@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -23,9 +25,9 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     public static Pose TARGET_POSE = new Pose(0, 0, 0);
     public static Pose TRACKING_POINT = new Pose(0, 0, 0);
 
-    public static Underglow.Color IDLE_COLOR = Underglow.Color.ALLIANCE;
-    public static Underglow.Color GOAL_TRACKING_COLOR = Underglow.Color.GREEN;
-    public static Underglow.Color AUTO_MOVEMENT_COLOR = Underglow.Color.WHITE;
+    public static int IDLE_COLOR = -1;
+    public static int GOAL_TRACKING_COLOR = Color.GREEN;
+    public static int AUTO_MOVEMENT_COLOR = Color.WHITE;
 
     MecDriveBase driveBase;
     Intake intake;

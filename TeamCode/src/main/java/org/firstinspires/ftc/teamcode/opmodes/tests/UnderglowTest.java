@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.tests;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -11,8 +13,8 @@ public class UnderglowTest extends OpMode {
 
     Underglow underglow;
 
-    Underglow.Color color = null;
-    Underglow.Color[] colors = {null, Underglow.Color.ALLIANCE, Underglow.Color.YELLOW, Underglow.Color.GREEN, Underglow.Color.WHITE, Underglow.Color.RAINBOW};
+    int color = Color.BLACK;
+    int[] colors = {Color.BLACK, -1, Color.YELLOW, Color.GREEN, Color.WHITE};
     int colorIndex = 0;
 
     boolean dpadWasPressed = false;
@@ -43,9 +45,9 @@ public class UnderglowTest extends OpMode {
         telemetry.addData("B", "Set Alliance RED");
         telemetry.addData("X", "Set Alliance BLUE");
         telemetry.addData("Y", "Set Alliance NULL (OFF)");
-        telemetry.addData("D-PAD UP(+)/DOWN(-)", "Cycle through NULL, ALLIANCE COLOR, YELLOW, GREEN, WHITE, and RAINBOW");
+        telemetry.addData("D-PAD UP(+)/DOWN(-)", "Cycle through BLACK, ALLIANCE COLOR, YELLOW, GREEN, and WHITE");
         telemetry.addLine();
-        telemetry.addData("Current Color", color == null ? "NULL" : color);
+        telemetry.addData("Current Color", color);
         telemetry.addData("Current Alliance", Global.alliance == null ? "NULL" : Global.alliance);
         telemetry.update();
     }

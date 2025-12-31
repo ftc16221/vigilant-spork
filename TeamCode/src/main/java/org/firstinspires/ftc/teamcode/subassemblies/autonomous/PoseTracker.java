@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 import static org.firstinspires.ftc.teamcode.util.LoggingKt.log;
 import static org.firstinspires.ftc.teamcode.util.MathKt.clamp;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -113,7 +115,7 @@ public class PoseTracker extends Subassembly {
             RobotLog.w("(PoseTracker) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
-            underglow.setColor(Underglow.Color.ORANGE);
+            underglow.setColor(Color.YELLOW);
             return;
         }
         assert currentPose != null;
@@ -122,7 +124,7 @@ public class PoseTracker extends Subassembly {
             RobotLog.w("(PoseTracker) targetPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
-            underglow.setColor(Underglow.Color.ORANGE);
+            underglow.setColor(Color.YELLOW);
             return;
         }
         assert targetPose != null;

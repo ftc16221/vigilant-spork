@@ -1,70 +1,67 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.hardware.sparkfun.SparkFunLEDStick;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
+
+import java.util.List;
 
 @Config
 public class Underglow extends Subassembly {
 
     public static boolean enabled = false;
 
-    RevBlinkinLedDriver underglow;
-    private Color lastColor;
+    List<SparkFunLEDStick> ledSticks;
+    private int lastColor;
 
     public Underglow(OpMode opMode) {
         super(opMode,"Underglow");
-        underglow = opMode.hardwareMap.get(RevBlinkinLedDriver.class, "underglow");
-        setColor(Color.ALLIANCE);
+
+        ledSticks = hardwareMap.getAll(SparkFunLEDStick.class);
+
+        setColorToAlliance();
     }
 
-    public void setColor(Color color) {
+    /**
+     * sets the color of all LED sticks
+     * @param color the desired color in hexadecimal (ie. green = 0xFF00FF00), for alliance use -1
+     */
+    public void setColor(int color) {
         if (color == lastColor) return; // only set strip color if it has changed
-        lastColor = color;
-
-        if (!enabled || color == null || Global.alliance == null) {
-            underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-            return;
+        else if (color == -1) {
+            setColorToAlliance();
+        } else {
+            for (SparkFunLEDStick ledStick : ledSticks) {
+                ledStick.setColor(color);
+            }
         }
+        lastColor = color;
+    }
 
-        switch (color) {
-            case ALLIANCE:
-                switch (Global.alliance) {
-                    case RED:
-                        underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_LAVA_PALETTE);
-                        break;
-                    case BLUE:
-                        underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_OCEAN_PALETTE);
-                        break;
-                }
-                break;
-            case ORANGE:
-                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.ORANGE);
-                break;
-            case YELLOW: // semi-autonomous unavailable
-                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
-                break;
-            case GREEN: // undefined
-                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-                break;
-            case WHITE: // autonomous active
-                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.WHITE);
-                break;
-            case RAINBOW: // used for debugging maybe?
-                underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_RAINBOW_PALETTE);
-                break;
+    public void setColorToAlliance() {
+        if (Global.alliance == Global.Alliance.BLUE) {
+            setColor(Color.BLUE);
+        } else if (Global.alliance == Global.Alliance.RED) {
+            setColor(Color.RED);
         }
     }
 
-    public enum Color {
-        ALLIANCE,
-        ORANGE,
-        YELLOW,
-        GREEN,
-        WHITE,
-        RAINBOW
+    public void disable() {
+        enabled = false;
+        for (SparkFunLEDStick ledStick : ledSticks) {
+            ledStick.turnAllOff();
+        }
+    }
+
+    public void enable() {
+        enabled = true;
+        for (SparkFunLEDStick ledStick : ledSticks) {
+            ledStick.setColor(lastColor);
+        }
     }
 }

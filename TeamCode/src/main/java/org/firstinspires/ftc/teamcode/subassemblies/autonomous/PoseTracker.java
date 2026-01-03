@@ -40,7 +40,6 @@ public class PoseTracker extends Subassembly {
     public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001;
     public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035;
 
-    public static boolean ENABLE_TUNING_MODE = false;
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
@@ -128,7 +127,7 @@ public class PoseTracker extends Subassembly {
         assert targetPose != null;
 
         // used for live tuning via FTC dashboard
-        if (ENABLE_TUNING_MODE) {
+        if (Global.ENABLE_TUNING_MODE) {
             xDrivePDController.setP(DRIVE_P);
             xDrivePDController.setD(DRIVE_D);
             yDrivePDController.setP(DRIVE_P);

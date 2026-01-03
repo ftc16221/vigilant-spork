@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp(group = Global.OpModeGroup.SETUP)
 @Config
-public class HomeSpindexer extends OpMode {
+public class AutoHomeSpindexer extends OpMode {
 
     public static double HOMING_POWER = 0.2;
     public static long RESET_DURATION = 100;

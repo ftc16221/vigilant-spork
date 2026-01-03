@@ -50,10 +50,10 @@ public class DeadReckoning extends Localizer {
                 )
         );
 
-        leftFront = driveBase.getLeftFront();
-        rightFront = driveBase.getRightFront();
-        leftRear = driveBase.getLeftRear();
-        rightRear = driveBase.getRightRear();
+        leftFront = driveBase.leftFront;
+        rightFront = driveBase.rightFront;
+        leftRear = driveBase.leftRear;
+        rightRear = driveBase.rightRear;
         motors = new DcMotor[]{leftFront, rightFront, leftRear, rightRear};
     }
 

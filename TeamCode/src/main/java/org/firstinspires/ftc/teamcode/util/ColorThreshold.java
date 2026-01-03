@@ -2,12 +2,12 @@ package org.firstinspires.ftc.teamcode.util;
 
 import android.graphics.Color;
 
-public class HSVThreshold {
+public class ColorThreshold {
 
     public float[] min = new float[3];
     public float[] max = new float[3];
 
-    public HSVThreshold(float minHue, float maxHue, float minSat, float maxSat, float minVal, float maxVal) {
+    public ColorThreshold(float minHue, float maxHue, float minSat, float maxSat, float minVal, float maxVal) {
         min[0] = minHue;
         max[0] = maxHue;
         min[1] = minSat;
@@ -16,7 +16,7 @@ public class HSVThreshold {
         max[2] = maxVal;
     }
 
-    public HSVThreshold(float hue, float sat, float val, float hueTolerance, float satValTolerance) {
+    public ColorThreshold(float hue, float sat, float val, float hueTolerance, float satValTolerance) {
         min[0] = addHue(hue, -hueTolerance);
         max[0] = addHue(hue, hueTolerance);
         min[1] = addValOrSat(sat, -satValTolerance);
@@ -25,7 +25,7 @@ public class HSVThreshold {
         max[2] = addValOrSat(val, satValTolerance);
     }
 
-    public HSVThreshold(int color1, int color2) {
+    public ColorThreshold(int color1, int color2) {
         float[] hsv1 = new float[3];
         float[] hsv2 = new float[3];
         Color.colorToHSV(color1, hsv1);
@@ -42,25 +42,31 @@ public class HSVThreshold {
     }
 
     public boolean isValid() {
-        boolean isValid = true;
+        boolean result = true;
         for (int i = 0; i < 3; i++) {
             if (min[i] > max[i]) {
-                isValid = false;
+                result = false;
                 break;
             }
         }
-        return isValid;
+        return result;
     }
 
-    public boolean isWithin(float hue, float sat, float val) {
+    public boolean isColorInRange(float hue, float sat, float val) {
         if(!isValid()) {
             return false;
         }
-        boolean isWithin = true;
-        if (hue < min[0] || hue > max[0]) isWithin = false;
-        if (val < min[1] || val > max[1]) isWithin = false;
-        if (sat < min[2] || sat > max[2]) isWithin = false;
-        return isWithin;
+        boolean result = true;
+        if (hue < min[0] || hue > max[0]) result = false;
+        if (val < min[1] || val > max[1]) result = false;
+        if (sat < min[2] || sat > max[2]) result = false;
+        return result;
+    }
+
+    public boolean isColorInRange(int color) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        return isColorInRange(hsv[0], hsv[1], hsv[2]);
     }
 
     private float addHue(float h1, float h2) {

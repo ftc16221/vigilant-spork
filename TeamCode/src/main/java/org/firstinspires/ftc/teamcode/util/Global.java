@@ -21,11 +21,11 @@ public class Global {
     }
 
     public static class OpModeGroup {
-        public static final String SET_ALLIANCE = "1 set alliance";
-        public static final String MAIN = "2 main";
-        public static final String DO_NOT_BREAK = "3 do not break";
-        public static final String TEST = "4 test";
-        public static final String TUNER = "5 tuner";
-        public static final String EXPLORATORY = "6 exploratory";
+        public static final String SETUP = "1 - Setup";
+        public static final String MAIN = "2 - Main";
+        public static final String DO_NOT_BREAK = "3 - Do not break";
+        public static final String TEST = "4 - Test";
+        public static final String TUNER = "5 - Tuner";
+        public static final String EXPLORATORY = "6 - Exploratory";
     }
 }

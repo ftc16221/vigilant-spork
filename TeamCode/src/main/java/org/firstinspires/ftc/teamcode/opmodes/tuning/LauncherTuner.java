@@ -81,7 +81,7 @@ public class LauncherTuner extends OpMode {
 
         telemetryA.addData("Max RPM", MAX_RPM);
         telemetryA.addData("Target RPM", TARGET_RPM);
-        telemetryA.addData("Actual RPM", launcher.getAverageVelocity());
+        telemetryA.addData("Actual RPM", launcher.getVelocity());
         if (useLimelight) {
             limelightCam.update();
             telemetryA.addData("Distance from goal", limelightCam.getDistanceFromTag(GOAL_APRILTAG_ID));

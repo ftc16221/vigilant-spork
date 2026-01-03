@@ -64,7 +64,7 @@ public class BasicTeleOp extends OpMode {
 
         telemetry.addData("Max RPM", MAX_RPM);
         telemetry.addData("Target RPM", targetRPM);
-        telemetry.addData("Actual RPM", launcher.getAverageVelocity());
+        telemetry.addData("Actual RPM", launcher.getVelocity());
         // UPDATES
         telemetry.update();
     }

@@ -10,14 +10,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit
 public class Global {
     public static Global.Alliance alliance = null;
     public static Pose lastPose = new Pose(0, 0, 0);
+
     public static final String PRESELECT_TELEOP = "SimpleTeleOp";
-    public static DistanceUnit DISTANCE_UNIT = DistanceUnit.CM;
-    public static AngleUnit ANGLE_UNIT = AngleUnit.DEGREES;
-    public static UnnormalizedAngleUnit UNNORMALIZED_ANGLE_UNIT = UnnormalizedAngleUnit.DEGREES; // should always be the same as ANGLE_UNIT
+    public static final DistanceUnit DISTANCE_UNIT = DistanceUnit.CM;
+    public static final AngleUnit ANGLE_UNIT = AngleUnit.DEGREES;
+    public static final UnnormalizedAngleUnit UNNORMALIZED_ANGLE_UNIT = UnnormalizedAngleUnit.DEGREES; // should always be the same as ANGLE_UNIT
+
+    public Motif motif = null;
 
     public enum Alliance {
         RED,
         BLUE
+    }
+
+    public enum Motif {
+        GPP, PGP, PPG
     }
 
     public static class OpModeGroup {
@@ -27,5 +34,16 @@ public class Global {
         public static final String TEST = "4 - Test";
         public static final String TUNER = "5 - Tuner";
         public static final String EXPLORATORY = "6 - Exploratory";
+    }
+
+    // singleton stuff :)
+    private static Global global;
+
+    private Global() { }
+
+    public static Global getInstance() {
+        if (global == null)
+            global = new Global();
+        return global;
     }
 }

@@ -83,5 +83,5 @@ public class HomeSpindexer extends OpMode {
         NOT_STARTED, MOVING_TO_HOME, HAS_REACHED_HOME, SETTING_HOME, HAS_SET_HOME
     }
 
-    private boolean isAtHome() { return spindexer.getDetectedColor() == Spindexer.DetectedColor.ORANGE; }
+    private boolean isAtHome() { return spindexer.getDetectedColor() == Spindexer.DetectedItem.HOME; }
 }

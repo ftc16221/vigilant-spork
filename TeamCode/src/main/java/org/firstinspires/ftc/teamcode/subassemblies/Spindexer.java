@@ -17,6 +17,9 @@ import org.firstinspires.ftc.teamcode.util.Subassembly;
 @Config
 public class Spindexer extends Subassembly {
 
+    public static boolean ENABLE_PASSIVE_REHOMING = false;
+    public static double REHOMING_THRESHOLD = 3; // encoder pulses
+
     public static double INTAKE_ANGLE = 0.0; // degrees
     public static double LAUNCHER_ANGLE = 180.0; // degrees TODO: find actual value
 
@@ -38,6 +41,8 @@ public class Spindexer extends Subassembly {
     private final DcMotor spindexerMotor;
     private final NormalizedColorSensor colorSensor;
     private final PIDFController spindexerPIDF = new PIDFController(kP, kI, kD, kF);;
+
+    private int encoderOffset = 0; // only used when passive re-homing is enabled
 
     private int targetPosition = 0;
     private double targetAngle = INTAKE_ANGLE;
@@ -92,14 +97,23 @@ public class Spindexer extends Subassembly {
                 alignForIntake();
             }
         }
+
+        if (ENABLE_PASSIVE_REHOMING) {
+            if (getDetectedColor() == DetectedColor.HOME_COLOR) {
+                int error = spindexerMotor.getCurrentPosition();
+                if (error >= REHOMING_THRESHOLD) {
+                    encoderOffset = -error;
+                }
+            }
+        }
     }
 
     public void stop() {
         spindexerMotor.setPower(0.0);
     }
 
-    public enum DetectedItem {
-        HOME, GREEN, PURPLE, UNKNOWN
+    public enum DetectedColor {
+        HOME_COLOR, GREEN, PURPLE, UNKNOWN
     }
 
     public enum Artifact {
@@ -194,16 +208,16 @@ public class Spindexer extends Subassembly {
         return spindexerMotor;
     }
 
-    public DetectedItem getDetectedColor() {
+    public DetectedColor getDetectedColor() {
         int rawColor = colorSensor.getNormalizedColors().toColor();
         if (HOME_COLOR_THRESHOLD.isColorInRange(rawColor)) {
-            return DetectedItem.HOME;
+            return DetectedColor.HOME_COLOR;
         } else if (GREEN_THRESHOLD.isColorInRange(rawColor)) {
-            return DetectedItem.GREEN;
+            return DetectedColor.GREEN;
         } else if (PURPLE_THRESHOLD.isColorInRange(rawColor)) {
-            return DetectedItem.PURPLE;
+            return DetectedColor.PURPLE;
         } else {
-            return DetectedItem.UNKNOWN;
+            return DetectedColor.UNKNOWN;
         }
     }
 
@@ -261,7 +275,7 @@ public class Spindexer extends Subassembly {
      * get current angle of the spindexer DcMotor in degrees
      */
     private double getCurrentAngle() {
-        return MathEx.encoderPositionToDegrees(spindexerMotor.getCurrentPosition(), ENCODER_RES);
+        return MathEx.encoderPositionToDegrees(spindexerMotor.getCurrentPosition() + encoderOffset, ENCODER_RES);
     }
 
     /**

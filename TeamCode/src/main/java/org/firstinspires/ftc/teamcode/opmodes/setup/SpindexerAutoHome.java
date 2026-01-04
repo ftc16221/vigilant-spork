@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp(group = Global.OpModeGroup.SETUP)
 @Config
-public class AutoHomeSpindexer extends OpMode {
+public class SpindexerAutoHome extends OpMode {
 
     public static double HOMING_POWER = 0.2;
     public static long RESET_DURATION = 100;
@@ -57,6 +57,7 @@ public class AutoHomeSpindexer extends OpMode {
             }
             case HAS_REACHED_HOME: {
                 if (!spindexerMotor.isBusy()) {
+                    spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     spindexerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     resetTimer.reset();
                     state = State.SETTING_HOME;
@@ -83,5 +84,5 @@ public class AutoHomeSpindexer extends OpMode {
         NOT_STARTED, MOVING_TO_HOME, HAS_REACHED_HOME, SETTING_HOME, HAS_SET_HOME
     }
 
-    private boolean isAtHome() { return spindexer.getDetectedColor() == Spindexer.DetectedItem.HOME; }
+    private boolean isAtHome() { return spindexer.getDetectedColor() == Spindexer.DetectedColor.HOME_COLOR; }
 }

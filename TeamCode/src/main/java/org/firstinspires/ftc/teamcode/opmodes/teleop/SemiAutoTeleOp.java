@@ -6,7 +6,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
+import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
+import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
@@ -28,6 +30,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     public static Underglow.Color AUTO_MOVEMENT_COLOR = Underglow.Color.WHITE;
 
     MecDriveBase driveBase;
+    Spindexer spindexer;
+    Launcher launcher;
     Intake intake;
     Underglow underglow;
     PoseTracker poseTracker;
@@ -38,10 +42,14 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     private boolean autoMovementEnabled = false;
     private boolean goalTrackingEnabled = false;
 
+    private boolean gamepad2RightTriggerWasPressed = false;
+
     @Override
     public void init() {
         driveBase = new MecDriveBase(this);
         intake = new Intake(this);
+        spindexer = new Spindexer(this, intake);
+        launcher = new Launcher(this, spindexer);
         limelightCam = new LimelightCam(this);
         pinpointOdo = new PinpointOdo(this, Global.lastPose);
         poseTracker = new PoseTracker(this, Global.lastPose);
@@ -58,16 +66,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     @Override
     public void loop() {
 
-        // INTAKE
-        if (gamepad1.dpad_up || gamepad2.a) {
-            intake.run(Intake.Direction.IN);
-        } else if (gamepad1.dpad_down || gamepad2.y) {
-            intake.run(Intake.Direction.OUT);
-        } else if (gamepad1.dpad_left || gamepad1.dpad_right || gamepad2.b) {
-            intake.stop();
-        }
-
-        // ALL DRIVEBASE MOVEMENT (SEMI-AUTO OR TELEOP)
+        // ################   GAMEPAD 1   ################
         if (gamepad1.right_bumper) { // start auto movement
             autoMovementEnabled = true;
             poseTracker.enableMovement();
@@ -93,8 +92,35 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             driveBase.control(gamepad1);
         }
 
+        // ################   GAMEPAD 2   ################
+        // LAUNCH MODE
+        if (gamepad2.right_trigger > 0.2 && !gamepad2RightTriggerWasPressed) {
+            launcher.launchAll();
+            gamepad2RightTriggerWasPressed = true;
+        } else {
+            gamepad2RightTriggerWasPressed = false;
+        }
+        if (gamepad2.rightBumperWasPressed()) {
+            launcher.launchAny();
+        } else if (gamepad2.yWasPressed() || gamepad2.triangleWasPressed()) {
+            launcher.launchMotif();
+        } else if (gamepad2.aWasPressed() || gamepad2.crossWasPressed()) {
+            launcher.launchGreen();
+        } else if (gamepad2.xWasPressed() || gamepad2.squareWasPressed()) {
+            launcher.launchPurple();
+        } else if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
+            launcher.cancelLaunches();
+        }
+
+        // INTAKE MODE
+        if (gamepad2.dpadUpWasPressed()) {
+            spindexer.alignForIntake();
+        }
+
         // UPDATES
         poseTracker.update();
+        launcher.update();
+        spindexer.update();
         poseTracker.runTelemetry();
         telemetry.update();
         drawing.update();

@@ -36,7 +36,9 @@ public class Spindexer extends Subassembly {
     public static double kP = 0.0, kI = 0.0, kD = 0.0, kF = 0.0;
     public static int TOLERANCE = 2; // degrees
 
-    private final Artifact[] drum = new Artifact[3];
+    private final static Artifact[] drum = new Artifact[3];
+
+    private final Intake intake;
 
     private final DcMotor spindexerMotor;
     private final NormalizedColorSensor colorSensor;
@@ -48,9 +50,13 @@ public class Spindexer extends Subassembly {
     private double targetAngle = INTAKE_ANGLE;
     private int activeSlot = 0;
 
+    private Mode mode = Mode.LAUNCHER;
+    private Mode prevMode = Mode.LAUNCHER;
 
-    public Spindexer(OpMode opMode) {
+
+    public Spindexer(OpMode opMode, Intake intake) {
         super(opMode, "Spindexer");
+        this.intake = intake;
 
         spindexerMotor = opMode.hardwareMap.dcMotor.get("spindexer");
         spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -65,6 +71,12 @@ public class Spindexer extends Subassembly {
             drum[0] = Artifact.GREEN;
             drum[1] = Artifact.PURPLE;
             drum[2] = Artifact.PURPLE;
+        } else {
+            if (isFull()) {
+                mode = Mode.LAUNCHER;
+            } else {
+                mode = Mode.INTAKE;
+            }
         }
     }
 
@@ -82,7 +94,7 @@ public class Spindexer extends Subassembly {
 
         // intake mode
         Artifact detectedArtifact = getDetectedArtifact();
-        if (!isFull() && targetAngle == INTAKE_ANGLE && !isBusy() && detectedArtifact != Artifact.EMPTY) {
+        if (!isFull() && mode == Mode.INTAKE && !isBusy() && detectedArtifact != Artifact.EMPTY) {
             drum[activeSlot] = detectedArtifact;
 
             if (isFull()) {
@@ -95,6 +107,18 @@ public class Spindexer extends Subassembly {
             } else {
                 // get ready for another artifact
                 alignForIntake();
+            }
+        }
+
+        if (isEmpty()) {
+            alignForIntake();
+        }
+
+        if (mode != prevMode) {
+            if (mode == Mode.INTAKE) {
+                intake.run(Intake.Direction.IN);
+            } else {
+                intake.stop();
             }
         }
 
@@ -120,11 +144,16 @@ public class Spindexer extends Subassembly {
         GREEN, PURPLE, EMPTY
     }
 
+    public enum Mode {
+        INTAKE, LAUNCHER
+    }
+
     /**
      * rotates the drum to align a specified artifact color with launcher
      * @return whether an artifact of specified color was found
      */
     public boolean alignForLaunch(Artifact artifact) {
+        mode = Mode.LAUNCHER;
         if (!contains(artifact)) return false;
         align(LAUNCHER_ANGLE, getIndexOfClosestArtifact(artifact));
         drum[activeSlot] = Artifact.EMPTY;
@@ -136,6 +165,7 @@ public class Spindexer extends Subassembly {
      * @return whether any artifact was found
      */
     public boolean alignAnyForLaunch() {
+        mode = Mode.LAUNCHER;
         if (isEmpty()) return false;
         align(LAUNCHER_ANGLE, getIndexOfClosestArtifact());
         drum[activeSlot] = Artifact.EMPTY;
@@ -148,6 +178,7 @@ public class Spindexer extends Subassembly {
      * @return whether any artifact was found
      */
     public boolean alignPrioritizedForLaunch(Artifact artifact) {
+        mode = Mode.LAUNCHER;
         boolean wasSuccess = alignForLaunch(artifact);
         if (!wasSuccess) wasSuccess = alignAnyForLaunch();
         if (wasSuccess) drum[activeSlot] = Artifact.EMPTY;
@@ -159,6 +190,7 @@ public class Spindexer extends Subassembly {
      * @return whether an empty slot was found
      */
     public boolean alignForIntake() {
+        mode = Mode.INTAKE;
         if (isFull()) return false;
         align(INTAKE_ANGLE, getIndexOfClosestArtifact(Artifact.EMPTY));
         return true;

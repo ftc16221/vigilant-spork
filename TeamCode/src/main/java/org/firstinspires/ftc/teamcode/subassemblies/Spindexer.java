@@ -31,9 +31,9 @@ public class Spindexer extends Subassembly {
     public static double PROXIMITY_THRESHOLD = 5.0; // cm
 
     public static double kP = 0.0, kI = 0.0, kD = 0.0, kF = 0.0;
-    public static int TOLERANCE = 4; // PPR
+    public static int TOLERANCE = 2; // degrees
 
-    private final Artifact[] slots = new Artifact[3];
+    private final Artifact[] drum = new Artifact[3];
 
     private final DcMotor spindexerMotor;
     private final NormalizedColorSensor colorSensor;
@@ -41,7 +41,7 @@ public class Spindexer extends Subassembly {
 
     private int targetPosition = 0;
     private double targetAngle = INTAKE_ANGLE;
-    private int index = 0;
+    private int activeSlot = 0;
 
 
     public Spindexer(OpMode opMode) {
@@ -50,16 +50,16 @@ public class Spindexer extends Subassembly {
         spindexerMotor = opMode.hardwareMap.dcMotor.get("spindexer");
         spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        goTo(0, 0);
+        align(0, 0);
 
         colorSensor = opMode.hardwareMap.get(NormalizedColorSensor.class, "color_sensor");
         colorSensor.setGain(COLOR_SENSOR_GAIN);
 
         boolean isAutoOpMode = opMode.getClass().isAnnotationPresent(Autonomous.class);
-        if (isAutoOpMode || slots[0] == null) {
-            slots[0] = Artifact.GREEN;
-            slots[1] = Artifact.PURPLE;
-            slots[2] = Artifact.PURPLE;
+        if (isAutoOpMode || drum[0] == null) {
+            drum[0] = Artifact.GREEN;
+            drum[1] = Artifact.PURPLE;
+            drum[2] = Artifact.PURPLE;
         }
     }
 
@@ -78,18 +78,18 @@ public class Spindexer extends Subassembly {
         // intake mode
         Artifact detectedArtifact = getDetectedArtifact();
         if (!isFull() && targetAngle == INTAKE_ANGLE && !isBusy() && detectedArtifact != Artifact.EMPTY) {
-            slots[index] = detectedArtifact;
+            drum[activeSlot] = detectedArtifact;
 
             if (isFull()) {
                 // go to first color of motif first, to save time
                 if (Global.motif != null && Global.motif.toString().startsWith("G") && contains(Artifact.GREEN)) {
-                    outtakePrioritized(Artifact.GREEN);
+                    alignPrioritizedForLaunch(Artifact.GREEN);
                 } else {
-                    outtakePrioritized(Artifact.PURPLE);
+                    alignPrioritizedForLaunch(Artifact.PURPLE);
                 }
             } else {
                 // get ready for another artifact
-                goTo(INTAKE_ANGLE, getIndexOfClosestArtifact(Artifact.EMPTY));
+                alignForIntake();
             }
         }
     }
@@ -110,10 +110,10 @@ public class Spindexer extends Subassembly {
      * rotates the drum to align a specified artifact color with launcher
      * @return whether an artifact of specified color was found
      */
-    public boolean outtake(Artifact artifact) {
+    public boolean alignForLaunch(Artifact artifact) {
         if (!contains(artifact)) return false;
-
-        goTo(LAUNCHER_ANGLE, getIndexOfClosestArtifact(artifact));
+        align(LAUNCHER_ANGLE, getIndexOfClosestArtifact(artifact));
+        drum[activeSlot] = Artifact.EMPTY;
         return true;
     }
 
@@ -121,10 +121,10 @@ public class Spindexer extends Subassembly {
      * rotates the drum to align an artifact of either color with launcher
      * @return whether any artifact was found
      */
-    public boolean outtakeAny() {
+    public boolean alignAnyForLaunch() {
         if (isEmpty()) return false;
-
-        goTo(LAUNCHER_ANGLE, getIndexOfClosestArtifact());
+        align(LAUNCHER_ANGLE, getIndexOfClosestArtifact());
+        drum[activeSlot] = Artifact.EMPTY;
         return true;
     }
 
@@ -133,23 +133,50 @@ public class Spindexer extends Subassembly {
      * prioritized artifacts, rotates to the other artifact color.
      * @return whether any artifact was found
      */
-    public boolean outtakePrioritized(Artifact artifact) {
-        boolean wasSuccess = outtake(artifact);
-        if (!wasSuccess) wasSuccess = outtakeAny();
+    public boolean alignPrioritizedForLaunch(Artifact artifact) {
+        boolean wasSuccess = alignForLaunch(artifact);
+        if (!wasSuccess) wasSuccess = alignAnyForLaunch();
+        if (wasSuccess) drum[activeSlot] = Artifact.EMPTY;
         return wasSuccess;
+    }
+
+    /**
+     * rotates the drum to align an empty slot with the intake
+     * @return whether an empty slot was found
+     */
+    public boolean alignForIntake() {
+        if (isFull()) return false;
+        align(INTAKE_ANGLE, getIndexOfClosestArtifact(Artifact.EMPTY));
+        return true;
     }
 
     public int getNumOfArtifact(Artifact artifact) {
         int result = 0;
-        for (Artifact artifact1 : slots) {
+        for (Artifact artifact1 : drum) {
             if (artifact1 == artifact) result++;
         }
         return result;
     }
 
+    /**
+     * compares the target position to current position, and if a difference of greater
+     * than {@value TOLERANCE} degrees is found return true
+     */
     public boolean isBusy() {
-        int error = Math.abs(targetPosition - spindexerMotor.getCurrentPosition());
-        return error > TOLERANCE;
+        int positionError = Math.abs(targetPosition - spindexerMotor.getCurrentPosition());
+        double errorInDegrees = MathEx.encoderPositionToDegrees(positionError, ENCODER_RES);
+        return errorInDegrees > TOLERANCE;
+    }
+
+    public boolean contains(Artifact artifact) {
+        boolean result = false;
+        for (Artifact artifact1 : drum) {
+            if (artifact1 == artifact) {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 
     public boolean isFull() {
@@ -167,14 +194,24 @@ public class Spindexer extends Subassembly {
         return spindexerMotor;
     }
 
-    /**
-     * Warning: will output -1 if no artifact exists
-     */
+    public DetectedItem getDetectedColor() {
+        int rawColor = colorSensor.getNormalizedColors().toColor();
+        if (HOME_COLOR_THRESHOLD.isColorInRange(rawColor)) {
+            return DetectedItem.HOME;
+        } else if (GREEN_THRESHOLD.isColorInRange(rawColor)) {
+            return DetectedItem.GREEN;
+        } else if (PURPLE_THRESHOLD.isColorInRange(rawColor)) {
+            return DetectedItem.PURPLE;
+        } else {
+            return DetectedItem.UNKNOWN;
+        }
+    }
+
     private int getIndexOfClosestArtifact(Artifact artifact) {
         int result = -1;
         double smallestDistance = 361;
         for (int i = 0; i < 3; i++) {
-            if (slots[i] == artifact) {
+            if (drum[i] == artifact) {
                 double distance = Math.abs(getDistanceFromIndex(i));
                 if (distance < smallestDistance) {
                     smallestDistance = distance;
@@ -185,14 +222,11 @@ public class Spindexer extends Subassembly {
         return result;
     }
 
-    /**
-     * Warning: will output -1 if no artifact exists
-     */
     private int getIndexOfClosestArtifact() {
         int result = -1;
         double smallestDistance = 361;
         for (int i = 0; i < 3; i++) {
-            if (slots[i] != Artifact.EMPTY) {
+            if (drum[i] != Artifact.EMPTY) {
                 double distance = Math.abs(getDistanceFromIndex(i));
                 if (distance < smallestDistance) {
                     smallestDistance = distance;
@@ -203,8 +237,8 @@ public class Spindexer extends Subassembly {
         return result;
     }
 
-    private double getDistanceFromIndex(int index) {
-        double indexAngle = targetAngle + (index * 120);
+    private double getDistanceFromIndex(int slotIndex) {
+        double indexAngle = targetAngle + (slotIndex * 120);
         double currentAngle = getCurrentAngle();
         double distance = (currentAngle - indexAngle) % 360;
 
@@ -214,24 +248,13 @@ public class Spindexer extends Subassembly {
         return distance;
     }
 
-    private void goTo(double angle, int index) {
-        this.targetAngle = angle;
-        this.index = index;
+    private void align(double drumAngle, int slotIndex) {
+        this.targetAngle = drumAngle;
+        this.activeSlot = slotIndex;
 
-        double distance = getDistanceFromIndex(index);
+        double distance = getDistanceFromIndex(slotIndex);
 
         setTargetAngle(getCurrentAngle() - distance);
-    }
-
-    public boolean contains(Artifact type) {
-        boolean result = false;
-        for (Artifact artifact : slots) {
-            if (artifact == type) {
-                result = true;
-                break;
-            }
-        }
-        return result;
     }
 
     /**
@@ -257,19 +280,6 @@ public class Spindexer extends Subassembly {
             return distanceSensor.getDistance(DistanceUnit.CM) <= PROXIMITY_THRESHOLD;
         } else {
             return true;
-        }
-    }
-
-    private DetectedItem getDetectedColor() {
-        int rawColor = colorSensor.getNormalizedColors().toColor();
-        if (HOME_COLOR_THRESHOLD.isColorInRange(rawColor)) {
-            return DetectedItem.HOME;
-        } else if (GREEN_THRESHOLD.isColorInRange(rawColor)) {
-            return DetectedItem.GREEN;
-        } else if (PURPLE_THRESHOLD.isColorInRange(rawColor)) {
-            return DetectedItem.PURPLE;
-        } else {
-            return DetectedItem.UNKNOWN;
         }
     }
 

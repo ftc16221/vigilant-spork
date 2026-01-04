@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.util.Global;
 
@@ -16,19 +17,18 @@ import java.util.concurrent.TimeUnit;
 @Config
 public class SpindexerAutoHome extends OpMode {
 
-    public static double HOMING_POWER = 0.2;
-    public static long RESET_DURATION = 100;
-    public static TimeUnit RESET_TIMEUNIT = TimeUnit.MILLISECONDS;
+    public static double HOMING_POWER = 0.02;
+    public static long RESET_DURATION = 100; // milliseconds
 
     private Spindexer spindexer;
     private DcMotor spindexerMotor;
 
     private State state = State.NOT_STARTED;
-    private final Deadline resetTimer = new Deadline(RESET_DURATION, RESET_TIMEUNIT);
+    private final Deadline resetTimer = new Deadline(RESET_DURATION, TimeUnit.MILLISECONDS);
 
     @Override
     public void init() {
-        spindexer = new Spindexer(this);
+        spindexer = new Spindexer(this, new Intake(this));
         spindexerMotor = spindexer.getMotor();
         spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }

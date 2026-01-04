@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
+import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
@@ -17,6 +18,7 @@ public class BasicTeleOp extends OpMode {
 
     MecDriveBase driveBase;
     Intake intake;
+    Spindexer spindexer;
     Launcher launcher;
     Underglow underglow;
 
@@ -28,7 +30,8 @@ public class BasicTeleOp extends OpMode {
     public void init() {
         driveBase = new MecDriveBase(this);
         intake = new Intake(this);
-        launcher = new Launcher(this);
+        spindexer = new Spindexer(this, intake);
+        launcher = new Launcher(this, spindexer);
         underglow = new Underglow(this);
 
         telemetry.update();

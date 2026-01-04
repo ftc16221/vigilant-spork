@@ -7,7 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
+import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
@@ -30,16 +32,13 @@ public class LauncherTuner extends OpMode {
 
     Launcher launcher;
     LimelightCam limelightCam;
-    Servo intakeServo;
 
     MultipleTelemetry telemetryA;
 
     @Override
     public void init() {
 
-        launcher = new Launcher(this);
-
-        intakeServo = hardwareMap.servo.get("intake");
+        launcher = new Launcher(this, new Spindexer(this, new Intake(this)));
 
         if (useLimelight) {
             limelightCam = new LimelightCam(this);
@@ -73,11 +72,6 @@ public class LauncherTuner extends OpMode {
             launcher.setTargetVelocity(TARGET_RPM);
         }
         prevTargetRPM = TARGET_RPM;
-
-        if (INTAKE_SERVO_POS != prevIntakeServoPos) {
-            intakeServo.setPosition(INTAKE_SERVO_POS);
-        }
-        prevIntakeServoPos = INTAKE_SERVO_POS;
 
         telemetryA.addData("Max RPM", MAX_RPM);
         telemetryA.addData("Target RPM", TARGET_RPM);

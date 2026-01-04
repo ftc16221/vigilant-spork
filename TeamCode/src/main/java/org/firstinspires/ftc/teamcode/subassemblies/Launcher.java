@@ -66,7 +66,7 @@ public class Launcher extends Subassembly {
         super(opMode, "Launcher");
         this.spindexer = spindexer;
 
-        flywheelMotor = (DcMotorEx) opMode.hardwareMap.dcMotor.get("flywheel");
+        flywheelMotor = (DcMotorEx) opMode.hardwareMap.dcMotor.get("launcher");
         flywheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // RUN_WITHOUT_ENCODER doesn't disable encoder readouts
         flywheelMotor.setDirection(FLYWHEEL_MOTOR_DIRECTION);
 

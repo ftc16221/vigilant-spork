@@ -39,19 +39,24 @@ public class Watchdog {
 
     private final MultipleTelemetry telemetry;
 
-    /** creates a watchdog object with the subassembly fields (public or private) automatically detected within opMode */
+    /**
+     * creates a watchdog object with the subassembly fields (public or private) automatically detected within opMode
+     */
     public Watchdog(OpMode opMode) {
         this(opMode, findSubassemblies(opMode));
     }
 
-    /** creates a watchdog object with the supplied subassemblies. Use if subassemblies are not declared as a field, or a subassembly should be excluded */
+    /**
+     * creates a watchdog object with the supplied subassemblies. Use if subassemblies are not declared as a field, or a subassembly should be excluded
+     */
     public Watchdog(OpMode opMode, Subassembly... subassemblies) {
         this.opMode = opMode;
         this.subassemblies = subassemblies;
 
         if (WRITE_TO_LOG_FILE) {
             logFile = new File(LOG_FILE_PATHNAME + generateFileName()); // create reference to target file
-            if (logFile.getParentFile() != null) logFile.getParentFile().mkdirs(); // ensure parent directories exist
+            if (logFile.getParentFile() != null)
+                logFile.getParentFile().mkdirs(); // ensure parent directories exist
 
             try {
                 logWriter = new FileWriter(logFile, true);
@@ -119,7 +124,7 @@ public class Watchdog {
                     if (value != null) {
                         subassemblies.add((Subassembly) value);
                     }
-                } catch (IllegalAccessException ignored) {}
+                } catch (IllegalAccessException ignored) { }
             }
         }
 
@@ -150,14 +155,19 @@ public class Watchdog {
         }
     }
 
-    public static void logError(String message) {
-        RobotLog.e(message);
-        log(message);
-    }
-
     public static void logInfo(String message) {
         RobotLog.i(message);
         log(message);
+    }
+
+    public static void logWarning(String message) {
+        RobotLog.w(message);
+        log("WARNING: " + message);
+    }
+
+    public static void logError(String message) {
+        RobotLog.e(message);
+        log("ERROR: " + message);
     }
 
     public void stop() {

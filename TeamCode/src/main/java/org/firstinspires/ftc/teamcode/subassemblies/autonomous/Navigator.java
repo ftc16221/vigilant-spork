@@ -127,13 +127,13 @@ public class Navigator extends Subassembly {
         }
         assert targetPose != null;
 
-        if (artifactPattern == ArtifactPattern.UNKNOWN) {
+        if (Global.motif == null) {
             List<Integer> tagIds = limelightCam.getDetectedTagIds();
-            if (tagIds.contains(21)) artifactPattern = ArtifactPattern.GPP;
-            else if (tagIds.contains(22)) artifactPattern = ArtifactPattern.PGP;
-            else if (tagIds.contains(23)) artifactPattern = ArtifactPattern.PPG;
-            if (artifactPattern != ArtifactPattern.UNKNOWN) {
-                Watchdog.logInfo(String.format("Pattern %s detected via obelisk apriltag", artifactPattern.name()));
+            if (tagIds.contains(21)) Global.motif = Global.Motif.GPP;
+            else if (tagIds.contains(22)) Global.motif = Global.Motif.PGP;
+            else if (tagIds.contains(23)) Global.motif = Global.Motif.PPG;
+            if (Global.motif != null) {
+                Watchdog.logInfo(String.format("Pattern %s detected via obelisk apriltag", Global.motif.name()));
             }}
 
         // used for live tuning via FTC dashboard

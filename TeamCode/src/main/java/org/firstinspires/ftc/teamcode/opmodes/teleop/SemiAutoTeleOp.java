@@ -131,7 +131,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     @Override
     public void stop() {
-        poseTracker.stop();
+        navigator.stop();
         watchdog.stop();
+        spindexer.stop();
     }
 }

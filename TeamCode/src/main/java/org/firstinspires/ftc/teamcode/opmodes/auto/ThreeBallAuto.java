@@ -22,7 +22,7 @@ public class ThreeBallAuto extends OpMode {
     public static double LAUNCH_SPEED = 3400.0; // RPM
     public static double LAUNCH_ANGLE = 45.0; // degrees
 
-    private Navigator navigator;
+//    private Navigator navigator;
     private Intake intake;
     private Spindexer spindexer;
     private Launcher launcher;
@@ -31,7 +31,7 @@ public class ThreeBallAuto extends OpMode {
 
     @Override
     public void init() {
-        navigator = new Navigator(this, STARTING_POSE);
+//        navigator = new Navigator(this, STARTING_POSE);
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
@@ -41,25 +41,25 @@ public class ThreeBallAuto extends OpMode {
     public void loop() {
         switch (state) {
             case NOT_STARTED:
-                navigator.setTargetPose(LAUNCH_POSE);
+//                navigator.setTargetPose(LAUNCH_POSE);
                 launcher.setTargetVelocity(LAUNCH_SPEED);
                 launcher.setHoodAngle(LAUNCH_ANGLE);
                 state = State.MOVING_TO_LAUNCH;
                 break;
             case MOVING_TO_LAUNCH:
-                if (navigator.isAtTarget()) {
+                if (/*navigator.isAtTarget()*/true) {
                     launcher.launchMotif();
                     state = State.LAUNCHING;
                 }
                 break;
             case LAUNCHING:
                 if (spindexer.isEmpty()) {
-                    navigator.setTargetPose(END_POSE);
+//                    navigator.setTargetPose(END_POSE);
                     state = State.MOVING_TO_END;
                 }
                 break;
             case MOVING_TO_END:
-                if (navigator.isAtTarget()) {
+                if (/*navigator.isAtTarget()*/true) {
 //                    navigator.stop();
                     intake.stop();
                     spindexer.stop();
@@ -71,7 +71,7 @@ public class ThreeBallAuto extends OpMode {
         launcher.update();
 
         telemetry.addData("state", state);
-        telemetry.addData("navigator isAtTarget", navigator.isAtTarget());
+//        telemetry.addData("navigator isAtTarget", navigator.isAtTarget());
         telemetry.addData("spindexer isBusy", spindexer.isBusy());
         telemetry.addData("launcher isReady", launcher.isReady());
         telemetry.addData("launcher state", launcher.getState());

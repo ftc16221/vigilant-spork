@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Path;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.util.Drawing;
 import org.firstinspires.ftc.teamcode.util.Global;
+import org.firstinspires.ftc.teamcode.util.Path;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
 @Autonomous(group = "test", preselectTeleOp = Global.PRESELECT_TELEOP)

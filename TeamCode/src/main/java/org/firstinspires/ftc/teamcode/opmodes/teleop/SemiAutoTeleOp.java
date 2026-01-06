@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
@@ -38,6 +39,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     LimelightCam limelightCam;
     PinpointOdo pinpointOdo;
     Drawing drawing;
+    Watchdog watchdog;
 
     private boolean autoMovementEnabled = false;
     private boolean goalTrackingEnabled = false;
@@ -55,6 +57,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         navigator = new Navigator(this, Global.lastPose);
         underglow = new Underglow(this);
         drawing = new Drawing(navigator);
+        watchdog = new Watchdog(this);
 
         driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -124,5 +127,11 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         navigator.runTelemetry();
         telemetry.update();
         drawing.update();
+    }
+
+    @Override
+    public void stop() {
+        poseTracker.stop();
+        watchdog.stop();
     }
 }

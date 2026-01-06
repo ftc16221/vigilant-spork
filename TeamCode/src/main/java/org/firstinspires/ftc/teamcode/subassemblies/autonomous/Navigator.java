@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -93,7 +94,7 @@ public class Navigator extends Subassembly {
         Class<? extends OpMode> opModeClass = opMode.getClass();
         if (opModeClass.isAnnotationPresent(Autonomous.class)) {
             opModeType = OpModeType.AUTONOMOUS;
-            RobotLog.i("(Navigator) OpMode appears to be Autonomous, automatically enabling movement");
+            Watchdog.logInfo("(Navigator) OpMode appears to be Autonomous, automatically enabling movement");
             enableMovement();
         } else if (opModeClass.isAnnotationPresent(TeleOp.class)) {
             opModeType = OpModeType.TELEOP;
@@ -109,7 +110,7 @@ public class Navigator extends Subassembly {
         currentPose = getPrioritizedPose();
 
         if (currentPose == null && isMovementEnabled) {
-            RobotLog.w("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
+            Watchdog.logError("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
             underglow.setColor(Underglow.Color.ORANGE);
@@ -118,13 +119,22 @@ public class Navigator extends Subassembly {
         assert currentPose != null;
 
         if (targetPose == null && isMovementEnabled) {
-            RobotLog.w("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
+            Watchdog.logError("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
             underglow.setColor(Underglow.Color.ORANGE);
             return;
         }
         assert targetPose != null;
+
+        if (artifactPattern == ArtifactPattern.UNKNOWN) {
+            List<Integer> tagIds = limelightCam.getDetectedTagIds();
+            if (tagIds.contains(21)) artifactPattern = ArtifactPattern.GPP;
+            else if (tagIds.contains(22)) artifactPattern = ArtifactPattern.PGP;
+            else if (tagIds.contains(23)) artifactPattern = ArtifactPattern.PPG;
+            if (artifactPattern != ArtifactPattern.UNKNOWN) {
+                Watchdog.logInfo(String.format("Pattern %s detected via obelisk apriltag", artifactPattern.name()));
+            }}
 
         // used for live tuning via FTC dashboard
         if (Global.ENABLE_TUNING_MODE) {

@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.util.CircularDoubleArray;
@@ -107,18 +106,18 @@ public class Launcher extends Subassembly {
                             break;
                     }
                     if (currentState == State.REJECTED) {
-                        Watchdog.logWarning("Artifact of " + launchQueue.getFirst() + " type couldn't be found");
+                        Watchdog.w("Artifact of " + launchQueue.getFirst() + " type couldn't be found");
                         break;
                     }
                     currentState = State.AWAITING_SPINDEXER;
-                    Watchdog.logInfo("Awaiting " + launchQueue.getFirst() + " artifact from spindexer");
+                    Watchdog.i("Awaiting " + launchQueue.getFirst() + " artifact from spindexer");
                 }
                 break;
             case AWAITING_SPINDEXER: // waiting for artifact delivery from spindexer
                 if (!spindexer.isBusy() && isReady()) {
                     gateServo.open();
                     currentState = State.LAUNCHING;
-                    Watchdog.logInfo("Launching artifact");
+                    Watchdog.i("Launching artifact");
                 }
                 break;
             case LAUNCHING: // waiting for artifact to launch
@@ -126,10 +125,10 @@ public class Launcher extends Subassembly {
                     gateServo.close();
                     launchQueue.removeFirst();
                     spindexer.emptyActiveSlot();
-                    Watchdog.logInfo("Artifact successfully launched");
+                    Watchdog.i("Artifact successfully launched");
                     if (launchQueue.isEmpty()) {
                         currentState = State.SPINDOWN;
-                        Watchdog.logInfo("All artifacts in queue launched, spinning down");
+                        Watchdog.i("All artifacts in queue launched, spinning down");
                     }
                     else {
                         currentState = State.IDLE;
@@ -139,7 +138,7 @@ public class Launcher extends Subassembly {
             case SPINDOWN: // spinning down, all artifacts launched
                 break;
             case REJECTED:
-                Watchdog.logWarning("An artifact couldn't be delivered or launch was cancelled");
+                Watchdog.w("An artifact couldn't be delivered or launch was cancelled");
                 if (!launchQueue.isEmpty()) launchQueue.removeFirst();
 
                 gateServo.close(); // ensure this is closed
@@ -156,10 +155,10 @@ public class Launcher extends Subassembly {
 
     public void launchMotif() {
         if (Global.motif == null) {
-            Watchdog.logError("Unable to launch motif as it is unknown");
+            Watchdog.e("Unable to launch motif as it is unknown");
             return;
         }
-        Watchdog.logInfo("Motif added to launch queue: " + Global.motif);
+        Watchdog.i("Motif added to launch queue: " + Global.motif);
         switch (Global.motif) {
             case GPP:
                 launchQueue.add(Artifact.GREEN);
@@ -184,28 +183,28 @@ public class Launcher extends Subassembly {
         for (int i = numOfArtifacts; i > 0; i--) {
             launchQueue.add(Artifact.ANY);
         }
-        Watchdog.logInfo("All " + numOfArtifacts + " artifacts added to launch queue");
+        Watchdog.i("All " + numOfArtifacts + " artifacts added to launch queue");
     }
 
     public void launchGreen() {
         launchQueue.add(Artifact.GREEN);
-        Watchdog.logInfo("Green artifact added to launch queue");
+        Watchdog.i("Green artifact added to launch queue");
     }
 
     public void launchPurple() {
         launchQueue.add(Artifact.PURPLE);
-        Watchdog.logInfo("Green artifact added to launch queue");
+        Watchdog.i("Green artifact added to launch queue");
     }
 
     public void launchAny() {
         launchQueue.add(Artifact.ANY);
-        Watchdog.logInfo("Artifact of any type added to launch queue");
+        Watchdog.i("Artifact of any type added to launch queue");
     }
 
     public void cancelLaunches() {
         launchQueue.clear();
         currentState = State.REJECTED;
-        Watchdog.logWarning("All launches cancelled");
+        Watchdog.w("All launches cancelled");
     }
 
     public void setTargetVelocity(double rpm) {

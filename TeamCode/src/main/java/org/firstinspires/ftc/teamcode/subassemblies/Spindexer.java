@@ -107,13 +107,13 @@ public class Spindexer extends Subassembly {
         // intake mode
         Artifact detectedArtifact = getDetectedArtifact();
         if (!isFull() && mode == Mode.INTAKE && !isBusy && detectedArtifact != Artifact.EMPTY) {
-            Watchdog.logInfo(detectedArtifact + " artifact detected in intake");
+            Watchdog.i(detectedArtifact + " artifact detected in intake");
             drum[activeSlot] = detectedArtifact;
         }
 
         if (mode == Mode.INTAKE) {
             if (isFull()) {
-                Watchdog.logInfo("Spindexer full, switching to LAUNCHER mode");
+                Watchdog.i("Spindexer full, switching to LAUNCHER mode");
                 mode = Mode.LAUNCHER;
                 // go to first color of motif first, to save time
                 int motifSlot = -1;
@@ -132,7 +132,7 @@ public class Spindexer extends Subassembly {
         }
 
         if (isEmpty() && mode == Mode.LAUNCHER) {
-            Watchdog.logInfo("Spindexer empty, switching to INTAKE mode");
+            Watchdog.i("Spindexer empty, switching to INTAKE mode");
             mode = Mode.INTAKE;
             activeSlot = getIndexOfClosestArtifact(Artifact.EMPTY);
         }
@@ -190,7 +190,7 @@ public class Spindexer extends Subassembly {
     public boolean alignForLaunch(Artifact artifact) {
         mode = Mode.LAUNCHER;
         if (!contains(artifact)) {
-            Watchdog.logWarning("Cannot align for launch as the spindexer does not contain any " + artifact + " artifacts");
+            Watchdog.w("Cannot align for launch as the spindexer does not contain any " + artifact + " artifacts");
             return false;
         }
         activeSlot = getIndexOfClosestArtifact(artifact);
@@ -204,7 +204,7 @@ public class Spindexer extends Subassembly {
     public boolean alignAnyForLaunch() {
         mode = Mode.LAUNCHER;
         if (isEmpty()) {
-            Watchdog.logWarning("Cannot align for launch as the spindexer is empty");
+            Watchdog.w("Cannot align for launch as the spindexer is empty");
             return false;
         }
         activeSlot = getIndexOfClosestArtifact();
@@ -230,7 +230,7 @@ public class Spindexer extends Subassembly {
     public boolean alignForIntake() {
         mode = Mode.INTAKE;
         if (isFull()) {
-            Watchdog.logWarning("Cannot align to intake as the spindexer is full");
+            Watchdog.w("Cannot align to intake as the spindexer is full");
             return false;
         };
         activeSlot = getIndexOfClosestArtifact(Artifact.EMPTY);

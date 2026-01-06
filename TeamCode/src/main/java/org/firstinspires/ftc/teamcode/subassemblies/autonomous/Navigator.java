@@ -94,7 +94,7 @@ public class Navigator extends Subassembly {
         Class<? extends OpMode> opModeClass = opMode.getClass();
         if (opModeClass.isAnnotationPresent(Autonomous.class)) {
             opModeType = OpModeType.AUTONOMOUS;
-            Watchdog.logInfo("(Navigator) OpMode appears to be Autonomous, automatically enabling movement");
+            Watchdog.i("(Navigator) OpMode appears to be Autonomous, automatically enabling movement");
             enableMovement();
         } else if (opModeClass.isAnnotationPresent(TeleOp.class)) {
             opModeType = OpModeType.TELEOP;
@@ -110,7 +110,7 @@ public class Navigator extends Subassembly {
         currentPose = getPrioritizedPose();
 
         if (currentPose == null && isMovementEnabled) {
-            Watchdog.logError("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
+            Watchdog.e("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
             underglow.setColor(Underglow.Color.ORANGE);
@@ -119,7 +119,7 @@ public class Navigator extends Subassembly {
         assert currentPose != null;
 
         if (targetPose == null && isMovementEnabled) {
-            Watchdog.logError("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
+            Watchdog.e("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
             underglow.setColor(Underglow.Color.ORANGE);
@@ -133,7 +133,7 @@ public class Navigator extends Subassembly {
             else if (tagIds.contains(22)) Global.motif = Global.Motif.PGP;
             else if (tagIds.contains(23)) Global.motif = Global.Motif.PPG;
             if (Global.motif != null) {
-                Watchdog.logInfo(String.format("Pattern %s detected via obelisk apriltag", Global.motif.name()));
+                Watchdog.i(String.format("Pattern %s detected via obelisk apriltag", Global.motif.name()));
             }}
 
         // used for live tuning via FTC dashboard

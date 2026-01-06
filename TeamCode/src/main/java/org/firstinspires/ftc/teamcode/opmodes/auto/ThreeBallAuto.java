@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
@@ -26,6 +27,7 @@ public class ThreeBallAuto extends OpMode {
     private Intake intake;
     private Spindexer spindexer;
     private Launcher launcher;
+    private Watchdog watchdog;
 
     private State state = State.NOT_STARTED;
 
@@ -35,6 +37,7 @@ public class ThreeBallAuto extends OpMode {
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
+        watchdog = new Watchdog(this, spindexer);
     }
 
     @Override
@@ -69,6 +72,7 @@ public class ThreeBallAuto extends OpMode {
 
         spindexer.update();
         launcher.update();
+        watchdog.update();
 
         telemetry.addData("state", state);
 //        telemetry.addData("navigator isAtTarget", navigator.isAtTarget());

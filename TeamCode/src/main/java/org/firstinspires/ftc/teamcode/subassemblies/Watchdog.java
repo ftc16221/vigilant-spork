@@ -8,11 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,11 +29,11 @@ import java.util.Set;
 public class Watchdog {
 
     public static boolean WRITE_TO_LOG_FILE = false;
-    public static String LOG_FILE_PATHNAME = ""; // TODO: find spot for log file
+    public static String LOG_FILE_DIR = AppUtil.FIRST_FOLDER + "/mmmlogs/";
     public static String LOG_FILE_NAME = "watchdog";
 
     private final File logFile;
-    private static FileWriter logWriter = null;
+    private static PrintWriter logWriter = null;
     private final Set<String> prevNormalizedIssues = new HashSet<>();
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 
@@ -54,14 +57,16 @@ public class Watchdog {
         this.subassemblies = subassemblies;
 
         if (WRITE_TO_LOG_FILE) {
-            logFile = new File(LOG_FILE_PATHNAME + generateFileName()); // create reference to target file
-            if (logFile.getParentFile() != null)
-                logFile.getParentFile().mkdirs(); // ensure parent directories exist
+            File dir = new File(LOG_FILE_DIR);
+            if (!dir.exists()) dir.mkdirs();
 
+            logFile = new File(dir, generateFileName()); // create reference to target file
             try {
-                logWriter = new FileWriter(logFile, true);
+                FileWriter fw = new FileWriter(logFile, true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                logWriter = new PrintWriter(bw);
             } catch (IOException e) {
-                RobotLog.e("Failed to open log file");
+                RobotLog.ee("Watchdog", e, "Failed to open log file");
             }
         } else {
             logFile = null;
@@ -73,7 +78,7 @@ public class Watchdog {
         for (Subassembly subassembly : subassemblies) {
             subassemblyStrings.add(subassembly.getClass().getSimpleName());
         }
-        logInfo("Watchdog initialized with the following subassembly types: " + subassemblyStrings);
+        i("Watchdog initialized with the following subassembly types: " + subassemblyStrings);
     }
 
     public void update() {
@@ -96,7 +101,7 @@ public class Watchdog {
             // add new issues
             if (!prevNormalizedIssues.contains(normalizedIssue)) {
                 prevNormalizedIssues.add(normalizedIssue);
-                logError("ISSUE DISCOVERED: " + issue);
+                e("ISSUE DISCOVERED: " + issue);
             }
 
             // add all issues to telemetry
@@ -107,7 +112,7 @@ public class Watchdog {
         prevNormalizedIssues.removeIf(i -> {
             boolean stillActive = normalizedIssues.contains(i); // check if our tracked issues were polled this cycle
             if (!stillActive) {
-                logError("ISSUE RESOLVED: " + i);
+                e("ISSUE RESOLVED: " + i);
             }
             return !stillActive;
         });
@@ -146,37 +151,29 @@ public class Watchdog {
 
     public static void log(String message) {
         if (logWriter != null) {
-            try {
-                logWriter.write(dateFormat.format(new Date()) + " " + message + "\n");
+                logWriter.println(dateFormat.format(new Date()) + " " + message);
                 logWriter.flush();
-            } catch (IOException e) {
-                RobotLog.e("Failed writing to log: ", e);
-            }
         }
     }
 
-    public static void logInfo(String message) {
+    public static void i(String message) {
         RobotLog.i(message);
         log(message);
     }
 
-    public static void logWarning(String message) {
+    public static void w(String message) {
         RobotLog.w(message);
         log("WARNING: " + message);
     }
 
-    public static void logError(String message) {
+    public static void e(String message) {
         RobotLog.e(message);
         log("ERROR: " + message);
     }
 
     public void stop() {
         if (logWriter != null) {
-            try {
-                logWriter.close();
-            } catch (IOException e) {
-                RobotLog.e("Failed closing log file", e);
-            }
+            logWriter.close();
             logWriter = null;
         }
     }

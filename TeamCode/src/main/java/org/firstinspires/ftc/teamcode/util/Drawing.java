@@ -5,9 +5,8 @@ import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Path;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 
 @Config
 public class Drawing {
@@ -21,7 +20,7 @@ public class Drawing {
     public final double INCH_PER_CM = 0.393701;
 
     private final FtcDashboard dashboard;
-    private final PoseTracker poseTracker;
+    private final Navigator navigator;
     private Canvas canvas;
 
     Path path;
@@ -30,8 +29,8 @@ public class Drawing {
     private boolean enableTargetPose = true;
     private boolean enablePath = false;
 
-    public Drawing(PoseTracker poseTracker) {
-        this.poseTracker = poseTracker;
+    public Drawing(Navigator navigator) {
+        this.navigator = navigator;
         dashboard = FtcDashboard.getInstance();
     }
 
@@ -43,10 +42,10 @@ public class Drawing {
 
         if (enablePath && path != null)
             drawPath(path, PATH_COLOR);
-        if (enableTargetPose && poseTracker.getTargetPose() != null)
-            drawPose(poseTracker.getTargetPose(), TARGET_POSE_COLOR);
-        if (enableCurrentPose && poseTracker.getCurrentPose() != null)
-            drawPose(poseTracker.getCurrentPose(), CURRENT_POSE_COLOR);
+        if (enableTargetPose && navigator.getTargetPose() != null)
+            drawPose(navigator.getTargetPose(), TARGET_POSE_COLOR);
+        if (enableCurrentPose && navigator.getCurrentPose() != null)
+            drawPose(navigator.getCurrentPose(), CURRENT_POSE_COLOR);
 
         dashboard.sendTelemetryPacket(packet);
     }

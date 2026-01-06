@@ -280,6 +280,10 @@ public class Spindexer extends Subassembly {
         }
     }
 
+    public void emptyActiveSlot() {
+        drum[activeSlot] = Artifact.EMPTY;
+    }
+
     private int getIndexOfClosestArtifact(Artifact artifact) {
         int result = -1;
         double smallestDistance = 181;

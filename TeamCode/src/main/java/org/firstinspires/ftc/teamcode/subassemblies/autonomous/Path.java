@@ -15,7 +15,7 @@ public class Path {
         value = poses;
     }
 
-    public boolean execute(PoseTracker poseTracker) {
+    public boolean execute(Navigator navigator) {
         if (state != prevState) {
             if (isComplete) return true;
             if (state >= value.length) {
@@ -23,15 +23,15 @@ public class Path {
                 RobotLog.i("Path Complete!");
                 return true;
             } else if (state + 1 == value.length) { // set ControllerType to APPROACH when approaching the last pose, otherwise default to DRIVE
-                poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);
+                navigator.setControllerType(Navigator.ControllerType.APPROACH);
             } else {
-                poseTracker.setControllerType(PoseTracker.ControllerType.DRIVE);
+                navigator.setControllerType(Navigator.ControllerType.DRIVE);
             }
-            poseTracker.setTargetPose(value[state]);
+            navigator.setTargetPose(value[state]);
             prevState = state;
             return false;
         }
-        if (poseTracker.isAtTarget()) state++;
+        if (navigator.isAtTarget()) state++;
         return false;
     }
 

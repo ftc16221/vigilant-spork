@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Path;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.util.Drawing;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
@@ -22,8 +22,8 @@ public class TestAuto extends LinearOpMode {
 
     public void runOpMode() {
 
-        PoseTracker poseTracker = new PoseTracker(this, STARTING_POSE);
-        Drawing drawing = new Drawing(poseTracker);
+        Navigator navigator = new Navigator(this, STARTING_POSE);
+        Drawing drawing = new Drawing(navigator);
 
         int currentPath = 1;
 
@@ -35,19 +35,19 @@ public class TestAuto extends LinearOpMode {
         if (opModeIsActive()) {
             while (opModeIsActive()) {
                 if (currentPath == 1) {
-                    path1.execute(poseTracker);
+                    path1.execute(navigator);
                     if (path1.isComplete()) {
                         currentPath = 2;
                         path2.reinitialize();
                     }
                 } else {
-                    path2.execute(poseTracker);
+                    path2.execute(navigator);
                     if (path2.isComplete()) {
                         currentPath = 1;
                         path1.reinitialize();
                     }
                 }
-                poseTracker.update();
+                navigator.update();
                 drawing.update();
             }
         }

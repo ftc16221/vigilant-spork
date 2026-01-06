@@ -33,7 +33,7 @@ import javax.annotation.CheckForNull;
  * This class keeps track of the robot's position and handles all autonomous movement
  */
 @Config
-public class PoseTracker extends Subassembly {
+public class Navigator extends Subassembly {
 
     // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)
     public static double DRIVE_P = 0.01, DRIVE_D = 0.0001;
@@ -75,8 +75,8 @@ public class PoseTracker extends Subassembly {
     boolean isPointTrackingEnabled = false;
     double trackingPower = 0;
 
-    public PoseTracker(OpMode opMode, Pose startingPose) {
-        super(opMode, "PoseTracker");
+    public Navigator(OpMode opMode, Pose startingPose) {
+        super(opMode, "Navigator");
         dashboard = FtcDashboard.getInstance();
         this.startingPose = startingPose;
         currentPose = startingPose;
@@ -93,7 +93,7 @@ public class PoseTracker extends Subassembly {
         Class<? extends OpMode> opModeClass = opMode.getClass();
         if (opModeClass.isAnnotationPresent(Autonomous.class)) {
             opModeType = OpModeType.AUTONOMOUS;
-            RobotLog.i("(PoseTracker) OpMode appears to be Autonomous, automatically enabling movement");
+            RobotLog.i("(Navigator) OpMode appears to be Autonomous, automatically enabling movement");
             enableMovement();
         } else if (opModeClass.isAnnotationPresent(TeleOp.class)) {
             opModeType = OpModeType.TELEOP;
@@ -101,7 +101,7 @@ public class PoseTracker extends Subassembly {
             opModeType = OpModeType.UNKNOWN;
         }
 
-        log(opMode, "PoseTracker successfully initialized with the following Localizers: " + localizers);
+        log(opMode, "Navigator successfully initialized with the following Localizers: " + localizers);
     }
 
     public void update() {
@@ -109,7 +109,7 @@ public class PoseTracker extends Subassembly {
         currentPose = getPrioritizedPose();
 
         if (currentPose == null && isMovementEnabled) {
-            RobotLog.w("(PoseTracker) currentPose is null, disabling autonomous movement and stopping robot");
+            RobotLog.w("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
             underglow.setColor(Underglow.Color.ORANGE);
@@ -118,7 +118,7 @@ public class PoseTracker extends Subassembly {
         assert currentPose != null;
 
         if (targetPose == null && isMovementEnabled) {
-            RobotLog.w("(PoseTracker) targetPose is null, disabling autonomous movement and stopping robot");
+            RobotLog.w("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
             underglow.setColor(Underglow.Color.ORANGE);
@@ -170,7 +170,7 @@ public class PoseTracker extends Subassembly {
                 xPower = xDrivePDController.calculate(currentPose.x, targetPose.x);
                 yPower = yDrivePDController.calculate(currentPose.y, targetPose.y);
             } else {
-                RobotLog.e("(PoseTracker) Controller Type is null, setting it to APPROACH");
+                RobotLog.e("(Navigator) Controller Type is null, setting it to APPROACH");
                 controllerType = ControllerType.APPROACH;
                 xPower = 0.0;
                 yPower = 0.0;
@@ -244,7 +244,7 @@ public class PoseTracker extends Subassembly {
         telemetry.addLine();
     }
 
-    boolean isAtTarget() {
+    public boolean isAtTarget() {
         double xPosError = currentPose.x - targetPose.x;
         double yPosError = currentPose.y - targetPose.y;
         double hPosError = currentPose.h - targetPose.h;

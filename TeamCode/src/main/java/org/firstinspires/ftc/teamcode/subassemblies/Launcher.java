@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,9 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.util.CircularDoubleArray;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
@@ -33,10 +32,11 @@ public class Launcher extends Subassembly {
     public static double C = 0.0;
 
     // PIDF coefficients for flywheel speed
-    public static double kP = 0.0, kI = 0.0, kD = 0.0, kF = 0.0; // TODO: find these
+    public static double kP = 0.0, kI = 1.0, kD = 0.0, kF = 13.0; // TODO: find these on the flywheel
 
     public static double ENCODER_RES = 28.0; // PPR
     public static int NUM_OF_VELOCITY_SAMPLES = 5;
+    public static double VELOCITY_TOLERANCE = 50; // RPM
     public static int VELOCITY_DIP_THRESHOLD = 150; // ticks per second
     public static double TARGET_DIFF_WARNING_THRESHOLD = 30; // RPM
 
@@ -52,7 +52,6 @@ public class Launcher extends Subassembly {
     private final Servo hoodServo;
     private final ToggleServo gateServo;
     private final DcMotorEx flywheelMotor;
-    private final PIDFController flywheelPIDF = new PIDFController(kP, kI, kD, kF);
     private final CircularDoubleArray flywheelVelArray;
 
     private Double targetVel = 0.0;
@@ -67,8 +66,9 @@ public class Launcher extends Subassembly {
         this.spindexer = spindexer;
 
         flywheelMotor = (DcMotorEx) opMode.hardwareMap.dcMotor.get("launcher");
-        flywheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // RUN_WITHOUT_ENCODER doesn't disable encoder readouts
+        flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // RUN_WITHOUT_ENCODER doesn't disable encoder readouts
         flywheelMotor.setDirection(FLYWHEEL_MOTOR_DIRECTION);
+        flywheelMotor.setVelocityPIDFCoefficients(kP, kI, kD, kF);
 
         hoodServo = opMode.hardwareMap.servo.get("hood");
         hoodServo.setDirection(HOOD_SERVO_DIRECTION);
@@ -83,15 +83,14 @@ public class Launcher extends Subassembly {
 
     public void update() {
 
-        if (Global.ENABLE_TUNING_MODE) flywheelPIDF.setPIDF(kP, kI, kD, kF);
+        if (Global.ENABLE_TUNING_MODE) flywheelMotor.setVelocityPIDFCoefficients(kP, kI, kD, kF);
 
         flywheelVelArray.addValue(MathEx.toRPM(flywheelMotor.getVelocity(), ENCODER_RES));
-        double flywheelVel = getVelocity();
-
-        double flywheelPower = flywheelPIDF.calculate(flywheelVel, targetVel);
-        flywheelPower = MathEx.clamp(flywheelPower, -1, 1);
-        sendData("flywheel power", flywheelPower);
-        flywheelMotor.setPower(flywheelPower);
+        double flywheelVel = flywheelVelArray.getAverage();
+        flywheelMotor.setVelocity(MathEx.toEncoderTicksPerSec(targetVel, ENCODER_RES));
+        sendData("error", flywheelVel - targetVel);
+        sendData("current velocity", flywheelVel);
+        sendData("target velocity", targetVel);
 
         switch (currentState) {
             case IDLE: // waiting for item in queue
@@ -113,7 +112,7 @@ public class Launcher extends Subassembly {
                 }
                 break;
             case AWAITING_SPINDEXER: // waiting for artifact delivery from spindexer
-                if (!spindexer.isBusy()) {
+                if (!spindexer.isBusy() && isReady()) {
                     gateServo.open();
                     currentState = State.LAUNCHING;
                 }
@@ -122,6 +121,7 @@ public class Launcher extends Subassembly {
                 if (flywheelVel - flywheelMotor.getVelocity() > VELOCITY_DIP_THRESHOLD) {
                     gateServo.close();
                     launchQueue.removeFirst();
+                    spindexer.emptyActiveSlot();
                     if (launchQueue.isEmpty()) currentState = State.SPINDOWN;
                     else currentState = State.IDLE;
                 }
@@ -215,24 +215,15 @@ public class Launcher extends Subassembly {
         currentState = State.REJECTED;
     }
 
-    /**
-     * sets target RPM of the flywheel launcher
-     */
-    public void setTargetVelocity(double targetVel) {
-        this.targetVel = targetVel;
-        sendData("target flywheel velocity (RPM)", targetVel);
+    public void setTargetVelocity(double rpm) {
+        targetVel = rpm;
     }
 
-    /**
-     * gets the current velocity in RPM of the flywheel
-     */
     public double getVelocity() {
-        double avgVel = flywheelVelArray.getAverage();
-        sendData("average flywheel velocity (RPM)", avgVel);
-        return avgVel;
+        return flywheelVelArray.getAverage();
     }
 
-    private void setHoodAngle(double angleInDegrees) {
+    public void setHoodAngle(double angleInDegrees) {
         angleInDegrees = MathEx.clamp(angleInDegrees, MIN_HOOD_ANGLE, MAX_HOOD_ANGLE);
         hoodAngle = angleInDegrees;
         double absoluteAngle = hoodAngle - MIN_HOOD_ANGLE;
@@ -240,11 +231,19 @@ public class Launcher extends Subassembly {
         hoodServo.setPosition(MathEx.degreesToServoPosition(servoAngle, 1800, HOOD_RANGE_MIN, HOOD_RANGE_MAX));
     }
 
+    public boolean isReady() {
+        return Math.abs(flywheelVelArray.getAverage() - targetVel) < VELOCITY_TOLERANCE;
+    }
+
+    public State getState() {
+        return currentState;
+    }
+
     public enum Artifact {
         GREEN, PURPLE, ANY
     }
 
-    private enum State {
+    public enum State {
         IDLE, AWAITING_SPINDEXER, LAUNCHING, SPINDOWN, REJECTED
     }
 }

@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
@@ -22,10 +21,8 @@ public class LauncherTuner extends OpMode {
     public static double MAX_RPM = 6000;
     public static boolean USE_LIMELIGHT = false;
     public static int GOAL_APRILTAG_ID = 24; // default: tag id of red goal. blue goal is id 20
-    public static double INTAKE_SERVO_POS = 0.5;
 
     private double prevTargetRPM = 0;
-    private double prevIntakeServoPos = 0;
     private final boolean useLimelight = USE_LIMELIGHT;
 
     private boolean dpadWasPressed = false;
@@ -80,6 +77,8 @@ public class LauncherTuner extends OpMode {
             limelightCam.update();
             telemetryA.addData("Distance from goal", limelightCam.getDistanceFromTag(GOAL_APRILTAG_ID));
         }
+
+        launcher.update();
     }
 }
 

@@ -47,6 +47,10 @@ public class MathEx {
         return ticksPerSec * 60 / encoderResolution; // convert to ticks/min, then to revs/min
     }
 
+    public static double toEncoderTicksPerSec(double rpm, double encoderResolution) {
+        return rpm / 60 * encoderResolution; // convert to revs/sec, then ticks/sec
+    }
+
     /**
      * from revolutions per minute to encoder ticks per second
      */

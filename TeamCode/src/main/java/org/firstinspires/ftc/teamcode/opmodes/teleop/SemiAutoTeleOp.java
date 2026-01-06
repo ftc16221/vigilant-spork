@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;
@@ -34,7 +34,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     Launcher launcher;
     Intake intake;
     Underglow underglow;
-    PoseTracker poseTracker;
+    Navigator navigator;
     LimelightCam limelightCam;
     PinpointOdo pinpointOdo;
     Drawing drawing;
@@ -52,15 +52,15 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         launcher = new Launcher(this, spindexer);
         limelightCam = new LimelightCam(this);
         pinpointOdo = new PinpointOdo(this, Global.lastPose);
-        poseTracker = new PoseTracker(this, Global.lastPose);
+        navigator = new Navigator(this, Global.lastPose);
         underglow = new Underglow(this);
-        drawing = new Drawing(poseTracker);
+        drawing = new Drawing(navigator);
 
         driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        poseTracker.setTargetPose(TARGET_POSE);
-        poseTracker.setTrackingPoint(TRACKING_POINT);
-        poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);
+        navigator.setTargetPose(TARGET_POSE);
+        navigator.setTrackingPoint(TRACKING_POINT);
+        navigator.setControllerType(Navigator.ControllerType.APPROACH);
     }
 
     @Override
@@ -69,24 +69,24 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         // ################   GAMEPAD 1   ################
         if (gamepad1.right_bumper) { // start auto movement
             autoMovementEnabled = true;
-            poseTracker.enableMovement();
+            navigator.enableMovement();
             underglow.setColor(AUTO_MOVEMENT_COLOR);
         } else if (!gamepad1.atRest() && autoMovementEnabled) { // cancel auto movement
             autoMovementEnabled = false;
-            poseTracker.disableMovement();
+            navigator.disableMovement();
             underglow.setColor(IDLE_COLOR);
         } else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
             goalTrackingEnabled = true;
-            poseTracker.enablePointTracking();
+            navigator.enablePointTracking();
             underglow.setColor(GOAL_TRACKING_COLOR);
         } else if (gamepad1.right_stick_x != 0 && goalTrackingEnabled) { // cancel goal tracking
             goalTrackingEnabled = false;
-            poseTracker.disablePointTracking();
+            navigator.disablePointTracking();
             underglow.setColor(IDLE_COLOR);
         }
 
         if (goalTrackingEnabled) {
-            driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, poseTracker.getTrackingPower());
+            driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
         }
         if (!autoMovementEnabled && !goalTrackingEnabled) {
             driveBase.control(gamepad1);
@@ -118,10 +118,10 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         }
 
         // UPDATES
-        poseTracker.update();
+        navigator.update();
         launcher.update();
         spindexer.update();
-        poseTracker.runTelemetry();
+        navigator.runTelemetry();
         telemetry.update();
         drawing.update();
     }

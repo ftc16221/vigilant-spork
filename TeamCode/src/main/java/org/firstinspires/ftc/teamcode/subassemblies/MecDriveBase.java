@@ -27,8 +27,8 @@ public class MecDriveBase extends Subassembly {
 
         motors = new DcMotor[]{ leftFront, rightFront, leftRear, rightRear };
 
-//        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+//        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
 //        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
         rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
 

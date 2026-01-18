@@ -43,8 +43,8 @@ public class Launcher extends Subassembly {
     public static Servo.Direction HOOD_SERVO_DIRECTION = Servo.Direction.FORWARD;
     public static DcMotorSimple.Direction FLYWHEEL_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
-    public static double GATE_RANGE_MIN = 0.0;
-    public static double GATE_RANGE_MAX = 0.5;
+    public static double GATE_RANGE_MIN = 0.8;
+    public static double GATE_RANGE_MAX = 1.0;
 
     private final Spindexer spindexer;
     private final Servo hoodServo;
@@ -74,7 +74,7 @@ public class Launcher extends Subassembly {
         hoodServo.scaleRange(HOOD_RANGE_MIN, HOOD_RANGE_MAX);
 
         gateServo = new ToggleServo(opMode.hardwareMap.servo.get("gate"));
-
+        gateServo.setDirection(Servo.Direction.REVERSE);
         gateServo.setScaleRange(GATE_RANGE_MIN, GATE_RANGE_MAX);
 
         flywheelVelArray = new CircularDoubleArray(NUM_OF_VELOCITY_SAMPLES);
@@ -139,6 +139,7 @@ public class Launcher extends Subassembly {
                 }
                 break;
             case SPINDOWN: // spinning down, all artifacts launched
+                currentState = State.IDLE;
                 break;
             case REJECTED:
                 Watchdog.w("An artifact couldn't be delivered or launch was cancelled");
@@ -149,6 +150,7 @@ public class Launcher extends Subassembly {
                 if (launchQueue.isEmpty()) currentState = State.SPINDOWN;
                 else currentState = State.IDLE;
         }
+        telemetry.addData("launcher state", currentState);
     }
 
     public double autoAim(double distance) {

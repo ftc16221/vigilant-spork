@@ -46,7 +46,6 @@ public class Navigator extends Subassembly {
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
 
-    MultipleTelemetry telemetry;
     FtcDashboard dashboard;
 
     public PinpointOdo pinpointOdo;

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -29,7 +30,7 @@ public class Launcher extends Subassembly {
     public static double C = 0.0;
 
     // PIDF coefficients for flywheel speed
-    public static double kP = 0.0, kI = 1.0, kD = 0.0, kF = 13.0; // TODO: find these on the flywheel
+    public static double kP = 0.00016, kI = 0.0, kD = 0.000035, kF = 13.0;
 
     public static double ENCODER_RES = 28.0; // PPR
     public static int NUM_OF_VELOCITY_SAMPLES = 5;
@@ -51,6 +52,8 @@ public class Launcher extends Subassembly {
     private final DcMotorEx flywheelMotor;
     private final CircularDoubleArray flywheelVelArray;
 
+    private final PIDFController flywheelPIDF = new PIDFController(kP, kI, kD, kF);
+
     private Double targetVel = 0.0;
     private double hoodAngle = MIN_HOOD_ANGLE;
 
@@ -63,9 +66,8 @@ public class Launcher extends Subassembly {
         this.spindexer = spindexer;
 
         flywheelMotor = (DcMotorEx) opMode.hardwareMap.dcMotor.get("launcher");
-        flywheelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // RUN_WITHOUT_ENCODER doesn't disable encoder readouts
+        flywheelMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // RUN_WITHOUT_ENCODER doesn't disable encoder readouts
         flywheelMotor.setDirection(FLYWHEEL_MOTOR_DIRECTION);
-        flywheelMotor.setVelocityPIDFCoefficients(kP, kI, kD, kF);
 
         hoodServo = opMode.hardwareMap.servo.get("hood");
         hoodServo.setDirection(HOOD_SERVO_DIRECTION);
@@ -80,11 +82,12 @@ public class Launcher extends Subassembly {
 
     public void update() {
 
-        if (Global.ENABLE_TUNING_MODE) flywheelMotor.setVelocityPIDFCoefficients(kP, kI, kD, kF);
+        if (Global.ENABLE_TUNING_MODE) flywheelPIDF.setPIDF(kP, kI, kD, kF);
 
         flywheelVelArray.addValue(MathEx.toRPM(flywheelMotor.getVelocity(), ENCODER_RES));
         double flywheelVel = flywheelVelArray.getAverage();
-        flywheelMotor.setVelocity(MathEx.toEncoderTicksPerSec(targetVel, ENCODER_RES));
+        double powerDelta = flywheelPIDF.calculate(flywheelVel, targetVel);
+        flywheelMotor.setPower(flywheelMotor.getPower() + powerDelta);
         sendData("error", flywheelVel - targetVel);
         sendData("current velocity", flywheelVel);
         sendData("target velocity", targetVel);

@@ -24,7 +24,7 @@ public class Spindexer extends Subassembly {
     public static double INTAKE_ANGLE = -60.0; // degrees
     public static double LAUNCHER_ANGLE = 120.0; // degrees TODO: find actual value
 
-    public static double ENCODER_RES = 384.5; // PPR
+    public static double ENCODER_RES = 537.7; // PPR
 
     // color thresholds are in 0xAARRGGBB formatting
     public static ColorThreshold HOME_COLOR_THRESHOLD = new ColorThreshold(20f, 30f, 0.9f, 1.0f, 0.9f, 1.0f); // orange
@@ -34,10 +34,10 @@ public class Spindexer extends Subassembly {
     public static float COLOR_SENSOR_GAIN = 150f; // always >=1
     public static double PROXIMITY_THRESHOLD = 5.0; // cm
 
-    public static double kP = 0.008, kI = 0.04, kD = 0.0004, kF = 0.0; // TODO: tune with the real thing
+    public static double kP = 0.0, kI = 0.0, kD = 0.0, kF = 0.0; // TODO: tune with the real thing
     public static int TOLERANCE = 2; // degrees
 
-    public static Artifact[] drum = new Artifact[3];
+    public Artifact[] drum = new Artifact[3];
 
     private final Intake intake;
 
@@ -48,11 +48,10 @@ public class Spindexer extends Subassembly {
     private int encoderOffset = 0; // only used when passive re-homing is enabled
 
     private double baseAngle = INTAKE_ANGLE;
-    public static int activeSlot = 0;
+    public int activeSlot = 0;
 
-    public static Mode mode = Mode.LAUNCHER; // TODO: ensure this isn't set to INTAKE
+    public Mode mode = Mode.LAUNCHER; // TODO: ensure this isn't set to INTAKE
     private boolean isBusy = true;
-
 
     public Spindexer(OpMode opMode, Intake intake) {
         super(opMode, "Spindexer");
@@ -68,7 +67,7 @@ public class Spindexer extends Subassembly {
         colorSensor.setGain(COLOR_SENSOR_GAIN);
 
         boolean isAutoOpMode = opMode.getClass().isAnnotationPresent(Autonomous.class);
-        if (isAutoOpMode || drum[0] == null) { // TODO: ensure this isn't all EMPTY
+        if (isAutoOpMode || drum[0] == null) {
             drum[0] = Artifact.GREEN;
             drum[1] = Artifact.PURPLE;
             drum[2] = Artifact.PURPLE;
@@ -91,14 +90,13 @@ public class Spindexer extends Subassembly {
             colorSensor.setGain(COLOR_SENSOR_GAIN);
         }
 
-        if (mode == Mode.INTAKE) baseAngle = INTAKE_ANGLE;
-        else baseAngle = LAUNCHER_ANGLE;
+        if (mode == Mode.INTAKE && baseAngle != INTAKE_ANGLE) baseAngle = INTAKE_ANGLE;
+        else if (mode == Mode.LAUNCHER && baseAngle != LAUNCHER_ANGLE) baseAngle = LAUNCHER_ANGLE;
 
         double error = getDistanceFromIndex(activeSlot);
 
         double power = spindexerPIDF.calculate(error);
         power = MathEx.clamp(power, -1, 1);
-        sendData("spindexer power", power);
         spindexerMotor.setPower(power);
         isBusy = error > TOLERANCE;
         sendData("error", error);
@@ -329,7 +327,7 @@ public class Spindexer extends Subassembly {
     private double getDistanceFromIndex(int slotIndex) {
         double indexAngle = baseAngle + (slotIndex * 120);
         double currentAngle = getCurrentAngle();
-        double distance = (currentAngle - indexAngle) % 360;
+        double distance = (indexAngle - currentAngle) % 360;
 
         // normalize distance between [-179.9 to 180]
         if (distance > 180) distance -= 360;

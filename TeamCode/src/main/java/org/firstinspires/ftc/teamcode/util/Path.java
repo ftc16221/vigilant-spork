@@ -28,7 +28,7 @@ public class Path {
             } else {
                 navigator.setControllerType(Navigator.ControllerType.DRIVE);
             }
-            navigator.setTargetPose(value[state]);
+            navigator.setUnspecificTargetPose(value[state]);
             prevState = state;
             return false;
         }

@@ -22,7 +22,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 import java.util.ArrayList;
 import java.util.List;
 
-@Config
+//@Config
 public class LimelightCam extends Localizer {
 
     public static int POSE_ARRAY_SIZE = 15; // how many poses that should be stored and averaged

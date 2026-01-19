@@ -46,6 +46,8 @@ public class Navigator extends Subassembly {
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
 
+    public static double TRACKING_OFFSET = -90; // degrees
+
     FtcDashboard dashboard;
 
     public PinpointOdo pinpointOdo;
@@ -170,6 +172,9 @@ public class Navigator extends Subassembly {
         // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
         double hError = Global.ANGLE_UNIT == AngleUnit.DEGREES ? AngleUnit.normalizeDegrees(targetH - currentPose.h) : AngleUnit.normalizeRadians(targetH - currentPose.h);
         double hPower = headingPIDController.calculate(hError, 0);
+        sendData("targetH", targetH);
+        sendData("hPower", hPower);
+        if (!USE_H) hPower = 0;
 
         if (isPointTrackingEnabled) trackingPower = hPower;
 
@@ -204,7 +209,7 @@ public class Navigator extends Subassembly {
 
     private double findTrackedHeading(Pose referencePose) {
         Pose offsetPose = trackingPoint.subtract(referencePose);
-        return Global.ANGLE_UNIT.fromRadians(Math.atan2(offsetPose.y, offsetPose.x)); // heading that faces the targetPose
+        return Global.ANGLE_UNIT.fromRadians(Math.atan2(offsetPose.y, offsetPose.x)) + TRACKING_OFFSET; // heading that faces the targetPose
     }
 
     /** this method returns the pose of the earliest nonnull pose value from the localizer list,
@@ -293,10 +298,22 @@ public class Navigator extends Subassembly {
     /** Get current P(I)D controller type */
     public ControllerType getControllerType() { return controllerType; }
 
+    /** Set target pose, mirroring for blue alliance */
+    public void setUnspecificTargetPose(Pose targetPose) {
+        if (Global.alliance == Global.Alliance.BLUE) this.targetPose = targetPose.mirror();
+        else this.targetPose = targetPose;
+    }
+    /** Set target pose ignoring alliance */
     public void setTargetPose(Pose targetPose) { this.targetPose = targetPose; }
     public Pose getTargetPose() { return targetPose; }
     public Pose getCurrentPose() { return currentPose; }
 
+    /** Set tracking point, mirroring for blue alliance */
+    public void setUnspecificTrackingPoint(Pose trackingPoint) {
+        if (Global.alliance == Global.Alliance.BLUE) this.trackingPoint = trackingPoint.mirror();
+        else this.trackingPoint = trackingPoint;
+    }
+    /** Set tracking point ignoring alliance */
     public void setTrackingPoint(Pose trackingPoint) { this.trackingPoint = trackingPoint; }
     public Pose getTrackingPoint() { return trackingPoint; }
 

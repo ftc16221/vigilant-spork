@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
-@Config
+//@Config
 public class ThreeWheelOdo extends Localizer {
 
     public static double TRACK_WIDTH = 0; // distance between the middle of the wheels TODO: find val

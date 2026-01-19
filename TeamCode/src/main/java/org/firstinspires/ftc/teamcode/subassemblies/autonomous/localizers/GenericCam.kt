@@ -53,7 +53,7 @@ class GenericCam(opMode: OpMode): Localizer(opMode, "Vision") {
      * to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
      */
 
-    @Config
+//    @Config
     companion object {
         @JvmField
         var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
@@ -176,9 +176,9 @@ class GenericCam(opMode: OpMode): Localizer(opMode, "Vision") {
 
         return when (Global.alliance) {
             Global.Alliance.BLUE -> rawPose
-            Global.Alliance.RED -> rawPose.invert()
+            Global.Alliance.RED -> rawPose.mirror()
             null -> {
-                if (RED_APRILTAG_IDS.contains(detection.id)) rawPose.invert()
+                if (RED_APRILTAG_IDS.contains(detection.id)) rawPose.mirror()
                 else rawPose
             }
         }
@@ -194,11 +194,5 @@ class GenericCam(opMode: OpMode): Localizer(opMode, "Vision") {
     fun findAprilTag(id: Int): AprilTagDetection? {
         val detections = getValidDetections()
         return detections?.find { it.id == id }
-    }
-
-    fun Pose.invert() : Pose{
-        if (Global.ANGLE_UNIT == AngleUnit.DEGREES) h = AngleUnit.normalizeDegrees(h + 180)
-        else if (Global.ANGLE_UNIT == AngleUnit.RADIANS) h = AngleUnit.normalizeRadians(h + Math.PI)
-        return Pose(-x, -y, h)
     }
 }

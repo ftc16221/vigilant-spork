@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 
 import java.util.ArrayList;
 
-@Config
+//@Config
 public class DriveEncoders extends Localizer {
 
     public static double CM_PER_REVOLUTION = 0;

@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 @Config
 public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
-    public static Pose TRACKING_POINT = new Pose(0, 0, 0);
+    public static Pose GOAL_POSE = new Pose(-180, 180, 0);
 
     public static Pose CLOSE_LAUNCH_POSE = new Pose(0, 0, 0); // TODO
     public static double CLOSE_LAUNCH_RPM = 1300; // TODO
@@ -69,8 +69,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
         driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-//        navigator.setTargetPose(TARGET_POSE);
-        navigator.setTrackingPoint(TRACKING_POINT);
+        navigator.setTargetPose(FAR_LAUNCH_POSE);
+        navigator.setUnspecificTrackingPoint(GOAL_POSE);
         navigator.setControllerType(Navigator.ControllerType.APPROACH);
     }
 
@@ -81,6 +81,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     @Override
     public void loop() {
+        drawing.prep();
+        drawing.drawPoint(GOAL_POSE, "purple");
 
         // ################   GAMEPAD 1   ################
         if (gamepad1.right_bumper) { // start auto movement
@@ -143,6 +145,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         launcher.update();
         spindexer.update();
         drawing.update();
+        drawing.send();
         navigator.runTelemetry();
         spindexer.runTelemetry();
         telemetry.update();

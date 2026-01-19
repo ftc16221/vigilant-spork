@@ -22,6 +22,7 @@ public class Drawing {
     private final Navigator navigator;
     private final Localizer localizer;
     private Canvas canvas;
+    private TelemetryPacket packet;
 
     Path path;
 
@@ -41,12 +42,18 @@ public class Drawing {
         dashboard = FtcDashboard.getInstance();
     }
 
-    public void update() {
-        TelemetryPacket packet = new TelemetryPacket();
+    public void prep() {
+        packet = new TelemetryPacket();
         canvas = packet.fieldOverlay();
         canvas.setScale(INCH_PER_CM, INCH_PER_CM);
         canvas.setStrokeWidth(STROKE_WIDTH);
+    }
 
+    public void send() {
+        dashboard.sendTelemetryPacket(packet);
+    }
+
+    public void update() {
         if (enablePath && path != null)
             drawPath(path, PATH_COLOR);
         if (navigator != null) {
@@ -59,8 +66,6 @@ public class Drawing {
                 drawPose(localizer.getPose(), "yellow");
             }
         }
-
-        dashboard.sendTelemetryPacket(packet);
     }
 
     public void drawPath(Path path, String color) {
@@ -79,9 +84,13 @@ public class Drawing {
         double hInRadians = Math.toRadians(pose.h);
         canvas
                 .setStroke(color)
-                .setRotation(hInRadians)
                 .strokeCircle(pose.x, pose.y, POSE_RADIUS)
                 .strokeLine(pose.x, pose.y, pose.x + (POSE_RADIUS * Math.cos(hInRadians)), pose.y + (POSE_RADIUS * Math.sin(hInRadians)));
+    }
+
+    public void drawPoint(Pose pose, String color) {
+        canvas.setFill(color);
+        canvas.fillCircle(pose.x, pose.y, (double) STROKE_WIDTH / 2);
     }
 
     /**

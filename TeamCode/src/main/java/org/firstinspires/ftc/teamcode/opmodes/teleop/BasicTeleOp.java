@@ -43,9 +43,9 @@ public class BasicTeleOp extends OpMode {
         driveBase.control(gamepad1);
         // INTAKE
         if (gamepad1.dpad_up || gamepad2.a) {
-            intake.run(Intake.Direction.IN);
+            intake.setMode(Intake.Mode.IN);
         } else if (gamepad1.dpad_down || gamepad2.y) {
-            intake.run(Intake.Direction.OUT);
+            intake.setMode(Intake.Mode.OUT);
         } else if (gamepad1.dpad_left || gamepad1.dpad_right || gamepad2.b) {
             intake.stop();
         }

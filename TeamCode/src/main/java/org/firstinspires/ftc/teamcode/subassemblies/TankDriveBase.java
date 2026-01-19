@@ -21,7 +21,7 @@ public class TankDriveBase extends Subassembly {
 
         motors = new DcMotor[]{ left, right };
 
-//        left.setDirection(DcMotorSimple.Direction.REVERSE);
+//        left.setDirection(DcMotorSimple.Mode.REVERSE);
         right.setDirection(DcMotorSimple.Direction.REVERSE);
 
         setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

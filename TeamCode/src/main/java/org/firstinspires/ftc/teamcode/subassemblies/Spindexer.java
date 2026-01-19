@@ -9,48 +9,52 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.util.ColorThreshold;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+import java.util.concurrent.TimeUnit;
+
 @Config
 public class Spindexer extends Subassembly {
-
-    public static boolean ENABLE_PASSIVE_REHOMING = false;
-    public static double REHOMING_THRESHOLD = 3; // encoder pulses
-
     // from home
-    public static double INTAKE_ANGLE = -60.0; // degrees
-    public static double LAUNCHER_ANGLE = 120.0; // degrees TODO: find actual value
+    public static double INTAKE_ANGLE = 190.0; // degrees
+    public static double LAUNCHER_ANGLE = 0.0; // degrees
 
     public static double ENCODER_RES = 537.7; // PPR
 
     // color thresholds are in 0xAARRGGBB formatting
-    public static ColorThreshold HOME_COLOR_THRESHOLD = new ColorThreshold(20f, 30f, 0.9f, 1.0f, 0.9f, 1.0f); // orange
-    public static ColorThreshold GREEN_THRESHOLD = new ColorThreshold(130f, 150f, 0.45f, 0.7f, 0.15f, 1.0f);
-    public static ColorThreshold PURPLE_THRESHOLD = new ColorThreshold(210f, 230f, 0.4f, 0.7f, 0.13f, 1.0f);
+    public static ColorThreshold GREEN_THRESHOLD = new ColorThreshold(130f, 165f, 0.45f, 0.8f, 0.005f, 0.6f);
+    public static ColorThreshold PURPLE_THRESHOLD = new ColorThreshold(205f, 230f, 0.3f, 1.0f, 0.015f, 1.0f);
 
-    public static float COLOR_SENSOR_GAIN = 150f; // always >=1
+    public static float COLOR_SENSOR_GAIN = 10f; // always >=1
     public static double PROXIMITY_THRESHOLD = 5.0; // cm
 
-    public static double kP = 0.0, kI = 0.0, kD = 0.0, kF = 0.0; // TODO: tune with the real thing
+    public static double kP = 0.012, kI = 0.03, kD = 0.0005, kF = 0.0;
     public static int TOLERANCE = 2; // degrees
+
+    public static int INTAKE_SAFETY_DEADLINE = 3; // sec
+    public static int INTAKE_DEADLINE = 300; // ms
 
     public Artifact[] drum = new Artifact[3];
 
     private final Intake intake;
+    private final Deadline intakeSafetyDeadline = new Deadline(INTAKE_SAFETY_DEADLINE, TimeUnit.SECONDS);
+    private boolean hasIntakeSafetyDeadlineExpired = false;
+
+    private final Deadline intakeDeadline = new Deadline(INTAKE_DEADLINE, TimeUnit.MILLISECONDS);
 
     private final DcMotor spindexerMotor;
     private final NormalizedColorSensor colorSensor;
     private final PIDFController spindexerPIDF = new PIDFController(kP, kI, kD, kF);;
 
-    private int encoderOffset = 0; // only used when passive re-homing is enabled
-
     private double baseAngle = INTAKE_ANGLE;
-    public int activeSlot = 0;
+    private int activeSlot = 0;
 
-    public Mode mode = Mode.LAUNCHER; // TODO: ensure this isn't set to INTAKE
+    private Mode mode = Spindexer.Mode.LAUNCHER;
+    private Mode prevMode = mode;
     private boolean isBusy = true;
 
     public Spindexer(OpMode opMode, Intake intake) {
@@ -73,14 +77,19 @@ public class Spindexer extends Subassembly {
             drum[2] = Artifact.PURPLE;
         } else {
             if (isFull()) {
-                mode = Mode.LAUNCHER;
+                mode = Spindexer.Mode.LAUNCHER;
             } else {
-                mode = Mode.INTAKE;
+                mode = Spindexer.Mode.INTAKE;
             }
         }
 
-        if (isFull()) mode = Mode.LAUNCHER;
-        else mode = Mode.INTAKE;
+        // TODO: temp
+        drum[0] = Artifact.EMPTY;
+        drum[1] = Artifact.EMPTY;
+        drum[2] = Artifact.EMPTY;
+
+        if (isFull()) mode = Spindexer.Mode.LAUNCHER;
+        else mode = Spindexer.Mode.INTAKE;
     }
 
     public void update() {
@@ -90,8 +99,8 @@ public class Spindexer extends Subassembly {
             colorSensor.setGain(COLOR_SENSOR_GAIN);
         }
 
-        if (mode == Mode.INTAKE && baseAngle != INTAKE_ANGLE) baseAngle = INTAKE_ANGLE;
-        else if (mode == Mode.LAUNCHER && baseAngle != LAUNCHER_ANGLE) baseAngle = LAUNCHER_ANGLE;
+        if (mode == Spindexer.Mode.INTAKE && baseAngle != INTAKE_ANGLE) baseAngle = INTAKE_ANGLE;
+        else if (mode == Spindexer.Mode.LAUNCHER && baseAngle != LAUNCHER_ANGLE) baseAngle = LAUNCHER_ANGLE;
 
         double error = getDistanceFromIndex(activeSlot);
 
@@ -99,20 +108,21 @@ public class Spindexer extends Subassembly {
         power = MathEx.clamp(power, -1, 1);
         spindexerMotor.setPower(power);
         isBusy = error > TOLERANCE;
-        sendData("error", error);
-        sendData("power", power);
+        sendData("spx error", error);
+        sendData("spx power", power);
 
         // intake mode
         Artifact detectedArtifact = getDetectedArtifact();
-        if (!isFull() && mode == Mode.INTAKE && !isBusy && detectedArtifact != Artifact.EMPTY) {
+        if (!isFull() && mode == Spindexer.Mode.INTAKE && !isBusy && detectedArtifact != Artifact.EMPTY && intakeDeadline.hasExpired()) {
             Watchdog.i(detectedArtifact + " artifact detected in intake");
             drum[activeSlot] = detectedArtifact;
+            intakeDeadline.reset();
         }
 
-        if (mode == Mode.INTAKE) {
+        if (mode == Spindexer.Mode.INTAKE) {
             if (isFull()) {
                 Watchdog.i("Spindexer full, switching to LAUNCHER mode");
-                mode = Mode.LAUNCHER;
+                mode = Spindexer.Mode.LAUNCHER;
                 // go to first color of motif first, to save time
                 int motifSlot = -1;
                 if (Global.motif != null) {
@@ -129,19 +139,26 @@ public class Spindexer extends Subassembly {
             }
         }
 
-        if (isEmpty() && mode == Mode.LAUNCHER) {
+        if (isEmpty() && mode == Spindexer.Mode.LAUNCHER) {
             Watchdog.i("Spindexer empty, switching to INTAKE mode");
-            mode = Mode.INTAKE;
+            mode = Spindexer.Mode.INTAKE;
             activeSlot = getIndexOfClosestArtifact(Artifact.EMPTY);
         }
 
-        if (ENABLE_PASSIVE_REHOMING) {
-            if (getDetectedColor() == DetectedColor.HOME_COLOR) {
-                int encoderError = spindexerMotor.getCurrentPosition();
-                if (encoderError >= REHOMING_THRESHOLD) {
-                    encoderOffset = -encoderError;
-                }
+        if (prevMode != mode) {
+            if (mode == Spindexer.Mode.INTAKE) {
+                intake.setMode(Intake.Mode.IN);
+            } else if (mode == Spindexer.Mode.LAUNCHER) {
+                intake.setMode(Intake.Mode.OUT);
+                intakeSafetyDeadline.reset();
+                hasIntakeSafetyDeadlineExpired = false;
             }
+            prevMode = mode;
+        }
+
+        if (mode == Spindexer.Mode.LAUNCHER && intakeSafetyDeadline.hasExpired() && !hasIntakeSafetyDeadlineExpired) {
+            intake.setMode(Intake.Mode.OFF);
+            hasIntakeSafetyDeadlineExpired = true;
         }
     }
 
@@ -186,7 +203,7 @@ public class Spindexer extends Subassembly {
      * @return whether an artifact of specified color was found
      */
     public boolean alignForLaunch(Artifact artifact) {
-        mode = Mode.LAUNCHER;
+        mode = Spindexer.Mode.LAUNCHER;
         if (!contains(artifact)) {
             Watchdog.w("Cannot align for launch as the spindexer does not contain any " + artifact + " artifacts");
             return false;
@@ -200,7 +217,7 @@ public class Spindexer extends Subassembly {
      * @return whether any artifact was found
      */
     public boolean alignAnyForLaunch() {
-        mode = Mode.LAUNCHER;
+        mode = Spindexer.Mode.LAUNCHER;
         if (isEmpty()) {
             Watchdog.w("Cannot align for launch as the spindexer is empty");
             return false;
@@ -215,7 +232,7 @@ public class Spindexer extends Subassembly {
      * @return whether any artifact was found
      */
     public boolean alignPrioritizedForLaunch(Artifact artifact) {
-        mode = Mode.LAUNCHER;
+        mode = Spindexer.Mode.LAUNCHER;
         boolean wasSuccess = alignForLaunch(artifact);
         if (!wasSuccess) wasSuccess = alignAnyForLaunch();
         return wasSuccess;
@@ -226,7 +243,7 @@ public class Spindexer extends Subassembly {
      * @return whether an empty slot was found
      */
     public boolean alignForIntake() {
-        mode = Mode.INTAKE;
+        mode = Spindexer.Mode.INTAKE;
         if (isFull()) {
             Watchdog.w("Cannot align to intake as the spindexer is full");
             return false;
@@ -277,11 +294,13 @@ public class Spindexer extends Subassembly {
         return spindexerMotor;
     }
 
+    public NormalizedColorSensor getColorSensor() {
+        return colorSensor;
+    }
+
     public DetectedColor getDetectedColor() {
         int rawColor = colorSensor.getNormalizedColors().toColor();
-        if (HOME_COLOR_THRESHOLD.isColorInRange(rawColor)) {
-            return DetectedColor.HOME_COLOR;
-        } else if (GREEN_THRESHOLD.isColorInRange(rawColor)) {
+        if (GREEN_THRESHOLD.isColorInRange(rawColor)) {
             return DetectedColor.GREEN;
         } else if (PURPLE_THRESHOLD.isColorInRange(rawColor)) {
             return DetectedColor.PURPLE;
@@ -339,7 +358,7 @@ public class Spindexer extends Subassembly {
      * get current angle of the spindexer DcMotor in degrees
      */
     private double getCurrentAngle() {
-        return MathEx.encoderPositionToDegrees(spindexerMotor.getCurrentPosition() + encoderOffset, ENCODER_RES);
+        return MathEx.encoderPositionToDegrees(spindexerMotor.getCurrentPosition(), ENCODER_RES);
     }
 
     /**

@@ -44,7 +44,7 @@ public class ColorThreshold {
     public boolean isValid() {
         boolean result = true;
         for (int i = 0; i < 3; i++) {
-            if (min[i] > max[i]) {
+            if (min[i] >= max[i]) {
                 result = false;
                 break;
             }
@@ -57,9 +57,9 @@ public class ColorThreshold {
             return false;
         }
         boolean result = true;
-        if (hue < min[0] || hue > max[0]) result = false;
-        if (val < min[1] || val > max[1]) result = false;
-        if (sat < min[2] || sat > max[2]) result = false;
+        if (hue <= min[0] || hue >= max[0]) result = false;
+        if (sat <= min[1] || sat >= max[1]) result = false;
+        if (val <= min[2] || val >= max[2]) result = false;
         return result;
     }
 

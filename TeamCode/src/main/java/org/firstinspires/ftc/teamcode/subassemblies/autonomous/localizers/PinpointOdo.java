@@ -65,7 +65,7 @@ public class PinpointOdo extends Localizer {
     @Override public List<String> findIssues() {
         List<String> issues = new ArrayList<>();
         GoBildaPinpointDriver.DeviceStatus status = pinpoint.getDeviceStatus();
-        if (status != GoBildaPinpointDriver.DeviceStatus.READY) {
+        if (status != GoBildaPinpointDriver.DeviceStatus.READY && status != GoBildaPinpointDriver.DeviceStatus.FAULT_BAD_READ) {
             issues.add("Pinpoint status is " + status.name() + ", odometry functionality is likely very limited");
         }
         return issues;

@@ -5,11 +5,16 @@ import static java.lang.Math.max;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MecDriveBase extends Subassembly {
 
@@ -46,6 +51,32 @@ public class MecDriveBase extends Subassembly {
         double rightX = gamepad.right_stick_x;
 
         moveRobot(leftX, leftY, rightX);
+    }
+
+    @Override
+    public List<String> findIssues() {
+        List<String> issues = new ArrayList<>();
+
+        ArrayList<Double> motorCurrents = new ArrayList<>();
+        double sum = 0.0;
+        for (DcMotor motor : motors) {
+            DcMotorEx motorEx = (DcMotorEx) motor;
+            double current = motorEx.getCurrent(CurrentUnit.AMPS);
+            motorCurrents.add(current);
+            sum += current;
+        }
+        double avgCurrent = sum / motorCurrents.size();
+        for (int i = 0; i < motors.length; i++) {
+            double deviation = motorCurrents.get(i) - avgCurrent;
+            if (Math.abs(deviation) < 2) break;
+            int motorName = motors[i].getPortNumber();
+            if (deviation > 0) {
+                issues.add(String.format("driveBase motor (port %s) has a current %.2f amps higher than other motors, and is possibly stalled", motorName, Math.abs(deviation)));
+            } else {
+                issues.add(String.format("driveBase motor (port %s) has a current %.2f amps lower than other motors, and is possibly disconnected", motorName, Math.abs(deviation)));
+            }
+        }
+        return issues;
     }
 
     /**

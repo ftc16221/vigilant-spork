@@ -93,7 +93,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             autoMovementEnabled = false;
             navigator.disableMovement();
             underglow.setColor(IDLE_COLOR);
-        } else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
+        } /*else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
             goalTrackingEnabled = true;
             navigator.enablePointTracking();
             underglow.setColor(GOAL_TRACKING_COLOR);
@@ -101,7 +101,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             goalTrackingEnabled = false;
             navigator.disablePointTracking();
             underglow.setColor(IDLE_COLOR);
-        }
+        } TODO commented because there is some PID feedback loop happening*/
 
         if (goalTrackingEnabled) {
             driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
@@ -144,6 +144,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         navigator.update();
         launcher.update();
         spindexer.update();
+        watchdog.update();
         drawing.update();
         drawing.send();
         navigator.runTelemetry();

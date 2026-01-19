@@ -37,7 +37,7 @@ public class ThreeBallAuto extends OpMode {
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
-        watchdog = new Watchdog(this, spindexer);
+        watchdog = new Watchdog(this, spindexer, intake);
     }
 
     @Override

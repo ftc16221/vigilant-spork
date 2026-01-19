@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;
+import org.firstinspires.ftc.teamcode.util.Drawing;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
@@ -16,6 +17,7 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
 
         MecDriveBase driveBase = new MecDriveBase(this);
         Navigator navigator = new Navigator(this, Global.lastPose);
+        Drawing drawing = new Drawing(navigator);
         navigator.disableMovement();
 
         waitForStart();
@@ -24,6 +26,7 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
             while (opModeIsActive()) {
                 driveBase.control(gamepad1);
                 navigator.update();
+                drawing.update();
 
                 Pose currentPose = navigator.getCurrentPose();
                 if (currentPose == null) {
@@ -33,6 +36,7 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
                     telemetry.addData("y", currentPose.y);
                     telemetry.addData("h", currentPose.h);
                 }
+                telemetry.update();
             }
         }
     }

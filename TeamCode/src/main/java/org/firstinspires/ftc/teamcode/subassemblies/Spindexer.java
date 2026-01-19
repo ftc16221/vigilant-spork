@@ -7,10 +7,10 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
-import org.firstinspires.ftc.teamcode.util.ColorThreshold;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
@@ -25,23 +25,24 @@ public class Spindexer extends Subassembly {
 
     public static double ENCODER_RES = 537.7; // PPR
 
-    // color thresholds are in 0xAARRGGBB formatting
-    public static ColorThreshold GREEN_THRESHOLD = new ColorThreshold(130f, 165f, 0.45f, 0.8f, 0.005f, 0.6f);
-    public static ColorThreshold PURPLE_THRESHOLD = new ColorThreshold(205f, 230f, 0.3f, 1.0f, 0.015f, 1.0f);
+    public static float PURP_G_PCT_THRESHOLD = 37.5f; // must be less than
+    public static float PURP_B_PCT_THRESHOLD = 35.0f; // must be greater than
+
+    public static float GREEN_GRN_PCT_THRESHOLD = 45.0f; // must be greater than
 
     public static float COLOR_SENSOR_GAIN = 10f; // always >=1
     public static double PROXIMITY_THRESHOLD = 5.0; // cm
 
-    public static double kP = 0.012, kI = 0.03, kD = 0.0005, kF = 0.0;
-    public static int TOLERANCE = 2; // degrees
+    public static double kP = 0.009, kI = 0.03, kD = 0.0007, kF = 0.0;
+    public static double TOLERANCE = 2.0; // degrees
 
-    public static int INTAKE_SAFETY_DEADLINE = 3; // sec
+    public static int INTAKE_SAFETY_DEADLINE = 1200; // ms
     public static int INTAKE_DEADLINE = 300; // ms
 
     public Artifact[] drum = new Artifact[3];
 
     private final Intake intake;
-    private final Deadline intakeSafetyDeadline = new Deadline(INTAKE_SAFETY_DEADLINE, TimeUnit.SECONDS);
+    private final Deadline intakeSafetyDeadline = new Deadline(INTAKE_SAFETY_DEADLINE, TimeUnit.MILLISECONDS);
     private boolean hasIntakeSafetyDeadlineExpired = false;
 
     private final Deadline intakeDeadline = new Deadline(INTAKE_DEADLINE, TimeUnit.MILLISECONDS);
@@ -168,6 +169,7 @@ public class Spindexer extends Subassembly {
 
     public void runTelemetry() {
         telemetry.addData("mode", mode);
+        telemetry.addData("isBusy", isBusy);
         telemetry.addLine();
         telemetry.addLine("REMINDER: slots are indexed starting with 0");
         telemetry.addData("active slot", activeSlot);
@@ -299,10 +301,17 @@ public class Spindexer extends Subassembly {
     }
 
     public DetectedColor getDetectedColor() {
-        int rawColor = colorSensor.getNormalizedColors().toColor();
-        if (GREEN_THRESHOLD.isColorInRange(rawColor)) {
+        NormalizedRGBA rawColors = colorSensor.getNormalizedColors();
+        float normR = rawColors.red / rawColors.alpha;
+        float normG = rawColors.green / rawColors.alpha;
+        float normB = rawColors.blue / rawColors.alpha;
+        float sum = normR + normG + normB;
+        float percentG = normG / sum * 100;
+        float percentB = normB / sum * 100;
+
+        if (percentG > GREEN_GRN_PCT_THRESHOLD) {
             return DetectedColor.GREEN;
-        } else if (PURPLE_THRESHOLD.isColorInRange(rawColor)) {
+        } else if (percentG < PURP_G_PCT_THRESHOLD && percentB > PURP_B_PCT_THRESHOLD) {
             return DetectedColor.PURPLE;
         } else {
             return DetectedColor.UNKNOWN;

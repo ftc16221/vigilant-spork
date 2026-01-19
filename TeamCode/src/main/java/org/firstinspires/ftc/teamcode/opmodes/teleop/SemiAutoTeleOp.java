@@ -23,8 +23,16 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 @Config
 public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
-    public static Pose TARGET_POSE = new Pose(0, 0, 0);
     public static Pose TRACKING_POINT = new Pose(0, 0, 0);
+
+    public static Pose CLOSE_LAUNCH_POSE = new Pose(0, 0, 0); // TODO
+    public static double CLOSE_LAUNCH_RPM = 1300; // TODO
+    public static double CLOSE_LAUNCH_ANGLE = 40; // degrees
+
+    public static Pose FAR_LAUNCH_POSE = new Pose(0, 0, 0); // TODO
+    public static double FAR_LAUNCH_RPM = 3200; // TODO
+    public static double FAR_LAUNCH_ANGLE = 45;
+
 
     public static Underglow.Color IDLE_COLOR = Underglow.Color.ALLIANCE;
     public static Underglow.Color GOAL_TRACKING_COLOR = Underglow.Color.GREEN;
@@ -61,9 +69,14 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
         driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        navigator.setTargetPose(TARGET_POSE);
+//        navigator.setTargetPose(TARGET_POSE);
         navigator.setTrackingPoint(TRACKING_POINT);
         navigator.setControllerType(Navigator.ControllerType.APPROACH);
+    }
+
+    @Override
+    public void init_loop() {
+        limelightCam.searchForMotif();
     }
 
     @Override
@@ -129,9 +142,10 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         navigator.update();
         launcher.update();
         spindexer.update();
-        navigator.runTelemetry();
-        telemetry.update();
         drawing.update();
+        navigator.runTelemetry();
+        spindexer.runTelemetry();
+        telemetry.update();
     }
 
     @Override

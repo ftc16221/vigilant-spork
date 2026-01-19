@@ -30,7 +30,7 @@ public class Launcher extends Subassembly {
     public static double C = 0.0;
 
     // PIDF coefficients for flywheel speed
-    public static double kP = 0.00016, kI = 0.0, kD = 0.000035, kF = 13.0;
+    public static double kP = 0.00016, kI = 0.0, kD = 0.000035, kF = 0.0;
 
     public static double ENCODER_RES = 28.0; // PPR
     public static int NUM_OF_VELOCITY_SAMPLES = 5;
@@ -40,7 +40,6 @@ public class Launcher extends Subassembly {
 
     public static double HOOD_RANGE_MIN = 0.0;
     public static double HOOD_RANGE_MAX = 1.0;
-    public static Servo.Direction HOOD_SERVO_DIRECTION = Servo.Direction.FORWARD;
     public static DcMotorSimple.Direction FLYWHEEL_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE;
 
     public static double GATE_RANGE_MIN = 0.8;
@@ -70,7 +69,7 @@ public class Launcher extends Subassembly {
         flywheelMotor.setDirection(FLYWHEEL_MOTOR_DIRECTION);
 
         hoodServo = opMode.hardwareMap.servo.get("hood");
-        hoodServo.setDirection(HOOD_SERVO_DIRECTION);
+        hoodServo.setDirection(Servo.Direction.REVERSE);
         hoodServo.scaleRange(HOOD_RANGE_MIN, HOOD_RANGE_MAX);
 
         gateServo = new ToggleServo(opMode.hardwareMap.servo.get("gate"));
@@ -124,7 +123,7 @@ public class Launcher extends Subassembly {
                 }
                 break;
             case LAUNCHING: // waiting for artifact to launch
-                if (flywheelVel - flywheelMotor.getVelocity() > VELOCITY_DIP_THRESHOLD) {
+                if (flywheelVel - MathEx.toRPM(flywheelMotor.getVelocity(), ENCODER_RES) > VELOCITY_DIP_THRESHOLD) {
                     gateServo.close();
                     launchQueue.removeFirst();
                     spindexer.emptyActiveSlot();
@@ -151,6 +150,7 @@ public class Launcher extends Subassembly {
                 else currentState = State.IDLE;
         }
         telemetry.addData("launcher state", currentState);
+        telemetry.addData("launcher isReady", isReady());
     }
 
     public double autoAim(double distance) {
@@ -198,7 +198,7 @@ public class Launcher extends Subassembly {
 
     public void launchPurple() {
         launchQueue.add(Artifact.PURPLE);
-        Watchdog.i("Green artifact added to launch queue");
+        Watchdog.i("Purple artifact added to launch queue");
     }
 
     public void launchAny() {
@@ -234,6 +234,10 @@ public class Launcher extends Subassembly {
 
     public State getState() {
         return currentState;
+    }
+
+    public ToggleServo getGateServo() {
+        return gateServo;
     }
 
     public enum Artifact {

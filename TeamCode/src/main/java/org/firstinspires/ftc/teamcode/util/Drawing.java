@@ -20,6 +20,7 @@ public class Drawing {
 
     private final FtcDashboard dashboard;
     private final Navigator navigator;
+    private final Localizer localizer;
     private Canvas canvas;
 
     Path path;
@@ -30,6 +31,13 @@ public class Drawing {
 
     public Drawing(Navigator navigator) {
         this.navigator = navigator;
+        this.localizer = null;
+        dashboard = FtcDashboard.getInstance();
+    }
+
+    public Drawing(Localizer localizer) {
+        this.navigator = null;
+        this.localizer = localizer;
         dashboard = FtcDashboard.getInstance();
     }
 
@@ -41,10 +49,16 @@ public class Drawing {
 
         if (enablePath && path != null)
             drawPath(path, PATH_COLOR);
-        if (enableTargetPose && navigator.getTargetPose() != null)
-            drawPose(navigator.getTargetPose(), TARGET_POSE_COLOR);
-        if (enableCurrentPose && navigator.getCurrentPose() != null)
-            drawPose(navigator.getCurrentPose(), CURRENT_POSE_COLOR);
+        if (navigator != null) {
+            if (enableTargetPose && navigator.getTargetPose() != null)
+                drawPose(navigator.getTargetPose(), TARGET_POSE_COLOR);
+            if (enableCurrentPose && navigator.getCurrentPose() != null)
+                drawPose(navigator.getCurrentPose(), CURRENT_POSE_COLOR);
+        } else if (localizer != null) {
+            if (localizer.getPose() != null) {
+                drawPose(localizer.getPose(), "yellow");
+            }
+        }
 
         dashboard.sendTelemetryPacket(packet);
     }

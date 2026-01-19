@@ -3,13 +3,15 @@ package org.firstinspires.ftc.teamcode.opmodes.tests;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@TeleOp(name = "LimeLightAprilTagTest", group = Global.OpModeGroup.TEST)
+@Disabled
+@TeleOp(group = Global.OpModeGroup.TEST)
 public class LLAprilTagTest extends OpMode {
 
     LimelightCam limelight;

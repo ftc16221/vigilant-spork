@@ -10,7 +10,9 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.CircularPoseArray;
+import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -47,6 +49,19 @@ public class LimelightCam extends Localizer {
         poseArray = new CircularPoseArray(POSE_ARRAY_SIZE);
     }
 
+    public void searchForMotif() {
+        update();
+        Global.Motif lastMotif = Global.motif;
+        List<Integer> tagIds = getDetectedTagIds();
+        if (tagIds.contains(21)) Global.motif = Global.Motif.GPP;
+        else if (tagIds.contains(22)) Global.motif = Global.Motif.PGP;
+        else if (tagIds.contains(23)) Global.motif = Global.Motif.PPG;
+        telemetry.addData("tagIDs", tagIds);
+        if (Global.motif != lastMotif) {
+            Watchdog.i(String.format("New motif %s detected via obelisk apriltag", Global.motif.name()));
+        }
+    }
+
     @Override
     public void update() {
         result = limelight3A.getLatestResult();
@@ -54,7 +69,8 @@ public class LimelightCam extends Localizer {
             if (result.isValid() && !getDetectedTagIds().isEmpty()) {
                 // check if the new pose is close to the last ones, and if so use it, otherwise set pose to null
                 Pose newPose = new Pose(result.getBotpose(), DistanceUnit.METER);
-                poseArray.add(newPose);
+                if (newPose != null) poseArray.add(newPose);
+
                 Pose avgPose = poseArray.getAverage();
                 boolean withinTolerance =
                         avgPose.getDistanceFromPose(newPose) <= LINEAR_TOLERANCE

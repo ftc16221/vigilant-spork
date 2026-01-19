@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
+import org.firstinspires.ftc.teamcode.util.ToggleServo;
 
 @TeleOp(group = Global.OpModeGroup.TUNER)
 @Config
@@ -32,12 +33,15 @@ public class LauncherTuner extends OpMode {
     LimelightCam limelightCam;
     Watchdog watchdog;
 
+    ToggleServo gateServo;
+
     MultipleTelemetry telemetryA;
 
     @Override
     public void init() {
 
         launcher = new Launcher(this, new Spindexer(this, new Intake(this)));
+        gateServo = launcher.getGateServo();
 
         if (useLimelight) {
             limelightCam = new LimelightCam(this);
@@ -67,6 +71,20 @@ public class LauncherTuner extends OpMode {
         else if (gamepad1.dpad_left && !dpadWasPressed) TARGET_RPM -= 10;
 
         dpadWasPressed = gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_right || gamepad1.dpad_left;
+
+        if (gamepad1.aWasPressed()) {
+            launcher.setHoodAngle(0);
+        } else if (gamepad1.yWasPressed()) {
+            launcher.setHoodAngle(45);
+        } else if (gamepad1.xWasPressed()) {
+            launcher.setHoodAngle(60);
+        }
+
+        if (gamepad1.right_trigger > 0.1) {
+            gateServo.open();
+        } else if (gamepad1.left_trigger > 0.1) {
+            gateServo.close();
+        }
 
         TARGET_RPM = MathEx.clamp(TARGET_RPM, -MAX_RPM, MAX_RPM);
         if (TARGET_RPM != prevTargetRPM) {

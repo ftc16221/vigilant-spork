@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.MathEx;
@@ -17,10 +18,10 @@ import java.util.List;
 public class PinpointOdo extends Localizer {
 
     // Both of these offsets are in CM. The tracking point of the robot is the center of the wheelbase
-    public static double X_OFFSET = 10.8;
-    public static double Y_OFFSET = -4.8;
+    public static double X_OFFSET = 72; // 72mm
+    public static double Y_OFFSET = 60; // 60mm
     public static GoBildaPinpointDriver.GoBildaOdometryPods POD_TYPE = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
-    public static GoBildaPinpointDriver.EncoderDirection X_DIRECTION = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+    public static GoBildaPinpointDriver.EncoderDirection X_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED;
     public static GoBildaPinpointDriver.EncoderDirection Y_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
     public final GoBildaPinpointDriver pinpoint;
@@ -30,7 +31,7 @@ public class PinpointOdo extends Localizer {
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint_imu");
 
-        pinpoint.setOffsets(X_OFFSET, Y_OFFSET, Global.DISTANCE_UNIT);
+        pinpoint.setOffsets(X_OFFSET, Y_OFFSET, DistanceUnit.MM);
         pinpoint.setEncoderResolution(POD_TYPE);
         pinpoint.setEncoderDirections(X_DIRECTION, Y_DIRECTION);
 

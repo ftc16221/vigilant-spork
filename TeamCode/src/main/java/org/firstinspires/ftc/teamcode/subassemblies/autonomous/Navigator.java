@@ -119,12 +119,14 @@ public class Navigator extends Subassembly {
 
         if (targetPose == null && isMovementEnabled) {
             Watchdog.e("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
+
             disableMovement();
+            isPointTrackingEnabled = false;
             driveBase.stopMotors();
             underglow.setColor(Underglow.Color.ORANGE);
             return;
         }
-        assert targetPose != null;
+//        assert targetPose != null;
 
         if (Global.motif == null) {
             List<Integer> tagIds = limelightCam.getDetectedTagIds();
@@ -151,6 +153,8 @@ public class Navigator extends Subassembly {
             packet.put("hError", AngleUnit.normalizeDegrees(targetPose.h - currentPose.h));
             dashboard.sendTelemetryPacket(packet);
         }
+
+        if (!(isPointTrackingEnabled || isMovementEnabled)) return;
 
         double targetH;
         if (isPointTrackingEnabled) {
@@ -248,8 +252,10 @@ public class Navigator extends Subassembly {
         telemetry.addData("Current Controller", currentControllerString);
         telemetry.addData("Is Movement Enabled", isMovementEnabled);
         telemetry.addData("Is Point Tracking Enabled", isPointTrackingEnabled);
-        telemetry.addData("Current Position", "x=%.1f, y=%.1f, h=%.1f°", currentPose.x, currentPose.y, currentPose.h);
-        telemetry.addData("Target Position", "x=%.1f, y=%.1f, h=%.1f°", targetPose.x, targetPose.y, targetPose.h);
+        if (currentPose != null)
+            telemetry.addData("Current Position", "x=%.1f, y=%.1f, h=%.1f°", currentPose.x, currentPose.y, currentPose.h);
+        if (targetPose != null)
+            telemetry.addData("Target Position", "x=%.1f, y=%.1f, h=%.1f°", targetPose.x, targetPose.y, targetPose.h);
         telemetry.addLine();
     }
 
@@ -321,22 +327,5 @@ public class Navigator extends Subassembly {
         double rotY = y * Math.sin(-heading) + x * Math.cos(-heading);
 
         driveBase.moveRobot(rotX, rotY, h);
-    }
-
-    /** Draws the robot's position onto the field in FTC Dashboard */
-    private void drawFieldPosition() {
-        TelemetryPacket packet = new TelemetryPacket(true);
-        if (currentPose != null) {
-            packet.fieldOverlay()
-                    .setStroke("#12C600")
-                    .setRotation(Global.ANGLE_UNIT == AngleUnit.DEGREES ? Math.toRadians(currentPose.h) : currentPose.h)
-                    .setTranslation(currentPose.x, currentPose.y)
-                    .strokeCircle(0, 0, 9) // draw circle for robot position
-                    .strokeLine(0, 0, 9, 0);
-        } else {
-            packet.fieldOverlay().clear();
-        }
-
-        dashboard.sendTelemetryPacket(packet);
     }
 }

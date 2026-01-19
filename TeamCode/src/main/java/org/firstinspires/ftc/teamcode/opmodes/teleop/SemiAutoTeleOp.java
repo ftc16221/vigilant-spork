@@ -25,11 +25,11 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     public static Pose GOAL_POSE = new Pose(-180, 180, 0);
 
-    public static Pose CLOSE_LAUNCH_POSE = new Pose(0, 0, 0); // TODO
+    public static Pose CLOSE_LAUNCH_POSE = new Pose(-120, 120, 45); // TODO
     public static double CLOSE_LAUNCH_RPM = 1300; // TODO
     public static double CLOSE_LAUNCH_ANGLE = 40; // degrees
 
-    public static Pose FAR_LAUNCH_POSE = new Pose(0, 0, 0); // TODO
+    public static Pose FAR_LAUNCH_POSE = new Pose(120, 50, 70); // TODO
     public static double FAR_LAUNCH_RPM = 3200; // TODO
     public static double FAR_LAUNCH_ANGLE = 45;
 
@@ -85,15 +85,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         drawing.drawPoint(GOAL_POSE, "purple");
 
         // ################   GAMEPAD 1   ################
-        if (gamepad1.right_bumper) { // start auto movement
-            autoMovementEnabled = true;
-            navigator.enableMovement();
-            underglow.setColor(AUTO_MOVEMENT_COLOR);
-        } else if (!gamepad1.atRest() && autoMovementEnabled) { // cancel auto movement
-            autoMovementEnabled = false;
-            navigator.disableMovement();
-            underglow.setColor(IDLE_COLOR);
-        } /*else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
+        /*else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
             goalTrackingEnabled = true;
             navigator.enablePointTracking();
             underglow.setColor(GOAL_TRACKING_COLOR);
@@ -101,7 +93,21 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             goalTrackingEnabled = false;
             navigator.disablePointTracking();
             underglow.setColor(IDLE_COLOR);
-        } TODO commented because there is some PID feedback loop happening*/
+        } TODO commented because there is some PID feedback loop happening somewhere*/
+
+        if (gamepad1.dpadUpWasPressed()) {
+            navigator.setUnspecificTargetPose(FAR_LAUNCH_POSE);
+            startAutoMovement();
+            spindexer.alignAnyForLaunch();
+        } else if (gamepad1.dpadDownWasPressed()) {
+            navigator.setUnspecificTargetPose(CLOSE_LAUNCH_POSE);
+            startAutoMovement();
+            spindexer.alignAnyForLaunch();
+        }
+
+        if (!gamepad1.atRest()) {
+            stopAutoMovement();
+        }
 
         if (goalTrackingEnabled) {
             driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
@@ -135,8 +141,19 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             launcher.cancelLaunches();
         }
 
-        // INTAKE MODE
         if (gamepad2.dpadUpWasPressed()) {
+            launcher.setTargetVelocity(FAR_LAUNCH_RPM);
+            launcher.setHoodAngle(FAR_LAUNCH_ANGLE);
+        } else if (gamepad2.dpadDownWasPressed()) {
+            launcher.setTargetVelocity(CLOSE_LAUNCH_RPM);
+            launcher.setHoodAngle(CLOSE_LAUNCH_ANGLE);
+        } else if (gamepad2.dpadRightWasPressed()) {
+            launcher.setTargetVelocity(0);
+            launcher.setHoodAngle(0);
+        }
+
+        // INTAKE MODE
+        if (gamepad2.dpadLeftWasPressed()) {
             spindexer.alignForIntake();
         }
 
@@ -157,5 +174,17 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         navigator.stop();
         watchdog.stop();
         spindexer.stop();
+    }
+
+    private void startAutoMovement() {
+        autoMovementEnabled = true;
+        navigator.enableMovement();
+        underglow.setColor(AUTO_MOVEMENT_COLOR);
+    }
+
+    private void stopAutoMovement() {
+        autoMovementEnabled = false;
+        navigator.disableMovement();
+        underglow.setColor(IDLE_COLOR);
     }
 }

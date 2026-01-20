@@ -12,8 +12,10 @@ public class CircularPoseArray {
     }
 
     public void add(Pose newValue) {
-        // Subtract the old value being replaced
-        sum = sum.subtract(values[index]);
+        if (values[index] != null) {
+            // Subtract the old value being replaced
+            sum = sum.subtract(values[index]);
+        }
         // Add the new value
         values[index] = newValue;
         sum = sum.add(newValue);

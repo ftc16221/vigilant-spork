@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.teleop;
+package org.firstinspires.ftc.teamcode.opmodes.setup;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@TeleOp(name = "Set Alliance Blue", group = Global.OpModeGroup.SET_ALLIANCE)
+@TeleOp(name = "Set Alliance Blue", group = Global.OpModeGroup.SETUP)
 public class SetAllianceBlue extends LinearOpMode {
     @Override
     public void runOpMode() {

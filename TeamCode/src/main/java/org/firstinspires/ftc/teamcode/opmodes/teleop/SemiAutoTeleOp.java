@@ -8,9 +8,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
+import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
+import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.DashOpMode;
@@ -22,83 +25,168 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 @Config
 public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
-    public static Pose TARGET_POSE = new Pose(0, 0, 0);
-    public static Pose TRACKING_POINT = new Pose(0, 0, 0);
+    public static Pose GOAL_POSE = new Pose(-180, 180, 0);
+
+    public static Pose CLOSE_LAUNCH_POSE = new Pose(-120, 120, 45); // TODO
+    public static double CLOSE_LAUNCH_RPM = 1300; // TODO
+    public static double CLOSE_LAUNCH_ANGLE = 40; // degrees
+
+    public static Pose FAR_LAUNCH_POSE = new Pose(120, 50, 70); // TODO
+    public static double FAR_LAUNCH_RPM = 3200; // TODO
+    public static double FAR_LAUNCH_ANGLE = 45;
+
 
     public static int IDLE_COLOR = -1;
     public static int GOAL_TRACKING_COLOR = Color.GREEN;
     public static int AUTO_MOVEMENT_COLOR = Color.WHITE;
 
     MecDriveBase driveBase;
+    Spindexer spindexer;
+    Launcher launcher;
     Intake intake;
     Underglow underglow;
-    PoseTracker poseTracker;
+    Navigator navigator;
     LimelightCam limelightCam;
     PinpointOdo pinpointOdo;
     Drawing drawing;
+    Watchdog watchdog;
 
     private boolean autoMovementEnabled = false;
     private boolean goalTrackingEnabled = false;
+
+    private boolean gamepad2RightTriggerWasPressed = false;
 
     @Override
     public void init() {
         driveBase = new MecDriveBase(this);
         intake = new Intake(this);
+        spindexer = new Spindexer(this, intake);
+        launcher = new Launcher(this, spindexer);
         limelightCam = new LimelightCam(this);
         pinpointOdo = new PinpointOdo(this, Global.lastPose);
-        poseTracker = new PoseTracker(this, Global.lastPose);
+        navigator = new Navigator(this, Global.lastPose);
         underglow = new Underglow(this);
-        drawing = new Drawing(poseTracker);
+        drawing = new Drawing(navigator);
+        watchdog = new Watchdog(this);
 
         driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        poseTracker.setTargetPose(TARGET_POSE);
-        poseTracker.setTrackingPoint(TRACKING_POINT);
-        poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);
+        navigator.setTargetPose(FAR_LAUNCH_POSE);
+        navigator.setUnspecificTrackingPoint(GOAL_POSE);
+        navigator.setControllerType(Navigator.ControllerType.APPROACH);
+    }
+
+    @Override
+    public void init_loop() {
+        limelightCam.searchForMotif();
     }
 
     @Override
     public void loop() {
+        drawing.prep();
+        drawing.drawPoint(GOAL_POSE, "purple");
 
-        // INTAKE
-        if (gamepad1.dpad_up || gamepad2.a) {
-            intake.run(Intake.Direction.IN);
-        } else if (gamepad1.dpad_down || gamepad2.y) {
-            intake.run(Intake.Direction.OUT);
-        } else if (gamepad1.dpad_left || gamepad1.dpad_right || gamepad2.b) {
-            intake.stop();
-        }
-
-        // ALL DRIVEBASE MOVEMENT (SEMI-AUTO OR TELEOP)
-        if (gamepad1.right_bumper) { // start auto movement
-            autoMovementEnabled = true;
-            poseTracker.enableMovement();
-            underglow.setColor(AUTO_MOVEMENT_COLOR);
-        } else if (!gamepad1.atRest() && autoMovementEnabled) { // cancel auto movement
-            autoMovementEnabled = false;
-            poseTracker.disableMovement();
-            underglow.setColor(IDLE_COLOR);
-        } else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
+        // ################   GAMEPAD 1   ################
+        /*else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
             goalTrackingEnabled = true;
-            poseTracker.enablePointTracking();
+            navigator.enablePointTracking();
             underglow.setColor(GOAL_TRACKING_COLOR);
         } else if (gamepad1.right_stick_x != 0 && goalTrackingEnabled) { // cancel goal tracking
             goalTrackingEnabled = false;
-            poseTracker.disablePointTracking();
+            navigator.disablePointTracking();
             underglow.setColor(IDLE_COLOR);
+        } TODO commented because there is some PID feedback loop happening somewhere*/
+
+        if (gamepad1.dpadUpWasPressed()) {
+            navigator.setUnspecificTargetPose(FAR_LAUNCH_POSE);
+            startAutoMovement();
+            spindexer.alignAnyForLaunch();
+        } else if (gamepad1.dpadDownWasPressed()) {
+            navigator.setUnspecificTargetPose(CLOSE_LAUNCH_POSE);
+            startAutoMovement();
+            spindexer.alignAnyForLaunch();
+        }
+
+        if (!gamepad1.atRest()) {
+            stopAutoMovement();
         }
 
         if (goalTrackingEnabled) {
-            driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, poseTracker.getTrackingPower());
+            driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
         }
         if (!autoMovementEnabled && !goalTrackingEnabled) {
             driveBase.control(gamepad1);
         }
 
+        // ################   GAMEPAD 2   ################
+
+        if (gamepad2.dpadDownWasPressed()) {
+            launcher.setTargetVelocity(3000);
+        }
+
+        // LAUNCH MODE
+        if (gamepad2.right_trigger > 0.2 && !gamepad2RightTriggerWasPressed) {
+            launcher.launchAll();
+            gamepad2RightTriggerWasPressed = true;
+        } else {
+            gamepad2RightTriggerWasPressed = false;
+        }
+        if (gamepad2.rightBumperWasPressed()) {
+            launcher.launchAny();
+        } else if (gamepad2.yWasPressed() || gamepad2.triangleWasPressed()) {
+            launcher.launchMotif();
+        } else if (gamepad2.aWasPressed() || gamepad2.crossWasPressed()) {
+            launcher.launchGreen();
+        } else if (gamepad2.xWasPressed() || gamepad2.squareWasPressed()) {
+            launcher.launchPurple();
+        } else if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
+            launcher.cancelLaunches();
+        }
+
+        if (gamepad2.dpadUpWasPressed()) {
+            launcher.setTargetVelocity(FAR_LAUNCH_RPM);
+            launcher.setHoodAngle(FAR_LAUNCH_ANGLE);
+        } else if (gamepad2.dpadDownWasPressed()) {
+            launcher.setTargetVelocity(CLOSE_LAUNCH_RPM);
+            launcher.setHoodAngle(CLOSE_LAUNCH_ANGLE);
+        } else if (gamepad2.dpadRightWasPressed()) {
+            launcher.setTargetVelocity(0);
+            launcher.setHoodAngle(0);
+        }
+
+        // INTAKE MODE
+        if (gamepad2.dpadLeftWasPressed()) {
+            spindexer.alignForIntake();
+        }
+
         // UPDATES
-        poseTracker.update();
-        poseTracker.runTelemetry();
-        telemetry.update();
+        navigator.update();
+        launcher.update();
+        spindexer.update();
+        watchdog.update();
         drawing.update();
+        drawing.send();
+        navigator.runTelemetry();
+        spindexer.runTelemetry();
+        telemetry.update();
+    }
+
+    @Override
+    public void stop() {
+        navigator.stop();
+        watchdog.stop();
+        spindexer.stop();
+    }
+
+    private void startAutoMovement() {
+        autoMovementEnabled = true;
+        navigator.enableMovement();
+        underglow.setColor(AUTO_MOVEMENT_COLOR);
+    }
+
+    private void stopAutoMovement() {
+        autoMovementEnabled = false;
+        navigator.disableMovement();
+        underglow.setColor(IDLE_COLOR);
     }
 }

@@ -1,8 +1,9 @@
-package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
+package org.firstinspires.ftc.teamcode.util;
 
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.util.Pose;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
+
 
 public class Path {
 
@@ -15,7 +16,7 @@ public class Path {
         value = poses;
     }
 
-    public boolean execute(PoseTracker poseTracker) {
+    public boolean execute(Navigator navigator) {
         if (state != prevState) {
             if (isComplete) return true;
             if (state >= value.length) {
@@ -23,15 +24,15 @@ public class Path {
                 RobotLog.i("Path Complete!");
                 return true;
             } else if (state + 1 == value.length) { // set ControllerType to APPROACH when approaching the last pose, otherwise default to DRIVE
-                poseTracker.setControllerType(PoseTracker.ControllerType.APPROACH);
+                navigator.setControllerType(Navigator.ControllerType.APPROACH);
             } else {
-                poseTracker.setControllerType(PoseTracker.ControllerType.DRIVE);
+                navigator.setControllerType(Navigator.ControllerType.DRIVE);
             }
-            poseTracker.setTargetPose(value[state]);
+            navigator.setUnspecificTargetPose(value[state]);
             prevState = state;
             return false;
         }
-        if (poseTracker.isAtTarget()) state++;
+        if (navigator.isAtTarget()) state++;
         return false;
     }
 

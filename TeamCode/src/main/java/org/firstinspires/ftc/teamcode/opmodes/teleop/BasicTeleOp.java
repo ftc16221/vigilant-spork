@@ -6,9 +6,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
+import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
-import org.firstinspires.ftc.teamcode.util.MathKt;
+import org.firstinspires.ftc.teamcode.util.MathEx;
 
 @TeleOp(group = Global.OpModeGroup.MAIN)
 public class BasicTeleOp extends OpMode {
@@ -17,6 +18,7 @@ public class BasicTeleOp extends OpMode {
 
     MecDriveBase driveBase;
     Intake intake;
+    Spindexer spindexer;
     Launcher launcher;
     Underglow underglow;
 
@@ -28,7 +30,8 @@ public class BasicTeleOp extends OpMode {
     public void init() {
         driveBase = new MecDriveBase(this);
         intake = new Intake(this);
-        launcher = new Launcher(this);
+        spindexer = new Spindexer(this, intake);
+        launcher = new Launcher(this, spindexer);
         underglow = new Underglow(this);
 
         telemetry.update();
@@ -40,9 +43,9 @@ public class BasicTeleOp extends OpMode {
         driveBase.control(gamepad1);
         // INTAKE
         if (gamepad1.dpad_up || gamepad2.a) {
-            intake.run(Intake.Direction.IN);
+            intake.setMode(Intake.Mode.IN);
         } else if (gamepad1.dpad_down || gamepad2.y) {
-            intake.run(Intake.Direction.OUT);
+            intake.setMode(Intake.Mode.OUT);
         } else if (gamepad1.dpad_left || gamepad1.dpad_right || gamepad2.b) {
             intake.stop();
         }
@@ -54,7 +57,7 @@ public class BasicTeleOp extends OpMode {
 
         dpadWasPressed = gamepad2.dpad_up || gamepad2.dpad_down || gamepad2.dpad_right || gamepad2.dpad_left;
 
-        targetRPM = MathKt.clamp(targetRPM, -MAX_RPM, MAX_RPM);
+        targetRPM = MathEx.clamp(targetRPM, -MAX_RPM, MAX_RPM);
         if (targetRPM != prevTargetRPM) {
             launcher.setTargetVelocity(targetRPM);
         }
@@ -64,7 +67,7 @@ public class BasicTeleOp extends OpMode {
 
         telemetry.addData("Max RPM", MAX_RPM);
         telemetry.addData("Target RPM", targetRPM);
-        telemetry.addData("Actual RPM", launcher.getAverageVelocity());
+        telemetry.addData("Actual RPM", launcher.getVelocity());
         // UPDATES
         telemetry.update();
     }

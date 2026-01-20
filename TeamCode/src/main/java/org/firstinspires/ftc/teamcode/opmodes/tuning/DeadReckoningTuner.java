@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.DeadReckoning;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.DriveEncoders;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
@@ -14,11 +14,11 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 public class DeadReckoningTuner extends OpMode {
 
     MecDriveBase driveBase;
-    DeadReckoning deadReckoning;
+    DriveEncoders driveEncoders;
 
     public void init() {
         driveBase = new MecDriveBase(this);
-        deadReckoning = new DeadReckoning(this, driveBase, new Pose(0, 0, 0));
+        driveEncoders = new DriveEncoders(this, driveBase, new Pose(0, 0, 0));
 
         telemetry.addLine(
                 "This OpMode is built to gather scalars for the Dead Reckoning localizer.\n" +
@@ -32,7 +32,7 @@ public class DeadReckoningTuner extends OpMode {
 
     @Override
     public void loop() {
-        deadReckoning.update();
-        telemetry.addData("recorded position", deadReckoning.getPose());
+        driveEncoders.update();
+        telemetry.addData("recorded position", driveEncoders.getPose());
     }
 }

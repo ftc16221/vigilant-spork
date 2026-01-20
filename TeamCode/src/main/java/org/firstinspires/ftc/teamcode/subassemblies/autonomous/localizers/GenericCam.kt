@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers
 import android.util.Size
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.PtzControl
@@ -27,7 +27,7 @@ import javax.annotation.CheckForNull
  * Possibly will be used for Machine Learning in future seasons
  */
 @Config
-class GenericCam(opMode: LinearOpMode): Localizer(opMode, "Vision") {
+class GenericCam(opMode: OpMode): Localizer(opMode, "Vision") {
     /**
      * Variables to store the position and orientation of the camera on the robot. Setting these
      * values requires a definition of the axes of the camera and robot:
@@ -53,7 +53,7 @@ class GenericCam(opMode: LinearOpMode): Localizer(opMode, "Vision") {
      * to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
      */
 
-    @Config
+//    @Config
     companion object {
         @JvmField
         var CAMERA_POSITION = Position(DistanceUnit.INCH, 1.45, 6.75, 4.75, 0)
@@ -176,9 +176,9 @@ class GenericCam(opMode: LinearOpMode): Localizer(opMode, "Vision") {
 
         return when (Global.alliance) {
             Global.Alliance.BLUE -> rawPose
-            Global.Alliance.RED -> rawPose.invert()
+            Global.Alliance.RED -> rawPose.mirror()
             null -> {
-                if (RED_APRILTAG_IDS.contains(detection.id)) rawPose.invert()
+                if (RED_APRILTAG_IDS.contains(detection.id)) rawPose.mirror()
                 else rawPose
             }
         }
@@ -194,11 +194,5 @@ class GenericCam(opMode: LinearOpMode): Localizer(opMode, "Vision") {
     fun findAprilTag(id: Int): AprilTagDetection? {
         val detections = getValidDetections()
         return detections?.find { it.id == id }
-    }
-
-    fun Pose.invert() : Pose{
-        if (Global.ANGLE_UNIT == AngleUnit.DEGREES) h = AngleUnit.normalizeDegrees(h + 180)
-        else if (Global.ANGLE_UNIT == AngleUnit.RADIANS) h = AngleUnit.normalizeRadians(h + Math.PI)
-        return Pose(-x, -y, h)
     }
 }

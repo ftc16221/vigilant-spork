@@ -5,9 +5,7 @@ import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Path;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 
 @Config
 public class Drawing {
@@ -21,8 +19,10 @@ public class Drawing {
     public final double INCH_PER_CM = 0.393701;
 
     private final FtcDashboard dashboard;
-    private final PoseTracker poseTracker;
+    private final Navigator navigator;
+    private final Localizer localizer;
     private Canvas canvas;
+    private TelemetryPacket packet;
 
     Path path;
 
@@ -30,25 +30,42 @@ public class Drawing {
     private boolean enableTargetPose = true;
     private boolean enablePath = false;
 
-    public Drawing(PoseTracker poseTracker) {
-        this.poseTracker = poseTracker;
+    public Drawing(Navigator navigator) {
+        this.navigator = navigator;
+        this.localizer = null;
         dashboard = FtcDashboard.getInstance();
     }
 
-    public void update() {
-        TelemetryPacket packet = new TelemetryPacket();
+    public Drawing(Localizer localizer) {
+        this.navigator = null;
+        this.localizer = localizer;
+        dashboard = FtcDashboard.getInstance();
+    }
+
+    public void prep() {
+        packet = new TelemetryPacket();
         canvas = packet.fieldOverlay();
         canvas.setScale(INCH_PER_CM, INCH_PER_CM);
         canvas.setStrokeWidth(STROKE_WIDTH);
+    }
 
+    public void send() {
+        dashboard.sendTelemetryPacket(packet);
+    }
+
+    public void update() {
         if (enablePath && path != null)
             drawPath(path, PATH_COLOR);
-        if (enableTargetPose && poseTracker.getTargetPose() != null)
-            drawPose(poseTracker.getTargetPose(), TARGET_POSE_COLOR);
-        if (enableCurrentPose && poseTracker.getCurrentPose() != null)
-            drawPose(poseTracker.getCurrentPose(), CURRENT_POSE_COLOR);
-
-        dashboard.sendTelemetryPacket(packet);
+        if (navigator != null) {
+            if (enableTargetPose && navigator.getTargetPose() != null)
+                drawPose(navigator.getTargetPose(), TARGET_POSE_COLOR);
+            if (enableCurrentPose && navigator.getCurrentPose() != null)
+                drawPose(navigator.getCurrentPose(), CURRENT_POSE_COLOR);
+        } else if (localizer != null) {
+            if (localizer.getPose() != null) {
+                drawPose(localizer.getPose(), "yellow");
+            }
+        }
     }
 
     public void drawPath(Path path, String color) {
@@ -67,9 +84,13 @@ public class Drawing {
         double hInRadians = Math.toRadians(pose.h);
         canvas
                 .setStroke(color)
-                .setRotation(hInRadians)
                 .strokeCircle(pose.x, pose.y, POSE_RADIUS)
                 .strokeLine(pose.x, pose.y, pose.x + (POSE_RADIUS * Math.cos(hInRadians)), pose.y + (POSE_RADIUS * Math.sin(hInRadians)));
+    }
+
+    public void drawPoint(Pose pose, String color) {
+        canvas.setFill(color);
+        canvas.fillCircle(pose.x, pose.y, (double) STROKE_WIDTH / 2);
     }
 
     /**

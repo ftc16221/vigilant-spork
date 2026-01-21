@@ -14,16 +14,20 @@ import java.util.List;
 @Config
 public class Underglow extends Subassembly {
 
+    public static int BRIGHTNESS = 25; // 0-31
+
     public static boolean enabled = false;
 
     List<SparkFunLEDStick> ledSticks;
     private int lastColor;
+    private int lastBrightness = BRIGHTNESS;
 
     public Underglow(OpMode opMode) {
         super(opMode,"Underglow");
 
         ledSticks = hardwareMap.getAll(SparkFunLEDStick.class);
 
+        setBrightness(BRIGHTNESS);
         setColorToAlliance();
     }
 
@@ -41,6 +45,16 @@ public class Underglow extends Subassembly {
             }
         }
         lastColor = color;
+    }
+
+    public void setBrightness(int brightness) {
+        if (brightness == lastBrightness) return;
+        else {
+            for (SparkFunLEDStick ledStick : ledSticks) {
+                ledStick.setBrightness(brightness);
+            }
+        }
+        lastBrightness = brightness;
     }
 
     public void setColorToAlliance() {

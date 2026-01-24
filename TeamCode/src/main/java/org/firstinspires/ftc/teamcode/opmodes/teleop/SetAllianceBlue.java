@@ -13,11 +13,11 @@ public class SetAllianceBlue extends LinearOpMode {
         telemetry.addLine("Alliance set to BLUE.\nPress START to enable underglow\nPress STOP to disable underglow");
         telemetry.update();
         Global.alliance = null;
-        Underglow.enabled = false;
+        Underglow underglow = new Underglow(this);
         waitForStart();
         if (opModeIsActive()) {
             Global.alliance = Global.Alliance.BLUE;
-            Underglow.enabled = true;
+            underglow.enable(3);
         }
         requestOpModeStop();
     }

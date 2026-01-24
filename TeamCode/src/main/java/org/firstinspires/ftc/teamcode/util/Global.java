@@ -20,6 +20,14 @@ public class Global {
         BLUE
     }
 
+    public static Alliance getAlliance() {
+        return Global.alliance;
+    }
+    public static Alliance setAlliance(Alliance alliance) {
+        Global.alliance = alliance;
+        return Global.alliance;
+    }
+
     public static class OpModeGroup {
         public static final String SET_ALLIANCE = "1 set alliance";
         public static final String MAIN = "2 main";

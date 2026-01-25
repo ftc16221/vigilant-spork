@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subassemblies;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -88,6 +89,11 @@ public class Launcher extends Subassembly {
         kickerServo.setScaleRange(KICKER_RANGE_MIN, KICKER_RANGE_MAX);
 
         flywheelVelArray = new CircularDoubleArray(NUM_OF_VELOCITY_SAMPLES);
+
+        if (opMode.getClass().isAnnotationPresent(Autonomous.class)) {
+            gateServo.close();
+            kickerServo.close();
+        }
     }
 
     public void update() {

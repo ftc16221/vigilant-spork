@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Config
@@ -33,7 +34,7 @@ public class Spindexer extends Subassembly {
     public static float COLOR_SENSOR_GAIN = 10f; // always >=1
     public static double PROXIMITY_THRESHOLD = 5.0; // cm
 
-    public static double kP = 0.009, kI = 0.1, kD = 0.0007, kF = 0.0; // vibrations and instability from a high kI are actually good to shake out stuck artifacts
+    public static double kP = 0.009, kI = 0.1, kD = 0.0007, kF = 0.0; // vibrations and instability from a high kI are actually good, to shake out stuck artifacts
     public static double TOLERANCE = 2.0; // degrees
 
     public static int INTAKE_SAFETY_DEADLINE = 1200; // ms
@@ -44,12 +45,14 @@ public class Spindexer extends Subassembly {
     private final Intake intake;
     private final Deadline intakeSafetyDeadline = new Deadline(INTAKE_SAFETY_DEADLINE, TimeUnit.MILLISECONDS);
     private boolean hasIntakeSafetyDeadlineExpired = false;
-
     private final Deadline intakeDeadline = new Deadline(INTAKE_DEADLINE, TimeUnit.MILLISECONDS);
 
     private final DcMotor spindexerMotor;
-    private final NormalizedColorSensor colorSensor;
     private final PIDFController spindexerPIDF = new PIDFController(kP, kI, kD, kF);;
+
+    private final NormalizedColorSensor colorSensor;
+    private final DetectedColor[] lastDetectedColors = new DetectedColor[10];
+    private int detectedColorIndex;
 
     private double baseAngle = INTAKE_ANGLE;
     private int activeSlot = 0;
@@ -309,13 +312,29 @@ public class Spindexer extends Subassembly {
         float percentG = normG / sum * 100;
         float percentB = normB / sum * 100;
 
+        DetectedColor currentColor;
         if (percentG > GREEN_G_PCT_THRESHOLD) {
-            return DetectedColor.GREEN;
+            currentColor = DetectedColor.GREEN;
         } else if (percentG < PURP_G_PCT_THRESHOLD && percentB > PURP_B_PCT_THRESHOLD) {
-            return DetectedColor.PURPLE;
+            currentColor = DetectedColor.PURPLE;
         } else {
-            return DetectedColor.UNKNOWN;
+            currentColor = DetectedColor.UNKNOWN;
         }
+
+        lastDetectedColors[detectedColorIndex] = currentColor;
+        detectedColorIndex = (detectedColorIndex + 1) % lastDetectedColors.length;
+
+        int numOfPurpleDetections = 0;
+        int numOfGreenDetections = 0;
+
+        for (DetectedColor detectedColor : lastDetectedColors) {
+            if      (detectedColor == DetectedColor.PURPLE) numOfPurpleDetections++;
+            else if (detectedColor == DetectedColor.GREEN)  numOfGreenDetections++;
+        }
+
+        if      (numOfPurpleDetections > 8) return DetectedColor.PURPLE;
+        else if (numOfGreenDetections  > 8) return DetectedColor.GREEN;
+        else  /* i love alignment */        return DetectedColor.UNKNOWN;
     }
 
     public void emptyActiveSlot() {

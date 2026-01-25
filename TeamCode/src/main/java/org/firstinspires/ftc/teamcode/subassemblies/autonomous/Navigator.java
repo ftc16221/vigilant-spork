@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 
 import static org.firstinspires.ftc.teamcode.util.LoggingKt.log;
-import static org.firstinspires.ftc.teamcode.util.MathKt.clamp;
+import static org.firstinspires.ftc.teamcode.util.MathEx.clamp;
 
 import android.graphics.Color;
 
@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -35,20 +36,20 @@ import javax.annotation.CheckForNull;
  * This class keeps track of the robot's position and handles all autonomous movement
  */
 @Config
-public class PoseTracker extends Subassembly {
+public class Navigator extends Subassembly {
 
     // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)
     public static double DRIVE_P = 0.01, DRIVE_D = 0.0001;
     public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001;
     public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035;
 
-    public static boolean ENABLE_TUNING_MODE = false;
     public static double MAX_POWER = 0.8;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
 
-    MultipleTelemetry telemetry;
+    public static double TRACKING_OFFSET = -90; // degrees
+
     FtcDashboard dashboard;
 
     public PinpointOdo pinpointOdo;
@@ -78,8 +79,8 @@ public class PoseTracker extends Subassembly {
     boolean isPointTrackingEnabled = false;
     double trackingPower = 0;
 
-    public PoseTracker(OpMode opMode, Pose startingPose) {
-        super(opMode, "PoseTracker");
+    public Navigator(OpMode opMode, Pose startingPose) {
+        super(opMode, "Navigator");
         dashboard = FtcDashboard.getInstance();
         this.startingPose = startingPose;
         currentPose = startingPose;
@@ -96,7 +97,7 @@ public class PoseTracker extends Subassembly {
         Class<? extends OpMode> opModeClass = opMode.getClass();
         if (opModeClass.isAnnotationPresent(Autonomous.class)) {
             opModeType = OpModeType.AUTONOMOUS;
-            RobotLog.i("(PoseTracker) OpMode appears to be Autonomous, automatically enabling movement");
+            Watchdog.i("(Navigator) OpMode appears to be Autonomous, automatically enabling movement");
             enableMovement();
         } else if (opModeClass.isAnnotationPresent(TeleOp.class)) {
             opModeType = OpModeType.TELEOP;
@@ -104,7 +105,7 @@ public class PoseTracker extends Subassembly {
             opModeType = OpModeType.UNKNOWN;
         }
 
-        log(opMode, "PoseTracker successfully initialized with the following Localizers: " + localizers);
+        log(opMode, "Navigator successfully initialized with the following Localizers: " + localizers);
     }
 
     public void update() {
@@ -112,7 +113,7 @@ public class PoseTracker extends Subassembly {
         currentPose = getPrioritizedPose();
 
         if (currentPose == null && isMovementEnabled) {
-            RobotLog.w("(PoseTracker) currentPose is null, disabling autonomous movement and stopping robot");
+            Watchdog.e("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
             underglow.setColor(Color.YELLOW);
@@ -121,16 +122,27 @@ public class PoseTracker extends Subassembly {
         assert currentPose != null;
 
         if (targetPose == null && isMovementEnabled) {
-            RobotLog.w("(PoseTracker) targetPose is null, disabling autonomous movement and stopping robot");
+            Watchdog.e("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
+
             disableMovement();
+            isPointTrackingEnabled = false;
             driveBase.stopMotors();
             underglow.setColor(Color.YELLOW);
             return;
         }
-        assert targetPose != null;
+//        assert targetPose != null;
+
+        if (Global.motif == null) {
+            List<Integer> tagIds = limelightCam.getDetectedTagIds();
+            if (tagIds.contains(21)) Global.motif = Global.Motif.GPP;
+            else if (tagIds.contains(22)) Global.motif = Global.Motif.PGP;
+            else if (tagIds.contains(23)) Global.motif = Global.Motif.PPG;
+            if (Global.motif != null) {
+                Watchdog.i(String.format("Pattern %s detected via obelisk apriltag", Global.motif.name()));
+            }}
 
         // used for live tuning via FTC dashboard
-        if (ENABLE_TUNING_MODE) {
+        if (Global.ENABLE_TUNING_MODE) {
             xDrivePDController.setP(DRIVE_P);
             xDrivePDController.setD(DRIVE_D);
             yDrivePDController.setP(DRIVE_P);
@@ -146,6 +158,8 @@ public class PoseTracker extends Subassembly {
             dashboard.sendTelemetryPacket(packet);
         }
 
+        if (!(isPointTrackingEnabled || isMovementEnabled)) return;
+
         double targetH;
         if (isPointTrackingEnabled) {
             Pose referencePose;
@@ -160,6 +174,9 @@ public class PoseTracker extends Subassembly {
         // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
         double hError = Global.ANGLE_UNIT == AngleUnit.DEGREES ? AngleUnit.normalizeDegrees(targetH - currentPose.h) : AngleUnit.normalizeRadians(targetH - currentPose.h);
         double hPower = headingPIDController.calculate(hError, 0);
+        sendData("targetH", targetH);
+        sendData("hPower", hPower);
+        if (!USE_H) hPower = 0;
 
         if (isPointTrackingEnabled) trackingPower = hPower;
 
@@ -173,7 +190,7 @@ public class PoseTracker extends Subassembly {
                 xPower = xDrivePDController.calculate(currentPose.x, targetPose.x);
                 yPower = yDrivePDController.calculate(currentPose.y, targetPose.y);
             } else {
-                RobotLog.e("(PoseTracker) Controller Type is null, setting it to APPROACH");
+                RobotLog.e("(Navigator) Controller Type is null, setting it to APPROACH");
                 controllerType = ControllerType.APPROACH;
                 xPower = 0.0;
                 yPower = 0.0;
@@ -194,7 +211,7 @@ public class PoseTracker extends Subassembly {
 
     private double findTrackedHeading(Pose referencePose) {
         Pose offsetPose = trackingPoint.subtract(referencePose);
-        return Global.ANGLE_UNIT.fromRadians(Math.atan2(offsetPose.y, offsetPose.x)); // heading that faces the targetPose
+        return Global.ANGLE_UNIT.fromRadians(Math.atan2(offsetPose.y, offsetPose.x)) + TRACKING_OFFSET; // heading that faces the targetPose
     }
 
     /** this method returns the pose of the earliest nonnull pose value from the localizer list,
@@ -242,12 +259,14 @@ public class PoseTracker extends Subassembly {
         telemetry.addData("Current Controller", currentControllerString);
         telemetry.addData("Is Movement Enabled", isMovementEnabled);
         telemetry.addData("Is Point Tracking Enabled", isPointTrackingEnabled);
-        telemetry.addData("Current Position", "x=%.1f, y=%.1f, h=%.1f°", currentPose.x, currentPose.y, currentPose.h);
-        telemetry.addData("Target Position", "x=%.1f, y=%.1f, h=%.1f°", targetPose.x, targetPose.y, targetPose.h);
+        if (currentPose != null)
+            telemetry.addData("Current Position", "x=%.1f, y=%.1f, h=%.1f°", currentPose.x, currentPose.y, currentPose.h);
+        if (targetPose != null)
+            telemetry.addData("Target Position", "x=%.1f, y=%.1f, h=%.1f°", targetPose.x, targetPose.y, targetPose.h);
         telemetry.addLine();
     }
 
-    boolean isAtTarget() {
+    public boolean isAtTarget() {
         double xPosError = currentPose.x - targetPose.x;
         double yPosError = currentPose.y - targetPose.y;
         double hPosError = currentPose.h - targetPose.h;
@@ -281,10 +300,22 @@ public class PoseTracker extends Subassembly {
     /** Get current P(I)D controller type */
     public ControllerType getControllerType() { return controllerType; }
 
+    /** Set target pose, mirroring for blue alliance */
+    public void setUnspecificTargetPose(Pose targetPose) {
+        if (Global.alliance == Global.Alliance.BLUE) this.targetPose = targetPose.mirror();
+        else this.targetPose = targetPose;
+    }
+    /** Set target pose ignoring alliance */
     public void setTargetPose(Pose targetPose) { this.targetPose = targetPose; }
     public Pose getTargetPose() { return targetPose; }
     public Pose getCurrentPose() { return currentPose; }
 
+    /** Set tracking point, mirroring for blue alliance */
+    public void setUnspecificTrackingPoint(Pose trackingPoint) {
+        if (Global.alliance == Global.Alliance.BLUE) this.trackingPoint = trackingPoint.mirror();
+        else this.trackingPoint = trackingPoint;
+    }
+    /** Set tracking point ignoring alliance */
     public void setTrackingPoint(Pose trackingPoint) { this.trackingPoint = trackingPoint; }
     public Pose getTrackingPoint() { return trackingPoint; }
 
@@ -315,22 +346,5 @@ public class PoseTracker extends Subassembly {
         double rotY = y * Math.sin(-heading) + x * Math.cos(-heading);
 
         driveBase.moveRobot(rotX, rotY, h);
-    }
-
-    /** Draws the robot's position onto the field in FTC Dashboard */
-    private void drawFieldPosition() {
-        TelemetryPacket packet = new TelemetryPacket(true);
-        if (currentPose != null) {
-            packet.fieldOverlay()
-                    .setStroke("#12C600")
-                    .setRotation(Global.ANGLE_UNIT == AngleUnit.DEGREES ? Math.toRadians(currentPose.h) : currentPose.h)
-                    .setTranslation(currentPose.x, currentPose.y)
-                    .strokeCircle(0, 0, 9) // draw circle for robot position
-                    .strokeLine(0, 0, 9, 0);
-        } else {
-            packet.fieldOverlay().clear();
-        }
-
-        dashboard.sendTelemetryPacket(packet);
     }
 }

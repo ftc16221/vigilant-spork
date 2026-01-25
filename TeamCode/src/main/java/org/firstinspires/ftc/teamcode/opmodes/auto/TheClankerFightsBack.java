@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.util.CircularDoubleArray;
 import org.firstinspires.ftc.teamcode.util.Global;
-import org.firstinspires.ftc.teamcode.util.MathKt;
+import org.firstinspires.ftc.teamcode.util.MathEx;
 
 import java.util.List;
 
@@ -96,8 +96,8 @@ public class TheClankerFightsBack extends OpMode {
         }
 
 
-        hPower = MathKt.clamp(hPower, -MAX_POWER, MAX_POWER);
-        yPower = MathKt.clamp(yPower, -MAX_POWER, MAX_POWER);
+        hPower = MathEx.clamp(hPower, -MAX_POWER, MAX_POWER);
+        yPower = MathEx.clamp(yPower, -MAX_POWER, MAX_POWER);
         driveBase.moveRobot(0, yPower, hPower);
 
         telemetry.addData("num of detections", detectorResults.size());

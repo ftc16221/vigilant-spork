@@ -13,14 +13,15 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 
 import java.util.ArrayList;
 
-@Config
-public class DeadReckoning extends Localizer {
+//@Config
+public class DriveEncoders extends Localizer {
 
     public static double CM_PER_REVOLUTION = 0;
     public static double ENCODER_RESOLUTION = 537.7;
     public static double TRACK_WIDTH = 0.0;
     public static RevHubOrientationOnRobot.LogoFacingDirection HUB_LOGO_FACING_DIRECTION = RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD;
     public static RevHubOrientationOnRobot.UsbFacingDirection HUB_USB_FACING_DIRECTION = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+
     // scalars to account for imperfect traction because mecanum wheels have very little surface contact
     public static double FORWARD_SCALAR = 1.0;
     public static double STRAFE_SCALAR = 1.0;
@@ -35,7 +36,7 @@ public class DeadReckoning extends Localizer {
 
     private ArrayList<Integer> previousPositions = new ArrayList<>();
 
-    public DeadReckoning(OpMode opMode, MecDriveBase driveBase, Pose startingPose) {
+    public DriveEncoders(OpMode opMode, MecDriveBase driveBase, Pose startingPose) {
         super(opMode, "Dead Reckoning");
         this.startingPose = startingPose;
         pose = startingPose;
@@ -50,10 +51,10 @@ public class DeadReckoning extends Localizer {
                 )
         );
 
-        leftFront = driveBase.getLeftFront();
-        rightFront = driveBase.getRightFront();
-        leftRear = driveBase.getLeftRear();
-        rightRear = driveBase.getRightRear();
+        leftFront = driveBase.leftFront;
+        rightFront = driveBase.rightFront;
+        leftRear = driveBase.leftRear;
+        rightRear = driveBase.rightRear;
         motors = new DcMotor[]{leftFront, rightFront, leftRear, rightRear};
     }
 

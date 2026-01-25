@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
-@Config
+//@Config
 public class SparkFunOpticalOdo extends Localizer {
 
     public static SparkFunOTOS.Pose2D OTOS_OFFSET = new SparkFunOTOS.Pose2D(0, 0, 180);

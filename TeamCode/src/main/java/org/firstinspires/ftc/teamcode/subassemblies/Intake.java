@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subassemblies;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.util.Subassembly;
@@ -18,18 +19,20 @@ public class Intake extends Subassembly {
         super(opMode, "Intake");
         HardwareMap hardwareMap = opMode.hardwareMap;
         intakeServo = hardwareMap.crservo.get("intake");
+        intakeServo.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
-    public void run(Direction direction) {
-        if (direction == Direction.IN) intakeServo.setPower(SERVO_POWER);
-        else if (direction == Direction.OUT) intakeServo.setPower(-SERVO_POWER);
+    public void setMode(Mode mode) {
+        if (mode == Mode.IN) intakeServo.setPower(SERVO_POWER);
+        else if (mode == Mode.OUT) intakeServo.setPower(-SERVO_POWER);
+        else if (mode == Mode.OFF) intakeServo.setPower(0);
     }
 
     public void stop() {
         intakeServo.setPower(0);
     }
 
-    public enum Direction {
-        OUT, IN
+    public enum Mode {
+        OUT, IN, OFF
     }
 }

@@ -1,21 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto;
 
-import android.graphics.Color;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.UtilityOctoQuadConfigMenu;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Path;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.PoseTracker;
 import org.firstinspires.ftc.teamcode.util.ColorNameLookup;
-import org.firstinspires.ftc.teamcode.util.Drawing;
 import org.firstinspires.ftc.teamcode.util.Global;
-import org.firstinspires.ftc.teamcode.util.Pose;
 
 import java.util.Arrays;
 
@@ -98,15 +91,14 @@ public class UnderglowTestAuto extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            underglow.disable();
+            underglow.off();
             idle();
-            underglow.enable(1);
             underglow.setColorToAlliance();
             idle();
 
             while (opModeIsActive()) {
                 if (this.isStopRequested()) {
-                    underglow.disable();
+                    underglow.off();
                     idle();
                 }
                 /*
@@ -193,9 +185,7 @@ public class UnderglowTestAuto extends LinearOpMode {
                 }
                 setLEDs(underglow, stickArray, spindexerLEDs, loadedArtifacts);
 
-                telemetry.addData("Loaded Artifacts", Arrays.deepToString(loadedArtifacts));
-                telemetry.addData("Enabled", underglow.isEnabled());
-
+                telemetry.addData("Loaded Artifacts", Arrays.toString(loadedArtifacts));
                 telemetry.update();
             }
 

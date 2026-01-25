@@ -35,28 +35,29 @@ public class UnderglowTest extends OpMode {
 
     public void init() {
         underglow = new Underglow(this);
-        underglow.enable(brightness);
+        underglow.setColor(color);
+        underglow.setBrightness(brightness);
         callTelemetry();
     }
 
     public void loop() {
         if (gamepad1.a) {
             // set all LEDs at once
-            ledIndex = -1;
-            underglow.enable(brightness);
+            underglow.setColor(color);
+            underglow.setBrightness(brightness);
         }
         if (gamepad1.b) {
-            Global.alliance = Global.Alliance.RED;
+            Global.setAlliance(Global.Alliance.RED);
             colors[1] = Color.RED;
             underglow.setColor(Color.RED);
         }
         if (gamepad1.x) {
-            Global.alliance = Global.Alliance.BLUE;
+            Global.setAlliance(Global.Alliance.BLUE);
             colors[1] = Color.BLUE;
             underglow.setColor(Color.BLUE);
         }
         if (gamepad1.y) {
-            Global.alliance = null;
+            Global.setAlliance(null);
             colors[1] = Color.BLACK;
             underglow.setColor(Color.BLACK);
         }
@@ -117,7 +118,6 @@ public class UnderglowTest extends OpMode {
         telemetry.addData("*  Bumper LEFT", brightness -1);
 
         telemetry.addLine();
-        telemetry.addData("Underglow Enabled", underglow.isEnabled());
         telemetry.addData("Current Color", ColorNameLookup.getColorByInt(color).getName());
         telemetry.addData("Current Alliance", Global.alliance == null ? "NULL" : Global.alliance);
         telemetry.addData("Current LED Index", ledIndex);

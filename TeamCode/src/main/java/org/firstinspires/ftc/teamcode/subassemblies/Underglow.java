@@ -7,6 +7,7 @@ import com.qualcomm.hardware.sparkfun.SparkFunLEDStick;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.teamcode.util.ColorNameLookup;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
@@ -32,21 +33,24 @@ public class Underglow extends Subassembly {
          */
         public LEDStick(SparkFunLEDStick ledStick, int numLeds, int color, int brightness) {
             this.ledStick = ledStick;
+            this.numLeds = numLeds;
 
-            LightEmittingDiode[] initLEDs = new LightEmittingDiode[numLeds];
-            Arrays.fill(initLEDs, new LightEmittingDiode(color, brightness));
+            setAllLedsTo(color, brightness);
 
-            lightEmittingDiodes = Arrays.asList(initLEDs);
-
-            ledStick.setColor(color);
-            ledStick.setBrightness(brightness);
+//            LightEmittingDiode[] initLEDs = new LightEmittingDiode[numLeds];
+//            Arrays.fill(initLEDs, new LightEmittingDiode(color, brightness));
+//
+//            lightEmittingDiodes = Arrays.asList(initLEDs);
+//
+//            ledStick.setColor(color);
+//            ledStick.setBrightness(brightness);
         }
 
         /**
          * data structure for storing the values to apply to each LED in a multi-led stick.
          */
         public class LightEmittingDiode {
-            public int color = 0;
+            public int color = Color.BLACK;
             public int brightness = 0;
             public LightEmittingDiode(int color, int brightness) {
                 this.color = color;
@@ -56,13 +60,19 @@ public class Underglow extends Subassembly {
 
         SparkFunLEDStick ledStick;
         List<LightEmittingDiode> lightEmittingDiodes;
+        int numLeds;
 
         /**
          * Reset all LEDs to default color and brightness
          */
         public void setAllLedsTo(int color, int brightness) {
-            setColor(color);
-            setBrightness(brightness);
+            LightEmittingDiode[] initLEDs = new LightEmittingDiode[this.numLeds];
+            Arrays.fill(initLEDs, new LightEmittingDiode(color, brightness));
+
+            this.lightEmittingDiodes = Arrays.asList(initLEDs);
+
+            this.ledStick.setColor(color);
+            this.ledStick.setBrightness(brightness);
         }
 
         /**
@@ -109,9 +119,6 @@ public class Underglow extends Subassembly {
          * @param ledIndex the desired LED to activate
          */
         public void activateLed(int ledIndex) {
-            if (ledIndex == -1) {
-                setAllLedsTo(defaultColor, defaultBrightness);
-            }
             LightEmittingDiode led = getLed(ledIndex);
             if (led != null) {
                 ledStick.setColor(ledIndex, led.color);
@@ -196,8 +203,6 @@ public class Underglow extends Subassembly {
 
     List<LEDStick> ledSticks;
 
-    private int lastColor;
-
     private static final int defaultColor = Color.BLACK;
     private static final int defaultBrightness = 1;
     private static final int numLeds = 10;
@@ -209,18 +214,15 @@ public class Underglow extends Subassembly {
         ledSticks = new ArrayList<>(mappedSticks.size());
         for (SparkFunLEDStick stick : mappedSticks) {
             LEDStick ledStick = new LEDStick(stick, numLeds, getAllianceColor(), defaultBrightness);
+            ledStick.setAllLedsTo(getAllianceColor(), defaultBrightness);
             ledSticks.add(ledStick);
         }
 
     };
 
     public int getAllianceColor() {
-        if (Global.alliance == Global.Alliance.BLUE) {
-            return Color.BLUE;
-        } else if (Global.alliance == Global.Alliance.RED) {
-            return Color.RED;
-        }
-        return Color.BLACK;
+        if (Global.getAlliance() == null) return Color.BLACK;
+        return ColorNameLookup.getColorByName(Global.getAlliance().name()).getIntValue();
     };
 
     /**
@@ -228,18 +230,12 @@ public class Underglow extends Subassembly {
      * @param color the desired color in hexadecimal (ie. green = 0xFF00FF00), for alliance use -1
      */
     public void setColor(int color) {
-        if (color == lastColor) return; // only set strip color if it has changed
-        else if (color == -1) {
-            color = getAllianceColor();
-        }
         for (LEDStick ledStick : ledSticks) {
             ledStick.setColor(color);
         }
-        lastColor = color;
     }
 
     public void setColor(int stickIndex, int ledIndex, int color) {
-        if (color == -1) color = getAllianceColor();
         ledSticks.get(stickIndex).setColor(ledIndex, color);
     }
 
@@ -253,24 +249,19 @@ public class Underglow extends Subassembly {
     }
 
     public void setColorToAlliance() {
-        setColor(getAllianceColor());
+        setAllSticksTo(getAllianceColor(), defaultBrightness);
     }
 
-    public void disable() {
-        enabled = false;
-        for (LEDStick ledStick : ledSticks) {
-            ledStick.ledStick.turnAllOff();
+    /**
+     * Set all LEDs to black and 0 brightness.
+     * It is possible that setting color to 0 causes some stuck leds?
+     */
+    public void off() {
+        setAllSticksTo(Color.BLACK, 0);
+    }
+    public void setAllSticksTo(int color, int brightness) {
+        for (LEDStick ledStick: ledSticks) {
+            ledStick.setAllLedsTo(color, brightness);
         }
     }
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void enable(int brightness) {
-        enabled = true;
-        for (LEDStick ledStick : ledSticks) {
-            ledStick.activateLeds();
-        }
-    }
-
 }

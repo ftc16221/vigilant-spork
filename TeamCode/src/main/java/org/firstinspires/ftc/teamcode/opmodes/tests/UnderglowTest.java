@@ -125,11 +125,4 @@ public class UnderglowTest extends OpMode {
 
         telemetry.update();
     }
-//    public void callTelemetry() {
-//        telemetryColor.setValue(colors[colorIndex]);
-//        telemetryAlliance.setValue(Global.alliance == null ? "NULL" : Global.alliance);
-//        telemetryEnabled.setValue(underglow.isEnabled());
-//        telemetryBrightness.setValue(brightness);
-//        telemetry.update();
-//    }
 }

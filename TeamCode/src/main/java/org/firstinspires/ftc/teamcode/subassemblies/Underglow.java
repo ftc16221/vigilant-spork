@@ -37,13 +37,6 @@ public class Underglow extends Subassembly {
 
             setAllLedsTo(color, brightness);
 
-//            LightEmittingDiode[] initLEDs = new LightEmittingDiode[numLeds];
-//            Arrays.fill(initLEDs, new LightEmittingDiode(color, brightness));
-//
-//            lightEmittingDiodes = Arrays.asList(initLEDs);
-//
-//            ledStick.setColor(color);
-//            ledStick.setBrightness(brightness);
         }
 
         /**

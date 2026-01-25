@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@TeleOp(name = "Set Alliance Blue", group = Global.OpModeGroup.SET_ALLIANCE)
+@TeleOp(name = "Set Alliance Blue", group = Global.OpModeGroup.SETUP)
 @Disabled
 public class SetAlliance extends LinearOpMode {
 

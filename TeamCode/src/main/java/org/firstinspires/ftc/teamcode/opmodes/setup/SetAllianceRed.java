@@ -7,17 +7,10 @@ import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
 
 @TeleOp(name = "Set Alliance Red", group = Global.OpModeGroup.SETUP)
-public class SetAllianceRed extends LinearOpMode {
+public class SetAllianceRed extends SetAlliance {
     @Override
-    public void runOpMode() {
-        telemetry.addLine("Alliance set to RED.\nPress START to enable underglow\nPress STOP to disable underglow");
-        telemetry.update();
-        Underglow.enabled = false;
-        waitForStart();
-        if (opModeIsActive()) {
-            Underglow.enabled = true;
-            Global.alliance = Global.Alliance.RED;
-        }
-        requestOpModeStop();
+    public void setAllianceColor() {
+        setAlliance(Global.Alliance.RED);
+        super.setAllianceColor();
     }
 }

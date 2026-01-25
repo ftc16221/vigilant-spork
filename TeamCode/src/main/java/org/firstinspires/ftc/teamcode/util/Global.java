@@ -24,10 +24,19 @@ public class Global {
         motif = null;
         lastPose = new Pose(0, 0, 0);
     }
+    public static final int defaultUnderglowBrightness = 5;
 
     public enum Alliance {
         RED,
         BLUE
+    }
+
+    public static Alliance getAlliance() {
+        return Global.alliance;
+    }
+    public static Alliance setAlliance(Alliance alliance) {
+        Global.alliance = alliance;
+        return Global.alliance;
     }
 
     public enum Motif {

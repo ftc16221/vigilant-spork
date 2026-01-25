@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.util.CircularDoubleArray;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.util.Subassembly;
 import org.firstinspires.ftc.teamcode.util.ToggleServo;
 
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 @Config
 public class Launcher extends Subassembly {
@@ -36,7 +38,6 @@ public class Launcher extends Subassembly {
     public static int NUM_OF_VELOCITY_SAMPLES = 5;
     public static double VELOCITY_TOLERANCE = 50; // RPM
     public static int VELOCITY_DIP_THRESHOLD = 150; // ticks per second
-    public static double TARGET_DIFF_WARNING_THRESHOLD = 30; // RPM
 
     public static double HOOD_RANGE_MIN = 0.0;
     public static double HOOD_RANGE_MAX = 1.0;
@@ -45,13 +46,20 @@ public class Launcher extends Subassembly {
     public static double GATE_RANGE_MIN = 0.8;
     public static double GATE_RANGE_MAX = 1.0;
 
+    public static double KICKER_RANGE_MIN = 0.0;
+    public static double KICKER_RANGE_MAX = 0.2;
+    public static int KICKER_EXTENSION_TIME = 300; // milliseconds
+
     private final Spindexer spindexer;
     private final Servo hoodServo;
     private final ToggleServo gateServo;
+    private final ToggleServo kickerServo;
     private final DcMotorEx flywheelMotor;
     private final CircularDoubleArray flywheelVelArray;
 
     private final PIDFController flywheelPIDF = new PIDFController(kP, kI, kD, kF);
+
+    private final Deadline kickerDeadline = new Deadline(KICKER_EXTENSION_TIME, TimeUnit.MILLISECONDS);
 
     private Double targetVel = 0.0;
     private double hoodAngle = MIN_HOOD_ANGLE;
@@ -75,6 +83,9 @@ public class Launcher extends Subassembly {
         gateServo = new ToggleServo(opMode.hardwareMap.servo.get("gate"));
         gateServo.setDirection(Servo.Direction.REVERSE);
         gateServo.setScaleRange(GATE_RANGE_MIN, GATE_RANGE_MAX);
+
+        kickerServo = new ToggleServo(opMode.hardwareMap.servo.get("kicker"));
+        kickerServo.setScaleRange(KICKER_RANGE_MIN, KICKER_RANGE_MAX);
 
         flywheelVelArray = new CircularDoubleArray(NUM_OF_VELOCITY_SAMPLES);
     }
@@ -118,13 +129,19 @@ public class Launcher extends Subassembly {
             case AWAITING_SPINDEXER: // waiting for artifact delivery from spindexer
                 if (!spindexer.isBusy() && isReady()) {
                     gateServo.open();
+                    kickerServo.open();
+                    kickerDeadline.reset();
                     currentState = State.LAUNCHING;
                     Watchdog.i("Launching artifact");
                 }
                 break;
             case LAUNCHING: // waiting for artifact to launch
+                if (kickerDeadline.hasExpired()) {
+                    kickerServo.close();
+                }
                 if (flywheelVel - MathEx.toRPM(flywheelMotor.getVelocity(), ENCODER_RES) > VELOCITY_DIP_THRESHOLD) {
                     gateServo.close();
+                    kickerServo.close();
                     launchQueue.removeFirst();
                     spindexer.emptyActiveSlot();
                     Watchdog.i("Artifact successfully launched");

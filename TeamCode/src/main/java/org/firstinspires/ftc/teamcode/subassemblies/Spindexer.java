@@ -28,12 +28,12 @@ public class Spindexer extends Subassembly {
     public static float PURP_G_PCT_THRESHOLD = 37.5f; // must be less than
     public static float PURP_B_PCT_THRESHOLD = 35.0f; // must be greater than
 
-    public static float GREEN_GRN_PCT_THRESHOLD = 45.0f; // must be greater than
+    public static float GREEN_G_PCT_THRESHOLD = 45.0f; // must be greater than
 
     public static float COLOR_SENSOR_GAIN = 10f; // always >=1
     public static double PROXIMITY_THRESHOLD = 5.0; // cm
 
-    public static double kP = 0.009, kI = 0.03, kD = 0.0007, kF = 0.0;
+    public static double kP = 0.009, kI = 0.1, kD = 0.0007, kF = 0.0; // vibrations and instability from a high kI are actually good to shake out stuck artifacts
     public static double TOLERANCE = 2.0; // degrees
 
     public static int INTAKE_SAFETY_DEADLINE = 1200; // ms
@@ -309,7 +309,7 @@ public class Spindexer extends Subassembly {
         float percentG = normG / sum * 100;
         float percentB = normB / sum * 100;
 
-        if (percentG > GREEN_GRN_PCT_THRESHOLD) {
+        if (percentG > GREEN_G_PCT_THRESHOLD) {
             return DetectedColor.GREEN;
         } else if (percentG < PURP_G_PCT_THRESHOLD && percentB > PURP_B_PCT_THRESHOLD) {
             return DetectedColor.PURPLE;

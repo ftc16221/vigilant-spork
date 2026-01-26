@@ -27,15 +27,13 @@ public class LocalizationManager extends Subassembly {
     private Pose velocity;
     private double time;
 
-    public LocalizationManager(OpMode opMode, Pose startingPose, Localizer... localizers) {
+    public LocalizationManager(OpMode opMode, Localizer... localizers) {
         super(opMode, "Localizer Manager");
         this.localizers = new ArrayList<>(Arrays.asList(localizers));
         for (Localizer localizer : localizers) {
             if (localizer.isAbsolute) absoluteLocalizers.add(localizer);
             else relativeLocalizers.add(localizer);
         }
-
-        relativeLocalizers.forEach(localizer -> localizer.setPose(startingPose));
 
         Watchdog.i("LocalizerManager successfully initialized with the following Localizers: " + Arrays.toString(localizers));
     }
@@ -61,7 +59,9 @@ public class LocalizationManager extends Subassembly {
         pose = mostAccurateLocalizer.getPose();
         relativeLocalizers.forEach(localizer -> localizer.setPose(pose));
 
-        velocity = pose.subtract(prevPose).divideBy(dt);
+        if (prevPose != null) {
+            velocity = pose.subtract(prevPose).divideBy(dt);
+        }
     }
 
     private Localizer getMostAccurateLocalizer(List<Localizer> localizers) {

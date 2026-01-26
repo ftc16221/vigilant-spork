@@ -46,7 +46,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     Underglow underglow;
     Navigator navigator;
     LimelightCam limelightCam;
-    PinpointOdo pinpointOdo;
     Drawing drawing;
     Watchdog watchdog;
 
@@ -61,10 +60,11 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
+        limelightCam = new LimelightCam(this);
         LocalizationManager localizationManager = new LocalizationManager(
-                this, Global.lastPose,
+                this,
                 new PinpointOdo(this, Global.lastPose),
-                new LimelightCam(this)
+                limelightCam
         );
         navigator = new Navigator(this, localizationManager);
         underglow = new Underglow(this);

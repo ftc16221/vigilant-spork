@@ -27,7 +27,6 @@ public class TestAuto extends LinearOpMode {
 
         LocalizationManager localizationManager = new LocalizationManager(
                 this,
-                STARTING_POSE,
                 new PinpointOdo(this, STARTING_POSE),
                 new LimelightCam(this)
         );
@@ -57,7 +56,9 @@ public class TestAuto extends LinearOpMode {
                     }
                 }
                 navigator.update();
+                drawing.prep();
                 drawing.update();
+                drawing.send();
             }
         }
     }

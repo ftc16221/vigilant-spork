@@ -38,7 +38,6 @@ public class ThreeBallAuto extends OpMode {
     public void init() {
         LocalizationManager localizationManager = new LocalizationManager(
                 this,
-                STARTING_POSE,
                 new PinpointOdo(this, STARTING_POSE),
                 new LimelightCam(this)
         );

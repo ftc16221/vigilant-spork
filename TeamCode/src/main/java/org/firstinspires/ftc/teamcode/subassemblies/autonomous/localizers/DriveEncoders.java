@@ -66,7 +66,6 @@ public class DriveEncoders extends Localizer {
         pose = pose.add(fieldCentricChange);
 
         double deltaTime = time - prevTime;
-        velocity = fieldCentricChange.divideBy(deltaTime);
 
         prevTime = time;
     }

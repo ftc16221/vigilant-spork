@@ -8,7 +8,10 @@ import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.LocalizationManager;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
@@ -23,7 +26,7 @@ public class ThreeBallAuto extends OpMode {
     public static double LAUNCH_SPEED = 3400.0; // RPM
     public static double LAUNCH_ANGLE = 45.0; // degrees
 
-//    private Navigator navigator;
+    private Navigator navigator;
     private Intake intake;
     private Spindexer spindexer;
     private Launcher launcher;
@@ -33,7 +36,13 @@ public class ThreeBallAuto extends OpMode {
 
     @Override
     public void init() {
-//        navigator = new Navigator(this, STARTING_POSE);
+        LocalizationManager localizationManager = new LocalizationManager(
+                this,
+                STARTING_POSE,
+                new PinpointOdo(this, STARTING_POSE),
+                new LimelightCam(this)
+        );
+        navigator = new Navigator(this, localizationManager);
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
@@ -44,26 +53,26 @@ public class ThreeBallAuto extends OpMode {
     public void loop() {
         switch (state) {
             case NOT_STARTED:
-//                navigator.setTargetPose(LAUNCH_POSE);
+                navigator.setTargetPose(LAUNCH_POSE);
                 launcher.setTargetVelocity(LAUNCH_SPEED);
                 launcher.setHoodAngle(LAUNCH_ANGLE);
                 state = State.MOVING_TO_LAUNCH;
                 break;
             case MOVING_TO_LAUNCH:
-                if (/*navigator.isAtTarget()*/true) {
+                if (navigator.isAtTarget()) {
                     launcher.launchMotif();
                     state = State.LAUNCHING;
                 }
                 break;
             case LAUNCHING:
                 if (spindexer.isEmpty()) {
-//                    navigator.setTargetPose(END_POSE);
+                    navigator.setTargetPose(END_POSE);
                     state = State.MOVING_TO_END;
                 }
                 break;
             case MOVING_TO_END:
-                if (/*navigator.isAtTarget()*/true) {
-//                    navigator.stop();
+                if (navigator.isAtTarget()) {
+                    navigator.stop();
                     intake.stop();
                     spindexer.stop();
                     requestOpModeStop();
@@ -75,7 +84,7 @@ public class ThreeBallAuto extends OpMode {
         watchdog.update();
 
         telemetry.addData("state", state);
-//        telemetry.addData("navigator isAtTarget", navigator.isAtTarget());
+        telemetry.addData("navigator isAtTarget", navigator.isAtTarget());
         telemetry.addData("spindexer isBusy", spindexer.isBusy());
         telemetry.addData("launcher isReady", launcher.isReady());
         telemetry.addData("launcher state", launcher.getState());

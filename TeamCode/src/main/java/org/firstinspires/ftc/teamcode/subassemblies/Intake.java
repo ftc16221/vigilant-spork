@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
-@Config
+//@Config
 public class Intake extends Subassembly {
 
     public static double SERVO_POWER = 0.8;

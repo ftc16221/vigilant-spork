@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.LocalizationManager;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
@@ -60,9 +61,12 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
-        limelightCam = new LimelightCam(this);
-        pinpointOdo = new PinpointOdo(this, Global.lastPose);
-        navigator = new Navigator(this, Global.lastPose);
+        LocalizationManager localizationManager = new LocalizationManager(
+                this, Global.lastPose,
+                new PinpointOdo(this, Global.lastPose),
+                new LimelightCam(this)
+        );
+        navigator = new Navigator(this, localizationManager);
         underglow = new Underglow(this);
         drawing = new Drawing(navigator);
         watchdog = new Watchdog(this);

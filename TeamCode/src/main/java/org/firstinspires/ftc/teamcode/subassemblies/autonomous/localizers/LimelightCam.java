@@ -39,7 +39,7 @@ public class LimelightCam extends Localizer {
 
 
     public LimelightCam(OpMode opMode) {
-        super(opMode, "Limelight 3A");
+        super(opMode, "Limelight 3A", true, 0.97);
         tagLibrary = AprilTagGameDatabase.getCurrentGameTagLibrary();
         limelight3A = hardwareMap.get(Limelight3A.class, "limelight");
         telemetry.setMsTransmissionInterval(11);

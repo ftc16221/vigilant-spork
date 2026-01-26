@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.ToggleServo;
 
 @TeleOp(group = Global.OpModeGroup.TUNER)
-@Config
+//@Config
 public class LauncherTuner extends OpMode {
 
     public static double TARGET_RPM = 0;

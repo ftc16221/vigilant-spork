@@ -21,15 +21,15 @@ import java.util.concurrent.TimeUnit;
 @Config
 public class Spindexer extends Subassembly {
     // from home
-    public static double INTAKE_ANGLE = 190.0; // degrees
-    public static double LAUNCHER_ANGLE = 0.0; // degrees
+    public static double INTAKE_ANGLE = 60.0; // degrees
+    public static double LAUNCHER_ANGLE = 225.0; // degrees
 
     public static double ENCODER_RES = 537.7; // PPR
 
     public static float PURP_G_PCT_THRESHOLD = 37.5f; // must be less than
-    public static float PURP_B_PCT_THRESHOLD = 35.0f; // must be greater than
+    public static float PURP_B_PCT_THRESHOLD = 35f; // must be greater than
 
-    public static float GREEN_G_PCT_THRESHOLD = 45.0f; // must be greater than
+    public static float GREEN_G_PCT_THRESHOLD = 45f; // must be greater than
 
     public static float COLOR_SENSOR_GAIN = 10f; // always >=1
     public static double PROXIMITY_THRESHOLD = 5.0; // cm

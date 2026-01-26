@@ -49,7 +49,7 @@ public class Launcher extends Subassembly {
 
     public static double KICKER_RANGE_MIN = 0.0;
     public static double KICKER_RANGE_MAX = 0.2;
-    public static int KICKER_EXTENSION_TIME = 300; // milliseconds
+    public static int KICKER_EXTENSION_TIME = 150; // milliseconds
 
     private final Spindexer spindexer;
     private final Servo hoodServo;

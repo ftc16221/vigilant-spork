@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @Config
@@ -188,7 +189,7 @@ public class Spindexer extends Subassembly {
         telemetry.addData("slot 1", drum[1]);
         telemetry.addData("slot 2", drum[2]);
         telemetry.addLine();
-        telemetry.addData("detected colors", lastDetectedColors);
+        telemetry.addData("detected colors", Arrays.toString(lastDetectedColors));
         double currentAngle = getCurrentAngle();
         telemetry.addData("current angle", currentAngle);
         telemetry.addData("current normalized angle", currentAngle % 360);

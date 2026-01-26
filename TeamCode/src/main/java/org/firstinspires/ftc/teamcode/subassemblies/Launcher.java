@@ -168,6 +168,7 @@ public class Launcher extends Subassembly {
                 if (!launchQueue.isEmpty()) launchQueue.removeFirst();
 
                 gateServo.close(); // ensure this is closed
+                kickerServo.close();
 
                 if (launchQueue.isEmpty()) currentState = State.SPINDOWN;
                 else currentState = State.IDLE;

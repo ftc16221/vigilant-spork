@@ -11,11 +11,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Position
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog
 import org.firstinspires.ftc.teamcode.util.DashOpMode
 import org.firstinspires.ftc.teamcode.util.Global
 import org.firstinspires.ftc.teamcode.util.Localizer
 import org.firstinspires.ftc.teamcode.util.Pose
-import org.firstinspires.ftc.teamcode.util.log
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
@@ -26,8 +26,8 @@ import javax.annotation.CheckForNull
  * Vision subassembly for detecting AprilTags and calculating robot position on the field via AprilTags.
  * Possibly will be used for Machine Learning in future seasons
  */
-@Config
-class GenericCam(opMode: OpMode): Localizer(opMode, "Vision") {
+//@Config
+class GenericCam(opMode: OpMode): Localizer(opMode, "Vision", true, 0.94) {
     /**
      * Variables to store the position and orientation of the camera on the robot. Setting these
      * values requires a definition of the axes of the camera and robot:
@@ -123,7 +123,7 @@ class GenericCam(opMode: OpMode): Localizer(opMode, "Vision") {
 
         FtcDashboard.getInstance().startCameraStream(dash, 0.0)
 
-        opMode.log("Vision successfully initialized")
+        Watchdog.i("Vision successfully initialized")
     }
 
     /**
@@ -137,7 +137,7 @@ class GenericCam(opMode: OpMode): Localizer(opMode, "Vision") {
             if (detection.metadata != null) {
                 validDetections.add(detection)
             } else {
-                opMode.log("Detected invalid AprilTag, ID: ${detection.id}")
+                Watchdog.i("Detected invalid AprilTag, ID: ${detection.id}")
             }
         }
 

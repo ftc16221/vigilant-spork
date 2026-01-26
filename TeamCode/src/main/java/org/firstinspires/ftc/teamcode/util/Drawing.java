@@ -7,7 +7,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 
-@Config
+//@Config
 public class Drawing {
 
     public static String CURRENT_POSE_COLOR = "yellow";

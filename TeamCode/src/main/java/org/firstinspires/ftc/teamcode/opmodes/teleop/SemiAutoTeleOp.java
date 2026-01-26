@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.LocalizationManager;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
@@ -45,7 +46,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     Underglow underglow;
     Navigator navigator;
     LimelightCam limelightCam;
-    PinpointOdo pinpointOdo;
     Drawing drawing;
     Watchdog watchdog;
 
@@ -61,8 +61,12 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
         limelightCam = new LimelightCam(this);
-        pinpointOdo = new PinpointOdo(this, Global.lastPose);
-        navigator = new Navigator(this, Global.lastPose);
+        LocalizationManager localizationManager = new LocalizationManager(
+                this,
+                new PinpointOdo(this, Global.lastPose),
+                limelightCam
+        );
+        navigator = new Navigator(this, localizationManager);
         underglow = new Underglow(this);
         drawing = new Drawing(navigator);
         watchdog = new Watchdog(this);
@@ -118,10 +122,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
         // ################   GAMEPAD 2   ################
 
-        if (gamepad2.dpadDownWasPressed()) {
-            launcher.setTargetVelocity(3000);
-        }
-
         // LAUNCH MODE
         if (gamepad2.right_trigger > 0.2 && !gamepad2RightTriggerWasPressed) {
             launcher.launchAll();
@@ -139,6 +139,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             launcher.launchPurple();
         } else if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
             launcher.cancelLaunches();
+        } else if (gamepad2.rightStickButtonWasPressed()) {
+            spindexer.emptyActiveSlot();
         }
 
         if (gamepad2.dpadUpWasPressed()) {

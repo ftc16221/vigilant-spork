@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 
-import static org.firstinspires.ftc.teamcode.util.LoggingKt.log;
 import static org.firstinspires.ftc.teamcode.util.MathEx.clamp;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
@@ -18,17 +16,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.Global;
-import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.CheckForNull;
 
 /**
  * This class keeps track of the robot's position and handles all autonomous movement
@@ -50,15 +42,10 @@ public class Navigator extends Subassembly {
 
     FtcDashboard dashboard;
 
-    public PinpointOdo pinpointOdo;
-    LimelightCam limelightCam;
-    List<Localizer> localizers = new ArrayList<>();
-    Localizer activeLocalizer = null;
-
     MecDriveBase driveBase;
     Underglow underglow;
+    LocalizationManager localizationManager;
 
-    final Pose startingPose;
     Pose currentPose;
     Pose targetPose;
     Pose trackingPoint;
@@ -77,19 +64,12 @@ public class Navigator extends Subassembly {
     boolean isPointTrackingEnabled = false;
     double trackingPower = 0;
 
-    public Navigator(OpMode opMode, Pose startingPose) {
+    public Navigator(OpMode opMode, LocalizationManager localizationManager) {
         super(opMode, "Navigator");
+        this.localizationManager = localizationManager;
         dashboard = FtcDashboard.getInstance();
-        this.startingPose = startingPose;
-        currentPose = startingPose;
-        pinpointOdo = new PinpointOdo(opMode, this.startingPose);
-        limelightCam = new LimelightCam(opMode);
         driveBase = new MecDriveBase(opMode);
         underglow = new Underglow(opMode);
-
-        // whatever localizer has the lowest index will take precedent
-        localizers.add(limelightCam);
-        localizers.add(pinpointOdo);
 
         // we can assume that if the opMode is an Autonomous opMode that we can immediately enable movement. If we can't that should be explicitly disabled.
         Class<? extends OpMode> opModeClass = opMode.getClass();
@@ -103,12 +83,12 @@ public class Navigator extends Subassembly {
             opModeType = OpModeType.UNKNOWN;
         }
 
-        log(opMode, "Navigator successfully initialized with the following Localizers: " + localizers);
     }
 
     public void update() {
 
-        currentPose = getPrioritizedPose();
+        localizationManager.update();
+        currentPose = localizationManager.getPose();
 
         if (currentPose == null && isMovementEnabled) {
             Watchdog.e("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
@@ -129,15 +109,6 @@ public class Navigator extends Subassembly {
             return;
         }
 //        assert targetPose != null;
-
-        if (Global.motif == null) {
-            List<Integer> tagIds = limelightCam.getDetectedTagIds();
-            if (tagIds.contains(21)) Global.motif = Global.Motif.GPP;
-            else if (tagIds.contains(22)) Global.motif = Global.Motif.PGP;
-            else if (tagIds.contains(23)) Global.motif = Global.Motif.PPG;
-            if (Global.motif != null) {
-                Watchdog.i(String.format("Pattern %s detected via obelisk apriltag", Global.motif.name()));
-            }}
 
         // used for live tuning via FTC dashboard
         if (Global.ENABLE_TUNING_MODE) {
@@ -212,44 +183,8 @@ public class Navigator extends Subassembly {
         return Global.ANGLE_UNIT.fromRadians(Math.atan2(offsetPose.y, offsetPose.x)) + TRACKING_OFFSET; // heading that faces the targetPose
     }
 
-    /** this method returns the pose of the earliest nonnull pose value from the localizer list,
-     * used to make sure more accurate or precise sensors are prioritized for localization. it will
-     * also set less accurate sensors to the most prioritized pose*/
-    @CheckForNull
-    public Pose getPrioritizedPose() {
-        for (int i = 0; i <= localizers.size() - 1; i++) {
-            localizers.get(i).update();
-        }
-
-        Pose pose = null;
-        Localizer newActiveLocalizer = null;
-        for (int i = 0; i <= localizers.size() - 1; i++) {
-            Localizer localizer = localizers.get(i);
-            if (localizer.getPose() != null) {
-                pose = localizer.getPose();
-                newActiveLocalizer = localizer;
-                break;
-            }
-        }
-
-        activeLocalizer = newActiveLocalizer;
-
-        if (pose != null) {
-            for (int i = 0; i <= localizers.size() - 1; i++) {
-                Localizer localizer = localizers.get(i);
-                if (localizer != newActiveLocalizer) localizer.setPose(pose);
-            }
-        }
-
-        return pose;
-    }
-
     public void runTelemetry() {
         telemetry.addLine("Pose Tracker:");
-        String activeLocalizerString;
-        if (activeLocalizer == null) activeLocalizerString = "NULL";
-        else activeLocalizerString = activeLocalizer.getClass().getName();
-        telemetry.addData("Active Localizer", activeLocalizerString);
         String currentControllerString;
         if (controllerType == ControllerType.APPROACH) currentControllerString = "APPROACH";
         else if (controllerType == ControllerType.DRIVE) currentControllerString = "DRIVE";
@@ -272,7 +207,7 @@ public class Navigator extends Subassembly {
         double headingError = Math.abs(hPosError);
         boolean withinTolerance;
         if (controllerType == ControllerType.APPROACH) {
-            withinTolerance = !activeLocalizer.isRobotMoving() && linearError < LINEAR_APPROACH_TOLERANCE && headingError < HEADING_APPROACH_TOLERANCE;
+            withinTolerance = !localizationManager.isRobotMoving() && linearError < LINEAR_APPROACH_TOLERANCE && headingError < HEADING_APPROACH_TOLERANCE;
         } else if (controllerType == ControllerType.DRIVE) {
             withinTolerance = linearError < LINEAR_DRIVE_TOLERANCE && headingError < HEADING_DRIVE_TOLERANCE;
         } else {

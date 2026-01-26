@@ -18,7 +18,7 @@ public class SparkFunOpticalOdo extends Localizer {
     private final SparkFunOTOS sparkFunOTOS;
 
     public SparkFunOpticalOdo(LinearOpMode opMode, Pose startingPose) {
-        super(opMode, "SparkFun OTOS");
+        super(opMode, "SparkFun OTOS", false, 0.87);
 
         sparkFunOTOS = hardwareMap.get(SparkFunOTOS.class, "sensor_otos");
         configure(startingPose.toSparkFunPose());

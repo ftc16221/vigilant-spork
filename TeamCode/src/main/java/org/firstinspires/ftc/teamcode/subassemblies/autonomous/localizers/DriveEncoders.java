@@ -37,7 +37,7 @@ public class DriveEncoders extends Localizer {
     private ArrayList<Integer> previousPositions = new ArrayList<>();
 
     public DriveEncoders(OpMode opMode, MecDriveBase driveBase, Pose startingPose) {
-        super(opMode, "Dead Reckoning");
+        super(opMode, "Dead Reckoning", false, 0.95);
         this.startingPose = startingPose;
         pose = startingPose;
 
@@ -66,7 +66,6 @@ public class DriveEncoders extends Localizer {
         pose = pose.add(fieldCentricChange);
 
         double deltaTime = time - prevTime;
-        velocity = fieldCentricChange.divideBy(deltaTime);
 
         prevTime = time;
     }

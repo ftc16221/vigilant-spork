@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@Config
+//@Config
 @TeleOp(group = Global.OpModeGroup.TEST)
 public class MotorConfigTest extends LinearOpMode {
 

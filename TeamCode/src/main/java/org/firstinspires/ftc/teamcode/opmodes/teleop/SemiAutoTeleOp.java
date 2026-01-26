@@ -122,10 +122,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
         // ################   GAMEPAD 2   ################
 
-        if (gamepad2.dpadDownWasPressed()) {
-            launcher.setTargetVelocity(3000);
-        }
-
         // LAUNCH MODE
         if (gamepad2.right_trigger > 0.2 && !gamepad2RightTriggerWasPressed) {
             launcher.launchAll();
@@ -143,6 +139,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             launcher.launchPurple();
         } else if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
             launcher.cancelLaunches();
+        } else if (gamepad2.rightStickButtonWasPressed()) {
+            spindexer.emptyActiveSlot();
         }
 
         if (gamepad2.dpadUpWasPressed()) {

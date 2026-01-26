@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 @Config
 public class Spindexer extends Subassembly {
     // from home
-    public static double INTAKE_ANGLE = 60.0; // degrees
-    public static double LAUNCHER_ANGLE = 225.0; // degrees
+    public static double INTAKE_ANGLE = 66.0; // degrees
+    public static double LAUNCHER_ANGLE = 220.0; // degrees
 
     public static double ENCODER_RES = 537.7; // PPR
 
@@ -115,17 +115,13 @@ public class Spindexer extends Subassembly {
             colorSensor.setGain(COLOR_SENSOR_GAIN);
         }
 
-        if      (mode == Spindexer.Mode.INTAKE   && baseAngle != INTAKE_ANGLE)   baseAngle = INTAKE_ANGLE;
-        else if (mode == Spindexer.Mode.LAUNCHER && baseAngle != LAUNCHER_ANGLE) baseAngle = LAUNCHER_ANGLE;
+        if (mode == Spindexer.Mode.INTAKE && baseAngle != INTAKE_ANGLE) baseAngle = INTAKE_ANGLE;
+        else if (mode == Spindexer.Mode.LAUNCHER && baseAngle != LAUNCHER_ANGLE)
+            baseAngle = LAUNCHER_ANGLE;
 
         double error = getDistanceFromIndex(activeSlot);
 
-        double power = spindexerPIDF.calculate(error);
-        power = MathEx.clamp(power, -1, 1);
-        spindexerMotor.setPower(power);
-        isBusy = error > TOLERANCE;
-        sendData("spx error", error);
-        sendData("spx power", power);
+        evaluatePID(error);
 
         // intake mode
         Artifact detectedArtifact = getDetectedArtifact();
@@ -198,10 +194,19 @@ public class Spindexer extends Subassembly {
         telemetry.addData("current normalized angle", currentAngle % 360);
     }
 
+    public void evaluatePID(double error) {
+        double power = spindexerPIDF.calculate(error);
+        power = MathEx.clamp(power, -1, 1);
+        spindexerMotor.setPower(power);
+        isBusy = error > TOLERANCE;
+        sendData("spx error", error);
+        sendData("spx power", power);
+    }
+
     /**
      * get current angle of the spindexer DcMotor in degrees
      */
-    private double getCurrentAngle() {
+    public double getCurrentAngle() {
         return MathEx.encoderPositionToDegrees(spindexerMotor.getCurrentPosition(), ENCODER_RES);
     }
 

@@ -33,7 +33,7 @@ public class Launcher extends Subassembly {
     public static double C = 0.0;
 
     // PIDF coefficients for flywheel speed
-    public static double kP = 0.00016, kI = 0.0, kD = 0.000035, kF = 0.0;
+    public static double kP = 0.0009, kI = 0.03, kD = 0.0, kF = 0.00021;
 
     public static double ENCODER_RES = 28.0; // PPR
     public static int NUM_OF_VELOCITY_SAMPLES = 5;
@@ -51,19 +51,24 @@ public class Launcher extends Subassembly {
     public static double KICKER_RANGE_MAX = 0.2;
     public static int KICKER_EXTENSION_TIME = 150; // milliseconds
 
+    public static int STUCK_DETECTION_TIME = 2500; // milliseconds
+
     private final Spindexer spindexer;
+
     private final Servo hoodServo;
+
     private final ToggleServo gateServo;
-    private final ToggleServo kickerServo;
+
     private final DcMotorEx flywheelMotor;
+    private final PIDFController flywheelPIDF = new PIDFController(kP, kI, kD, kF);
     private final CircularDoubleArray flywheelVelArray;
 
-    private final PIDFController flywheelPIDF = new PIDFController(kP, kI, kD, kF);
-
+    private final ToggleServo kickerServo;
     private final Deadline kickerDeadline = new Deadline(KICKER_EXTENSION_TIME, TimeUnit.MILLISECONDS);
 
+    private final Deadline stuckDeadline = new Deadline(STUCK_DETECTION_TIME, TimeUnit.MILLISECONDS);
+
     private Double targetVel = 0.0;
-    private double hoodAngle = MIN_HOOD_ANGLE;
 
     private State currentState = State.IDLE;
 
@@ -102,8 +107,8 @@ public class Launcher extends Subassembly {
 
         flywheelVelArray.addValue(MathEx.toRPM(flywheelMotor.getVelocity(), ENCODER_RES));
         double flywheelVel = flywheelVelArray.getAverage();
-        double powerDelta = flywheelPIDF.calculate(flywheelVel, targetVel);
-        flywheelMotor.setPower(flywheelMotor.getPower() + powerDelta);
+        double power = flywheelPIDF.calculate(flywheelVel, targetVel);
+        flywheelMotor.setPower(power);
         sendData("error", flywheelVel - targetVel);
         sendData("current velocity", flywheelVel);
         sendData("target velocity", targetVel);
@@ -135,30 +140,34 @@ public class Launcher extends Subassembly {
             case AWAITING_SPINDEXER: // waiting for artifact delivery from spindexer
                 if (!spindexer.isBusy() && isReady()) {
                     gateServo.open();
-                    kickerServo.open();
-                    kickerDeadline.reset();
+                    kick();
+                    stuckDeadline.reset();
                     currentState = State.LAUNCHING;
                     Watchdog.i("Launching artifact");
                 }
                 break;
             case LAUNCHING: // waiting for artifact to launch
-                if (kickerDeadline.hasExpired()) {
-                    kickerServo.close();
+                if (stuckDeadline.hasExpired()) {
+                    kick();
+                    stuckDeadline.reset();
                 }
                 if (flywheelVel - MathEx.toRPM(flywheelMotor.getVelocity(), ENCODER_RES) > VELOCITY_DIP_THRESHOLD) {
                     gateServo.close();
                     kickerServo.close();
+
                     launchQueue.removeFirst();
                     spindexer.emptyActiveSlot();
                     Watchdog.i("Artifact successfully launched");
                     if (launchQueue.isEmpty()) {
                         currentState = State.SPINDOWN;
                         Watchdog.i("All artifacts in queue launched, spinning down");
-                    }
-                    else {
+                    } else {
                         currentState = State.IDLE;
                     }
                 }
+                break;
+            case ARTIFACT_STUCK:
+                // TODO maybe shake the spindexer around or something?
                 break;
             case SPINDOWN: // spinning down, all artifacts launched
                 currentState = State.IDLE;
@@ -173,6 +182,11 @@ public class Launcher extends Subassembly {
                 if (launchQueue.isEmpty()) currentState = State.SPINDOWN;
                 else currentState = State.IDLE;
         }
+
+        if ((kickerDeadline.hasExpired() || spindexer.getMode() != Spindexer.Mode.LAUNCHER) && kickerServo.isOpen()) {
+            kickerServo.close();
+        }
+
         telemetry.addData("launcher state", currentState);
         telemetry.addData("launcher isReady", isReady());
     }
@@ -183,7 +197,7 @@ public class Launcher extends Subassembly {
     }
 
     public void launchMotif() {
-        if (Global.motif == null) {
+        if (Global.motif == Global.Motif.UNKNOWN) {
             Watchdog.e("Unable to launch motif as it is unknown");
             return;
         }
@@ -236,6 +250,11 @@ public class Launcher extends Subassembly {
         Watchdog.w("All launches cancelled");
     }
 
+    public void kick() {
+        kickerServo.open();
+        kickerDeadline.reset();
+    }
+
     public void setTargetVelocity(double rpm) {
         targetVel = rpm;
     }
@@ -246,8 +265,7 @@ public class Launcher extends Subassembly {
 
     public void setHoodAngle(double angleInDegrees) {
         angleInDegrees = MathEx.clamp(angleInDegrees, MIN_HOOD_ANGLE, MAX_HOOD_ANGLE);
-        hoodAngle = angleInDegrees;
-        double absoluteAngle = hoodAngle - MIN_HOOD_ANGLE;
+        double absoluteAngle = angleInDegrees - MIN_HOOD_ANGLE;
         double servoAngle = absoluteAngle * HOOD_GEAR_RATIO;
         hoodServo.setPosition(MathEx.degreesToServoPosition(servoAngle, 1800, HOOD_RANGE_MIN, HOOD_RANGE_MAX));
     }
@@ -269,6 +287,6 @@ public class Launcher extends Subassembly {
     }
 
     public enum State {
-        IDLE, AWAITING_SPINDEXER, LAUNCHING, SPINDOWN, REJECTED
+        IDLE, AWAITING_SPINDEXER, LAUNCHING, ARTIFACT_STUCK, SPINDOWN, REJECTED
     }
 }

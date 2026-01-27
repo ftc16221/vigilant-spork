@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
@@ -30,9 +31,20 @@ public class LocalizationManager extends Subassembly {
     public LocalizationManager(OpMode opMode, Localizer... localizers) {
         super(opMode, "Localizer Manager");
         this.localizers = new ArrayList<>(Arrays.asList(localizers));
+
+        LimelightCam limelightCam = null;
+
         for (Localizer localizer : localizers) {
             if (localizer.isAbsolute) absoluteLocalizers.add(localizer);
             else relativeLocalizers.add(localizer);
+
+            if (localizer instanceof LimelightCam) {
+                limelightCam = (LimelightCam) localizer;
+            }
+        }
+
+        if (limelightCam != null) {
+            limelightCam.useMT2 = !relativeLocalizers.isEmpty();
         }
 
         Watchdog.i("LocalizerManager successfully initialized with the following Localizers: " + Arrays.toString(localizers));
@@ -105,6 +117,4 @@ public class LocalizationManager extends Subassembly {
     public boolean isRobotMoving() {
         return getLinearSpeed() > LINEAR_SPEED_TOLERANCE || getAngularSpeed() > ANGULAR_SPEED_TOLERANCE;
     }
-
-
 }

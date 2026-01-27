@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.util.MathEx.clamp;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -19,8 +18,6 @@ import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
-
-import java.util.List;
 
 /**
  * This class keeps track of the robot's position and handles all autonomous movement
@@ -40,6 +37,8 @@ public class Navigator extends Subassembly {
 
     public static double TRACKING_OFFSET = -90; // degrees
 
+    public boolean useAccurateTolerance = true;
+
     FtcDashboard dashboard;
 
     MecDriveBase driveBase;
@@ -50,14 +49,10 @@ public class Navigator extends Subassembly {
     Pose targetPose;
     Pose trackingPoint;
 
-    // note use of multiple controllers, one is for accuracy (approach), the other for speed (drive)
-    PDController xDrivePDController = new PDController(DRIVE_P, DRIVE_D);
-    PDController yDrivePDController = new PDController(DRIVE_P, DRIVE_D);
-    PIDController xApproachPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
-    PIDController yApproachPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
+    PIDController xPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
+    PIDController yPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
     PIDController headingPIDController = new PIDController(HEADING_P, HEADING_I, HEADING_D);
 
-    ControllerType controllerType;
     final OpModeType opModeType;
 
     boolean isMovementEnabled = false;
@@ -112,12 +107,8 @@ public class Navigator extends Subassembly {
 
         // used for live tuning via FTC dashboard
         if (Global.ENABLE_TUNING_MODE) {
-            xDrivePDController.setP(DRIVE_P);
-            xDrivePDController.setD(DRIVE_D);
-            yDrivePDController.setP(DRIVE_P);
-            yDrivePDController.setD(DRIVE_D);
-            xApproachPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
-            yApproachPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
+            xPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
+            yPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
             headingPIDController.setPID(HEADING_P, HEADING_I, HEADING_D);
 
             TelemetryPacket packet = new TelemetryPacket();
@@ -150,20 +141,8 @@ public class Navigator extends Subassembly {
         if (isPointTrackingEnabled) trackingPower = hPower;
 
         if (isMovementEnabled) {
-
-            double xPower, yPower;
-            if (controllerType == ControllerType.APPROACH) {
-                xPower = xApproachPIDController.calculate(currentPose.x, targetPose.x);
-                yPower = yApproachPIDController.calculate(currentPose.y, targetPose.y);
-            } else if (controllerType == ControllerType.DRIVE) {
-                xPower = xDrivePDController.calculate(currentPose.x, targetPose.x);
-                yPower = yDrivePDController.calculate(currentPose.y, targetPose.y);
-            } else {
-                RobotLog.e("(Navigator) Controller Type is null, setting it to APPROACH");
-                controllerType = ControllerType.APPROACH;
-                xPower = 0.0;
-                yPower = 0.0;
-            }
+            double xPower = xPIDController.calculate(currentPose.x, targetPose.x);
+            double yPower = yPIDController.calculate(currentPose.y, targetPose.y);
 
             xPower = clamp(xPower, -MAX_POWER, MAX_POWER);
             yPower = clamp(yPower, -MAX_POWER, MAX_POWER);
@@ -184,12 +163,7 @@ public class Navigator extends Subassembly {
     }
 
     public void runTelemetry() {
-        telemetry.addLine("Pose Tracker:");
-        String currentControllerString;
-        if (controllerType == ControllerType.APPROACH) currentControllerString = "APPROACH";
-        else if (controllerType == ControllerType.DRIVE) currentControllerString = "DRIVE";
-        else currentControllerString = "NULL";
-        telemetry.addData("Current Controller", currentControllerString);
+        telemetry.addLine("Navigator:");
         telemetry.addData("Is Movement Enabled", isMovementEnabled);
         telemetry.addData("Is Point Tracking Enabled", isPointTrackingEnabled);
         if (currentPose != null)
@@ -203,15 +177,15 @@ public class Navigator extends Subassembly {
         double xPosError = currentPose.x - targetPose.x;
         double yPosError = currentPose.y - targetPose.y;
         double hPosError = currentPose.h - targetPose.h;
+
         double linearError = Math.hypot(xPosError, yPosError);
         double headingError = Math.abs(hPosError);
+
         boolean withinTolerance;
-        if (controllerType == ControllerType.APPROACH) {
+        if (useAccurateTolerance) {
             withinTolerance = !localizationManager.isRobotMoving() && linearError < LINEAR_APPROACH_TOLERANCE && headingError < HEADING_APPROACH_TOLERANCE;
-        } else if (controllerType == ControllerType.DRIVE) {
-            withinTolerance = linearError < LINEAR_DRIVE_TOLERANCE && headingError < HEADING_DRIVE_TOLERANCE;
         } else {
-            withinTolerance = false;
+            withinTolerance = linearError < LINEAR_DRIVE_TOLERANCE && headingError < HEADING_DRIVE_TOLERANCE;
         }
         return withinTolerance;
     }
@@ -220,18 +194,9 @@ public class Navigator extends Subassembly {
         Global.lastPose = currentPose;
     }
 
-    public enum ControllerType {
-        DRIVE, APPROACH
-    }
-
     private enum OpModeType {
         TELEOP, AUTONOMOUS, UNKNOWN
     }
-    
-    /** Set which P(I)D controller to use */
-    public void setControllerType(ControllerType controllerType) { this.controllerType = controllerType; }
-    /** Get current P(I)D controller type */
-    public ControllerType getControllerType() { return controllerType; }
 
     /** Set target pose, mirroring for blue alliance */
     public void setUnspecificTargetPose(Pose targetPose) {

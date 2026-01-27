@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -53,8 +52,8 @@ public class DriveEncoders extends Localizer {
 
         leftFront = driveBase.leftFront;
         rightFront = driveBase.rightFront;
-        leftRear = driveBase.leftRear;
-        rightRear = driveBase.rightRear;
+        leftRear = driveBase.leftBack;
+        rightRear = driveBase.rightBack;
         motors = new DcMotor[]{leftFront, rightFront, leftRear, rightRear};
     }
 

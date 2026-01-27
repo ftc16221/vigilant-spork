@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes.tests;
 
 import android.graphics.Color;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.util.Global;
 
+@Disabled
 @TeleOp(group = Global.OpModeGroup.TEST)
 public class SpindexerTest extends OpMode {
 

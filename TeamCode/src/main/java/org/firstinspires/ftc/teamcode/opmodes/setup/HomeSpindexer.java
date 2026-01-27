@@ -48,7 +48,7 @@ public class HomeSpindexer extends OpMode {
         colorSensor.setGain(SENSOR_GAIN);
 
         spindexerMotor = spindexer.getMotor();
-        spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        spindexerMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override

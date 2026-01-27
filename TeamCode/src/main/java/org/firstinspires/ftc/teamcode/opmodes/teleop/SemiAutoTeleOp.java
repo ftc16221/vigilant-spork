@@ -53,6 +53,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     private boolean goalTrackingEnabled = false;
 
     private boolean gamepad2RightTriggerWasPressed = false;
+    private double prevTime = 0;
 
     @Override
     public void init() {
@@ -75,7 +76,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
         navigator.setTargetPose(FAR_LAUNCH_POSE);
         navigator.setUnspecificTrackingPoint(GOAL_POSE);
-        navigator.setControllerType(Navigator.ControllerType.APPROACH);
     }
 
     @Override
@@ -85,6 +85,9 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     @Override
     public void loop() {
+        double dt = time - prevTime;
+        prevTime = time;
+
         drawing.prep();
         drawing.drawPoint(GOAL_POSE, "purple");
 
@@ -141,6 +144,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             launcher.cancelLaunches();
         } else if (gamepad2.rightStickButtonWasPressed()) {
             spindexer.emptyActiveSlot();
+            launcher.cancelLaunches();
         }
 
         if (gamepad2.dpadUpWasPressed()) {
@@ -159,6 +163,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             spindexer.alignForIntake();
         }
 
+        telemetry.addData("loop time", dt);
+
         // UPDATES
         navigator.update();
         launcher.update();
@@ -168,7 +174,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         drawing.send();
         navigator.runTelemetry();
         spindexer.runTelemetry();
-        telemetry.update();
     }
 
     @Override

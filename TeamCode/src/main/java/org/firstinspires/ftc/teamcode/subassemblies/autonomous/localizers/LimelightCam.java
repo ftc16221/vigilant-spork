@@ -6,10 +6,12 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.CircularPoseArray;
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -36,6 +38,8 @@ public class LimelightCam extends Localizer {
 
     private LLResult result;
     private int[] detectedTags;
+
+    public boolean useMT2 = true;
 
 
     public LimelightCam(OpMode opMode) {
@@ -67,10 +71,14 @@ public class LimelightCam extends Localizer {
         result = limelight3A.getLatestResult();
         if (result != null) {
             if (result.isValid() && !getDetectedTagIds().isEmpty()) {
-                // check if the new pose is close to the last ones, and if so use it, otherwise set pose to null
-                Pose newPose = new Pose(result.getBotpose(), DistanceUnit.METER);
+                Pose3D botPose;
+                if (useMT2) botPose = result.getBotpose_MT2();
+                else botPose = result.getBotpose();
+
+                Pose newPose = new Pose(botPose, DistanceUnit.METER);
                 if (newPose != null) poseArray.add(newPose);
 
+                // check if the new pose is close to the last ones, and if so use it, otherwise set pose to null
                 Pose avgPose = poseArray.getAverage();
                 boolean withinTolerance =
                         avgPose.getDistanceFromPose(newPose) <= LINEAR_TOLERANCE

@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.ToggleServo;
 
-@TeleOp(group = Global.OpModeGroup.TUNER)
 //@Config
+@TeleOp(group = Global.OpModeGroup.TUNER)
 public class LauncherTuner extends OpMode {
 
     public static double TARGET_RPM = 0;
@@ -28,6 +28,7 @@ public class LauncherTuner extends OpMode {
     private final boolean useLimelight = USE_LIMELIGHT;
 
     private boolean dpadWasPressed = false;
+    double prevTime = 0;
 
     Launcher launcher;
     LimelightCam limelightCam;
@@ -65,6 +66,14 @@ public class LauncherTuner extends OpMode {
 
     @Override
     public void loop() {
+        double dt = time - prevTime;
+        prevTime = time;
+
+        // slow down loop times on the PID tuner, so the effects are similar to more complex opModes
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException ignored) { }
+
         if (gamepad1.dpad_up && !dpadWasPressed) TARGET_RPM += 100;
         else if (gamepad1.dpad_down && !dpadWasPressed) TARGET_RPM -= 100;
         else if (gamepad1.dpad_right && !dpadWasPressed) TARGET_RPM += 10;
@@ -99,6 +108,7 @@ public class LauncherTuner extends OpMode {
             limelightCam.update();
             telemetryA.addData("Distance from goal", limelightCam.getDistanceFromTag(GOAL_APRILTAG_ID));
         }
+        telemetryA.addData("loop time", dt);
 
         launcher.update();
     }

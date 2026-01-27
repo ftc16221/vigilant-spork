@@ -111,7 +111,7 @@ public class Spindexer extends Subassembly {
                 mode = Spindexer.Mode.LAUNCHER;
                 // go to first color of motif first, to save time
                 int motifSlot = -1;
-                if (Global.motif != null) {
+                if (Global.motif != Global.Motif.UNKNOWN) {
                     if (Global.motif.toString().startsWith("G"))
                         motifSlot = getIndexOfClosestArtifact(Artifact.GREEN);
                     if (Global.motif.toString().startsWith("P"))

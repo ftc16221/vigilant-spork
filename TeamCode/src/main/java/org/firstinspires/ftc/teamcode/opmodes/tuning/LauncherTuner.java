@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.ToggleServo;
 
+//@Config
 @TeleOp(group = Global.OpModeGroup.TUNER)
-@Config
 public class LauncherTuner extends OpMode {
 
     public static double TARGET_RPM = 0;
@@ -68,6 +68,11 @@ public class LauncherTuner extends OpMode {
     public void loop() {
         double dt = time - prevTime;
         prevTime = time;
+
+        // slow down loop times on the PID tuner, so the effects are similar to more complex opModes
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException ignored) { }
 
         if (gamepad1.dpad_up && !dpadWasPressed) TARGET_RPM += 100;
         else if (gamepad1.dpad_down && !dpadWasPressed) TARGET_RPM -= 100;

@@ -33,7 +33,7 @@ public class Launcher extends Subassembly {
     public static double C = 0.0;
 
     // PIDF coefficients for flywheel speed
-    public static double kP = 0.00016, kI = 0.0, kD = 0.000035, kF = 0.0;
+    public static double kP = 0.0009, kI = 0.03, kD = 0.0, kF = 0.00021;
 
     public static double ENCODER_RES = 28.0; // PPR
     public static int NUM_OF_VELOCITY_SAMPLES = 5;
@@ -107,8 +107,8 @@ public class Launcher extends Subassembly {
 
         flywheelVelArray.addValue(MathEx.toRPM(flywheelMotor.getVelocity(), ENCODER_RES));
         double flywheelVel = flywheelVelArray.getAverage();
-        double powerDelta = flywheelPIDF.calculate(flywheelVel, targetVel);
-        flywheelMotor.setPower(flywheelMotor.getPower() + powerDelta);
+        double power = flywheelPIDF.calculate(flywheelVel, targetVel);
+        flywheelMotor.setPower(power);
         sendData("error", flywheelVel - targetVel);
         sendData("current velocity", flywheelVel);
         sendData("target velocity", targetVel);
@@ -197,7 +197,7 @@ public class Launcher extends Subassembly {
     }
 
     public void launchMotif() {
-        if (Global.motif == null) {
+        if (Global.motif == Global.Motif.UNKNOWN) {
             Watchdog.e("Unable to launch motif as it is unknown");
             return;
         }

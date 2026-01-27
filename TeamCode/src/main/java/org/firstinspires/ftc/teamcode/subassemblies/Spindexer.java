@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -67,8 +68,10 @@ public class Spindexer extends Subassembly {
         this.intake = intake;
 
         spindexerMotor = opMode.hardwareMap.dcMotor.get("spindexer");
+        spindexerMotor.setDirection(DcMotorSimple.Direction.FORWARD); // only use this with permanently reversed motors (see: https://ftcforum.firstinspires.org/forum/ftc-technology/75167-warning-about-gobilda-motor-directions)
         spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         activeSlot = 0;
         spindexerPIDF.setSetPoint(0);
 
@@ -288,7 +291,7 @@ public class Spindexer extends Subassembly {
     private double getDistanceFromIndex(int slotIndex) {
         double indexAngle = baseAngle + (slotIndex * 120);
         double currentAngle = getCurrentAngle();
-        double distance = (indexAngle - currentAngle) % 360;
+        double distance = (currentAngle - indexAngle) % 360;
 
         // normalize distance between [-179.9 to 180]
         if (distance > 180) distance -= 360;
@@ -324,6 +327,10 @@ public class Spindexer extends Subassembly {
      */
     public DcMotor getMotor() {
         return spindexerMotor;
+    }
+
+    public Mode getMode() {
+        return mode;
     }
 
     public NormalizedColorSensor getColorSensor() {

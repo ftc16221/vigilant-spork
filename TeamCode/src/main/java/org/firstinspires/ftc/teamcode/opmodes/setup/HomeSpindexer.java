@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
@@ -48,7 +49,7 @@ public class HomeSpindexer extends OpMode {
         colorSensor.setGain(SENSOR_GAIN);
 
         spindexerMotor = spindexer.getMotor();
-        spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        spindexerMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override

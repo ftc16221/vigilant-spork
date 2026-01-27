@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
@@ -38,6 +39,12 @@ public class Pose {
         this.h = pose3D.getOrientation().getYaw(Global.ANGLE_UNIT);
     }
 
+    public Pose(Pose2D pose2D) {
+        this.x = pose2D.getX(Global.DISTANCE_UNIT);
+        this.y = pose2D.getY(Global.DISTANCE_UNIT);
+        this.h = pose2D.getHeading(Global.ANGLE_UNIT);
+    }
+
     // The absolute stupidest of conversion, to try and deal with the fact apriltag metadata positions use different units than literally everything else in the SDK and even other aprilTag stuff :)
     public Pose(VectorF positionVectorF, Quaternion orientationQuaternion) {
         this.x = Global.DISTANCE_UNIT.fromInches(positionVectorF.get(0));
@@ -51,8 +58,19 @@ public class Pose {
         this.h = orientation.thirdAngle; // third angle is z axis, which is yaw/heading
     }
 
+
     public SparkFunOTOS.Pose2D toSparkFunPose() {
         return new SparkFunOTOS.Pose2D(x, y, h);
+    }
+
+    public Pose2D toPose2D() {
+        return new Pose2D(
+                Global.DISTANCE_UNIT,
+                x,
+                y,
+                Global.ANGLE_UNIT,
+                h
+        );
     }
 
     @NonNull

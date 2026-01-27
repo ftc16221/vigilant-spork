@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
@@ -42,21 +43,14 @@ public class PinpointOdo extends Localizer {
 
     @Override public void update() {
         pinpoint.update();
-
-        pose = new Pose(
-                pinpoint.getPosX(Global.DISTANCE_UNIT),
-                pinpoint.getPosY(Global.DISTANCE_UNIT),
-                MathEx.normalize(pinpoint.getHeading(Global.UNNORMALIZED_ANGLE_UNIT)) // i'm not sure why, but when a normalized angle unit is used instead the value outputs as degrees but normalizes to the same range as radians
-        );
+        pose = new Pose(pinpoint.getPosition());
     }
 
     @Override public void setPose(Pose newPose) {
         pose = newPose;
-        pinpoint.setPosX(newPose.x, Global.DISTANCE_UNIT);
-        pinpoint.setPosY(newPose.y, Global.DISTANCE_UNIT);
-        pinpoint.setHeading(newPose.h, Global.ANGLE_UNIT);
+        pinpoint.setPosition(pose.toPose2D());
     }
-
+/*  COMMENTED OUT BECAUSE EVEN THOUGH THIS IS A COOL CONCEPT, THE EXTRA I2C READS AREN'T WORTH IT
     @Override public List<String> findIssues() {
         List<String> issues = new ArrayList<>();
         GoBildaPinpointDriver.DeviceStatus status = pinpoint.getDeviceStatus();
@@ -64,7 +58,7 @@ public class PinpointOdo extends Localizer {
             issues.add("Pinpoint status is " + status.name() + ", odometry functionality is likely very limited");
         }
         return issues;
-    }
+    }*/
 
     public void recalibrate() {
         pinpoint.recalibrateIMU();

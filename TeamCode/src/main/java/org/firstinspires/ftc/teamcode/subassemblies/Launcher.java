@@ -69,7 +69,6 @@ public class Launcher extends Subassembly {
     private final Deadline stuckDeadline = new Deadline(STUCK_DETECTION_TIME, TimeUnit.MILLISECONDS);
 
     private Double targetVel = 0.0;
-    private double hoodAngle = MIN_HOOD_ANGLE;
 
     private State currentState = State.IDLE;
 
@@ -266,8 +265,7 @@ public class Launcher extends Subassembly {
 
     public void setHoodAngle(double angleInDegrees) {
         angleInDegrees = MathEx.clamp(angleInDegrees, MIN_HOOD_ANGLE, MAX_HOOD_ANGLE);
-        hoodAngle = angleInDegrees;
-        double absoluteAngle = hoodAngle - MIN_HOOD_ANGLE;
+        double absoluteAngle = angleInDegrees - MIN_HOOD_ANGLE;
         double servoAngle = absoluteAngle * HOOD_GEAR_RATIO;
         hoodServo.setPosition(MathEx.degreesToServoPosition(servoAngle, 1800, HOOD_RANGE_MIN, HOOD_RANGE_MAX));
     }

@@ -117,6 +117,4 @@ public class LocalizationManager extends Subassembly {
     public boolean isRobotMoving() {
         return getLinearSpeed() > LINEAR_SPEED_TOLERANCE || getAngularSpeed() > ANGULAR_SPEED_TOLERANCE;
     }
-
-
 }

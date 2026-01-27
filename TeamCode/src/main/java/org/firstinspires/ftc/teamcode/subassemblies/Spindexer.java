@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.subassemblies;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDFController;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -41,7 +40,7 @@ public class Spindexer extends Subassembly {
     public static int INTAKE_SAFETY_DEADLINE = 1200; // ms
     public static int INTAKE_DEADLINE = 300; // ms
 
-    public Artifact[] drum = new Artifact[3];
+    private final Artifact[] drum = new Artifact[3];
 
     private final Intake intake;
     private final Deadline intakeSafetyDeadline = new Deadline(INTAKE_SAFETY_DEADLINE, TimeUnit.MILLISECONDS);
@@ -50,7 +49,6 @@ public class Spindexer extends Subassembly {
 
     private final DcMotor spindexerMotor;
     private final PIDFController spindexerPIDF = new PIDFController(kP, kI, kD, kF);
-    ;
 
     private final NormalizedColorSensor colorSensor;
     private final Artifact[] lastDetectedColors = new Artifact[10];
@@ -72,44 +70,16 @@ public class Spindexer extends Subassembly {
         spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        activeSlot = 0;
         spindexerPIDF.setSetPoint(0);
 
         colorSensor = opMode.hardwareMap.get(NormalizedColorSensor.class, "color_sensor");
         colorSensor.setGain(COLOR_SENSOR_GAIN);
 
-        boolean isAutoOpMode = opMode.getClass().isAnnotationPresent(Autonomous.class);
-        if (isAutoOpMode || drum[0] == null) {
-            drum[0] = Artifact.GREEN;
-            drum[1] = Artifact.PURPLE;
-            drum[2] = Artifact.PURPLE;
-        } else {
-            if (isFull()) {
-                mode = Spindexer.Mode.LAUNCHER;
-            } else {
-                mode = Spindexer.Mode.INTAKE;
-            }
-        }
-
-        // TODO: temp
         drum[0] = Artifact.EMPTY;
         drum[1] = Artifact.EMPTY;
         drum[2] = Artifact.EMPTY;
 
-        if (isFull()) mode = Spindexer.Mode.LAUNCHER;
-        else mode = Spindexer.Mode.INTAKE;
-    }
-
-    public boolean isFull() {
-        return getNumOfArtifact(Artifact.EMPTY) == 0;
-    }
-
-    public int getNumOfArtifact(Artifact artifact) {
-        int result = 0;
-        for (Artifact artifact1 : drum) {
-            if (artifact1 == artifact) result++;
-        }
-        return result;
+        mode = Spindexer.Mode.INTAKE;
     }
 
     public void update() {
@@ -198,6 +168,13 @@ public class Spindexer extends Subassembly {
         telemetry.addData("current normalized angle", currentAngle % 360);
     }
 
+    /**
+     * get current angle of the spindexer DcMotor in degrees
+     */
+    public double getCurrentAngle() {
+        return MathEx.encoderTicksToDegrees(spindexerMotor.getCurrentPosition(), ENCODER_RES);
+    }
+
     public void evaluatePID(double error) {
         double power = spindexerPIDF.calculate(error);
         power = MathEx.clamp(power, -1, 1);
@@ -205,13 +182,6 @@ public class Spindexer extends Subassembly {
         isBusy = error > TOLERANCE;
         sendData("spx error", error);
         sendData("spx power", power);
-    }
-
-    /**
-     * get current angle of the spindexer DcMotor in degrees
-     */
-    public double getCurrentAngle() {
-        return MathEx.encoderPositionToDegrees(spindexerMotor.getCurrentPosition(), ENCODER_RES);
     }
 
     /**
@@ -273,6 +243,10 @@ public class Spindexer extends Subassembly {
         return true;
     }
 
+    public boolean isFull() {
+        return getNumOfArtifact(Artifact.EMPTY) == 0;
+    }
+
     private int getIndexOfClosestArtifact(Artifact artifact) {
         int result = -1;
         double smallestDistance = 181;
@@ -284,6 +258,14 @@ public class Spindexer extends Subassembly {
                     result = i;
                 }
             }
+        }
+        return result;
+    }
+
+    public int getNumOfArtifact(Artifact artifact) {
+        int result = 0;
+        for (Artifact artifact1 : drum) {
+            if (artifact1 == artifact) result++;
         }
         return result;
     }

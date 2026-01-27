@@ -19,14 +19,13 @@ public class Path {
     public boolean execute(Navigator navigator) {
         if (state != prevState) {
             if (isComplete) return true;
+            // set ControllerType to APPROACH when approaching the last pose, otherwise default to DRIVE
             if (state >= value.length) {
                 isComplete = true;
                 RobotLog.i("Path Complete!");
                 return true;
-            } else if (state + 1 == value.length) { // set ControllerType to APPROACH when approaching the last pose, otherwise default to DRIVE
-                navigator.setControllerType(Navigator.ControllerType.APPROACH);
             } else {
-                navigator.setControllerType(Navigator.ControllerType.DRIVE);
+                navigator.useAccurateTolerance = (state + 1 == value.length); // if last step
             }
             navigator.setUnspecificTargetPose(value[state]);
             prevState = state;

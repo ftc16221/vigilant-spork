@@ -18,24 +18,26 @@ import java.util.List;
 
 public class MecDriveBase extends Subassembly {
 
-    public DcMotor leftFront, rightFront, leftRear, rightRear;
+    public DcMotor leftFront, rightFront, leftBack, rightBack;
 
     public DcMotor[] motors;
+
+    private double lastLeftFrontPower, lastRightFrontPower, lastLeftBackPower, lastRightBackPower;
 
     public MecDriveBase(OpMode opMode) {
         super(opMode, "Mecanum Drive Base");
 
         leftFront = hardwareMap.dcMotor.get("left_front");
         rightFront = hardwareMap.dcMotor.get("right_front");
-        leftRear = hardwareMap.dcMotor.get("left_rear");
-        rightRear = hardwareMap.dcMotor.get("right_rear");
+        leftBack = hardwareMap.dcMotor.get("left_rear");
+        rightBack = hardwareMap.dcMotor.get("right_rear");
 
-        motors = new DcMotor[]{ leftFront, rightFront, leftRear, rightRear };
+        motors = new DcMotor[]{ leftFront, rightFront, leftBack, rightBack};
 
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 //        rightFront.setDirection(DcMotorSimple.Mode.REVERSE);
 //        leftRear.setDirection(DcMotorSimple.Mode.REVERSE);
-        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
 
         setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
@@ -98,15 +100,21 @@ public class MecDriveBase extends Subassembly {
         // but only if at least one is out of the range [-1, 1]
 
         double denominator = max(abs(y) + abs(x) + abs(yaw), 1.0);
-        double leftFrontPower = (y + x + yaw) / denominator;
+        double leftFrontPower =  (y + x + yaw) / denominator;
         double rightFrontPower = (y - x - yaw) / denominator;
-        double leftRearPower = (y - x + yaw) / denominator;
-        double rightRearPower = (y + x - yaw) / denominator;
+        double leftBackPower =   (y - x + yaw) / denominator;
+        double rightBackPower =  (y + x - yaw) / denominator;
 
-        leftFront.setPower(leftFrontPower);
-        rightFront.setPower(rightFrontPower);
-        leftRear.setPower(leftRearPower);
-        rightRear.setPower(rightRearPower);
+        // I know this looks so stupid but it minimizes loop times
+        if (Math.abs(leftFrontPower  - lastLeftFrontPower)  > 0.005) leftFront .setPower(leftFrontPower);
+        if (Math.abs(rightFrontPower - lastRightFrontPower) > 0.005) rightFront.setPower(rightFrontPower);
+        if (Math.abs(leftBackPower   - lastLeftBackPower)   > 0.005) leftBack  .setPower(leftBackPower);
+        if (Math.abs(rightBackPower  - lastRightBackPower)  > 0.005) rightBack .setPower(rightBackPower);
+
+        lastLeftFrontPower  = leftFrontPower;
+        lastRightFrontPower = rightFrontPower;
+        lastLeftBackPower   = leftBackPower;
+        lastRightBackPower  = rightBackPower;
     }
 
     public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) {

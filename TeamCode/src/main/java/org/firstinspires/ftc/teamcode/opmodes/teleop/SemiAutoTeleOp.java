@@ -76,7 +76,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
         navigator.setTargetPose(FAR_LAUNCH_POSE);
         navigator.setUnspecificTrackingPoint(GOAL_POSE);
-        navigator.setControllerType(Navigator.ControllerType.APPROACH);
     }
 
     @Override

@@ -44,7 +44,7 @@ public class LocalizationManager extends Subassembly {
         }
 
         if (limelightCam != null) {
-            limelightCam.useMT2 = !relativeLocalizers.isEmpty();
+            limelightCam.useMT2 = /*!relativeLocalizers.isEmpty()*/false;
         }
 
         Watchdog.i("LocalizerManager successfully initialized with the following Localizers: " + Arrays.toString(localizers));

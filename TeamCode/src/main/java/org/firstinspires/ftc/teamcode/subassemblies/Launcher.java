@@ -47,11 +47,12 @@ public class Launcher extends Subassembly {
     public static double GATE_RANGE_MIN = 0.8;
     public static double GATE_RANGE_MAX = 1.0;
 
-    public static double KICKER_RANGE_MIN = 0.0;
-    public static double KICKER_RANGE_MAX = 0.2;
+    public static double KICKER_RANGE_MIN = 0.03;
+    public static double KICKER_RANGE_MAX = 0.25;
     public static int KICKER_EXTENSION_TIME = 250; // milliseconds
 
-    public static int STUCK_DETECTION_TIME = 2500; // milliseconds
+    public static int STUCK_DETECTION_TIME = 1500; // milliseconds
+    public static int SPINDEXER_MOVEMENT_DELAY = 400;
 
     private final Spindexer spindexer;
 
@@ -65,6 +66,8 @@ public class Launcher extends Subassembly {
 
     private final ToggleServo kickerServo;
     private final Deadline kickerDeadline = new Deadline(KICKER_EXTENSION_TIME, TimeUnit.MILLISECONDS);
+    private final Deadline spindexerMovementDeadline = new Deadline(SPINDEXER_MOVEMENT_DELAY, TimeUnit.MILLISECONDS);
+
 
     private final Deadline stuckDeadline = new Deadline(STUCK_DETECTION_TIME, TimeUnit.MILLISECONDS);
 
@@ -115,7 +118,7 @@ public class Launcher extends Subassembly {
 
         switch (currentState) {
             case IDLE: // waiting for item in queue
-                if (!launchQueue.isEmpty()) {
+                if (!launchQueue.isEmpty() && spindexerMovementDeadline.hasExpired()) {
                     switch (launchQueue.getFirst()) {
                         case GREEN:
                             if (!spindexer.alignForLaunch(Spindexer.Artifact.GREEN))
@@ -252,6 +255,7 @@ public class Launcher extends Subassembly {
 
     public void kick() {
         kickerServo.open();
+        spindexerMovementDeadline.reset();
         kickerDeadline.reset();
     }
 

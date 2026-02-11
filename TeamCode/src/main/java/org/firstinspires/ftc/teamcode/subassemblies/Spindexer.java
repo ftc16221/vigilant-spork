@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 @Config
 public class Spindexer extends Subassembly {
     // from home
-    public static double INTAKE_ANGLE = 66.0; // degrees
-    public static double LAUNCHER_ANGLE = 220.0; // degrees
+    public static double INTAKE_ANGLE = 0.0; // degrees
+    public static double LAUNCHER_ANGLE = 164.0; // degrees
 
     public static double ENCODER_RES = 537.7; // PPR
 
@@ -38,6 +38,7 @@ public class Spindexer extends Subassembly {
     public static double TOLERANCE = 2.0; // degrees
 
     public static int INTAKE_SAFETY_DEADLINE = 1200; // ms
+    public static int SPINDEXER_MOVEMENT_DELAY = 400;
     public static int INTAKE_DEADLINE = 300; // ms
 
     private final Artifact[] drum = new Artifact[3];

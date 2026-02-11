@@ -52,44 +52,54 @@ public class HomeSpindexer extends OpMode {
     }
 
     @Override
+    public void start() {
+        spindexerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ignored) { };
+        spindexerMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        requestOpModeStop();
+    }
+
+    @Override
     public void loop() {
-        switch (state) {
-            case NOT_STARTED:
-                spindexerMotor.setPower(SEARCH_POWER);
-                state = State.SEARCHING;
-                break;
-            case SEARCHING:
-                colors = colorSensor.getNormalizedColors();
-                if (colors.alpha > ALPHA_THRESHOLD) {
-                    spindexerMotor.setTargetPosition(spindexerMotor.getCurrentPosition());
-                    spindexerMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    state = State.FOUND;
-                }
-                break;
-            case FOUND:
-                if (!spindexerMotor.isBusy()) {
-                    spindexerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    resetDeadline.reset();
-                    state = State.SETTING;
-                }
-                break;
-            case SETTING:
-                if (resetDeadline.hasExpired()) {
-                    spindexerMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    state = State.COMPLETE;
-                }
-                break;
-            case COMPLETE:
-                requestOpModeStop();
-                break;
-            case TUNING:
-                colors = colorSensor.getNormalizedColors();
-                telemetryA.addData("State", state);
-                telemetryA.addData("Alpha", colors.alpha);
-                telemetryA.addData("Alpha Threshold", ALPHA_THRESHOLD);
-                telemetryA.update();
-                break;
-        }
+//        switch (state) {
+//            case NOT_STARTED:
+//                spindexerMotor.setPower(SEARCH_POWER);
+//                state = State.SEARCHING;
+//                break;
+//            case SEARCHING:
+//                colors = colorSensor.getNormalizedColors();
+//                if (colors.alpha > ALPHA_THRESHOLD) {
+//                    spindexerMotor.setTargetPosition(spindexerMotor.getCurrentPosition());
+//                    spindexerMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    state = State.FOUND;
+//                }
+//                break;
+//            case FOUND:
+//                if (!spindexerMotor.isBusy()) {
+//                    spindexerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    resetDeadline.reset();
+//                    state = State.SETTING;
+//                }
+//                break;
+//            case SETTING:
+//                if (resetDeadline.hasExpired()) {
+//                    spindexerMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    state = State.COMPLETE;
+//                }
+//                break;
+//            case COMPLETE:
+//                requestOpModeStop();
+//                break;
+//            case TUNING:
+//                colors = colorSensor.getNormalizedColors();
+//                telemetryA.addData("State", state);
+//                telemetryA.addData("Alpha", colors.alpha);
+//                telemetryA.addData("Alpha Threshold", ALPHA_THRESHOLD);
+//                telemetryA.update();
+//                break;
+//        }
     }
 
     enum State {

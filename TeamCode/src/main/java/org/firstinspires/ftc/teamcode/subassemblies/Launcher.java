@@ -49,9 +49,9 @@ public class Launcher extends Subassembly {
 
     public static double KICKER_RANGE_MIN = 0.03;
     public static double KICKER_RANGE_MAX = 0.25;
-    public static int KICKER_EXTENSION_TIME = 250; // milliseconds
+    public static int KICKER_EXTENSION_TIME = 200; // milliseconds
 
-    public static int STUCK_DETECTION_TIME = 1500; // milliseconds
+    public static int STUCK_DETECTION_TIME = 1000; // milliseconds
     public static int SPINDEXER_MOVEMENT_DELAY = 400;
 
     private final Spindexer spindexer;
@@ -257,6 +257,11 @@ public class Launcher extends Subassembly {
         kickerServo.open();
         spindexerMovementDeadline.reset();
         kickerDeadline.reset();
+    }
+    public void unkick() {
+        kickerServo.close();
+        kickerDeadline.expire();
+        spindexerMovementDeadline.expire();
     }
 
     public void setTargetVelocity(double rpm) {

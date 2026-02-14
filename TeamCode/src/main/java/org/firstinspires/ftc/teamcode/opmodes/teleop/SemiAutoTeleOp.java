@@ -145,6 +145,12 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         } else if (gamepad2.rightStickButtonWasPressed()) {
             spindexer.emptyActiveSlot();
             launcher.cancelLaunches();
+        } else if (gamepad2.leftStickButtonWasPressed()) {
+            // if the kicker is stuck inside the spindexer, we need to release the pressure
+            // and retract the kicker.
+            // after that, the driver should be able to re-do whatever action needs to be done.
+            spindexer.stop();
+            launcher.unkick();
         }
 
         if (gamepad2.dpadUpWasPressed()) {

@@ -104,6 +104,11 @@ public class Launcher extends Subassembly {
         }
     }
 
+    public void start() {
+        kickerServo.close();
+        gateServo.close();
+    }
+
     public void update() {
 
         if (Global.ENABLE_TUNING_MODE) flywheelPIDF.setPIDF(kP, kI, kD, kF);

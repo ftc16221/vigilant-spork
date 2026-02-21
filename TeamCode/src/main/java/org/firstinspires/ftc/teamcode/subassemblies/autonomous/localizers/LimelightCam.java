@@ -119,7 +119,9 @@ public class LimelightCam extends Localizer {
         return pose.getDistanceFromPose(tagPose);
     }
 
-
+    public void updateOrientation(double yaw) {
+        limelight3A.updateRobotOrientation(yaw);
+    }
 
     public LLResult getResult() {
         return result;

@@ -41,6 +41,8 @@ public class Spindexer extends Subassembly {
     public static int SPINDEXER_MOVEMENT_DELAY = 400;
     public static int INTAKE_DEADLINE = 300; // ms
 
+    public double manualOffset = 0;
+
     private final Artifact[] drum = new Artifact[3];
 
     private final Intake intake;
@@ -272,7 +274,7 @@ public class Spindexer extends Subassembly {
     }
 
     private double getDistanceFromIndex(int slotIndex) {
-        double indexAngle = baseAngle + (slotIndex * 120);
+        double indexAngle = baseAngle + (slotIndex * 120) + manualOffset;
         double currentAngle = getCurrentAngle();
         double distance = (currentAngle - indexAngle) % 360;
 

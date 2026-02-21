@@ -85,11 +85,16 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     @Override
     public void loop() {
+
         double dt = time - prevTime;
         prevTime = time;
 
         drawing.prep();
         drawing.drawPoint(GOAL_POSE, "purple");
+
+        if (Global.motif == null) {
+            limelightCam.searchForMotif();
+        }
 
         // ################   GAMEPAD 1   ################
         /*else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
@@ -102,24 +107,24 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             underglow.setColor(IDLE_COLOR);
         } TODO commented because there is some PID feedback loop happening somewhere*/
 
-        if (gamepad1.dpadUpWasPressed()) {
+        if (/*gamepad1.dpadUpWasPressed()*/false) {
             navigator.setUnspecificTargetPose(FAR_LAUNCH_POSE);
             startAutoMovement();
             spindexer.alignAnyForLaunch();
-        } else if (gamepad1.dpadDownWasPressed()) {
+        } else if (/*gamepad1.dpadDownWasPressed()*/false) {
             navigator.setUnspecificTargetPose(CLOSE_LAUNCH_POSE);
             startAutoMovement();
             spindexer.alignAnyForLaunch();
         }
 
-        if (!gamepad1.atRest()) {
+        if (/*!gamepad1.atRest() && autoMovementEnabled*/false) {
             stopAutoMovement();
         }
 
-        if (goalTrackingEnabled) {
+        if (/*goalTrackingEnabled*/false) {
             driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
         }
-        if (!autoMovementEnabled && !goalTrackingEnabled) {
+        if (/*!autoMovementEnabled && !goalTrackingEnabled*/true) {
             driveBase.control(gamepad1);
         }
 
@@ -145,6 +150,12 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         } else if (gamepad2.rightStickButtonWasPressed()) {
             spindexer.emptyActiveSlot();
             launcher.cancelLaunches();
+        } else if (gamepad2.leftStickButtonWasPressed()) {
+            // if the kicker is stuck inside the spindexer, we need to release the pressure
+            // and retract the kicker.
+            // after that, the driver should be able to re-do whatever action needs to be done.
+            spindexer.stop();
+            launcher.unkick();
         }
 
         if (gamepad2.dpadUpWasPressed()) {
@@ -157,6 +168,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             launcher.setTargetVelocity(0);
             launcher.setHoodAngle(0);
         }
+
+        spindexer.manualOffset += -gamepad2.left_stick_x * 2;
 
         // INTAKE MODE
         if (gamepad2.dpadLeftWasPressed()) {

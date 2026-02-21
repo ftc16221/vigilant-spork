@@ -47,12 +47,16 @@ public class MecDriveBase extends Subassembly {
      *
      * @param gamepad the gamepad used to move the driveBase, usually gamepad1
      */
-    public void control(Gamepad gamepad) {
-        double leftX = MathEx.powerCurve(gamepad.left_stick_x);
-        double leftY = MathEx.powerCurve(-gamepad.left_stick_y);
-        double rightX = gamepad.right_stick_x;
+    public void control(Gamepad gamepad, double speedCoeff) {
+        double leftX = speedCoeff * MathEx.powerCurve(gamepad.left_stick_x);
+        double leftY = speedCoeff * MathEx.powerCurve(-gamepad.left_stick_y);
+        double rightX = speedCoeff * gamepad.right_stick_x;
 
         moveRobot(leftX, leftY, rightX);
+    }
+
+    public void control(Gamepad gamepad) {
+        control(gamepad, 1.0);
     }
 
     @Override

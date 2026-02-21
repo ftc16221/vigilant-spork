@@ -34,6 +34,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     public static double FAR_LAUNCH_RPM = 3200; // TODO
     public static double FAR_LAUNCH_ANGLE = 45;
 
+    public static double SLOW_COEFF = 0.2; // 20% speed
 
     public static Underglow.Color IDLE_COLOR = Underglow.Color.ALLIANCE;
     public static Underglow.Color GOAL_TRACKING_COLOR = Underglow.Color.GREEN;
@@ -125,7 +126,11 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
         }
         if (/*!autoMovementEnabled && !goalTrackingEnabled*/true) {
-            driveBase.control(gamepad1);
+            if (gamepad1.right_trigger > 0.5) {
+                driveBase.control(gamepad1, SLOW_COEFF);
+            } else {
+                driveBase.control(gamepad1);
+            }
         }
 
         // ################   GAMEPAD 2   ################

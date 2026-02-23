@@ -18,7 +18,7 @@ import java.util.List;
 //@Config
 public class PinpointOdo extends Localizer {
 
-    // Both of these offsets are in CM. The tracking point of the robot is the center of the wheelbase
+    // Both of these offsets are in MM. The tracking point of the robot is the center of the wheelbase
     public static double X_OFFSET = 72; // 72mm
     public static double Y_OFFSET = 60; // 60mm
     public static GoBildaPinpointDriver.GoBildaOdometryPods POD_TYPE = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;

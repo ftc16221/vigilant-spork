@@ -11,7 +11,7 @@ public abstract class Localizer extends Subassembly {
     public final boolean isAbsolute;
     public final double accuracy;
 
-    protected Pose pose;
+    protected volatile Pose pose;
 
     protected final OpMode opMode;
     protected final HardwareMap hardwareMap;

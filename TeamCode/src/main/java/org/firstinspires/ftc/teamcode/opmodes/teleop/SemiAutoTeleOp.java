@@ -154,21 +154,14 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         }
         if (gamepad2.rightBumperWasPressed()) {
             launcher.launchAny();
-        } else if (gamepad2.yWasPressed() || gamepad2.triangleWasPressed()) {
+        } else if (gamepad2.yWasPressed()) {
             launcher.launchMotif();
-        }
-        if (gamepad2.a/* || gamepad2.crossWasPressed()*/ && !gamepad2AWasPressed) {
+        } else if (gamepad2.aWasPressed()) {
             gamepad2AWasPressed = true;
             launcher.launchGreen();
-        }/* else if (gamepad2AWasPressed) {
-            gamepad2AWasPressed = false;
-        }*/
-        if (gamepad2.x/* || gamepad2.squareWasPressed()*/ && !gamepad2XWasPressed) {
+        } else if (gamepad2.xWasPressed()) {
             launcher.launchPurple();
-        }/* else if (gamepad2XWasPressed) {
-            gamepad2XWasPressed = false;
-        }*/
-        if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
+        } else if (gamepad2.bWasPressed()) {
             launcher.cancelLaunches();
         } else if (gamepad2.rightStickButtonWasPressed()) {
             spindexer.emptyActiveSlot();

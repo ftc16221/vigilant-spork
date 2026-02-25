@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.MathEx;
@@ -18,7 +19,7 @@ import java.util.List;
 //@Config
 public class PinpointOdo extends Localizer {
 
-    // Both of these offsets are in CM. The tracking point of the robot is the center of the wheelbase
+    // Both of these offsets are in MM. The tracking point of the robot is the center of the wheelbase
     public static double X_OFFSET = 72; // 72mm
     public static double Y_OFFSET = 60; // 60mm
     public static GoBildaPinpointDriver.GoBildaOdometryPods POD_TYPE = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
@@ -36,7 +37,7 @@ public class PinpointOdo extends Localizer {
         pinpoint.setEncoderResolution(POD_TYPE);
         pinpoint.setEncoderDirections(X_DIRECTION, Y_DIRECTION);
 
-        pinpoint.resetPosAndIMU();
+        pinpoint.recalibrateIMU();
 
         setPose(startingPose);
     }
@@ -50,6 +51,7 @@ public class PinpointOdo extends Localizer {
         if (newPose != null) {
             pose = newPose;
             pinpoint.setPosition(pose.toPose2D());
+            Watchdog.i("pinpoint pose has been set to " + newPose.toPose2D().toString());
         }
     }
 /*  COMMENTED OUT BECAUSE EVEN THOUGH THIS IS A COOL CONCEPT, THE EXTRA I2C READS AREN'T WORTH IT

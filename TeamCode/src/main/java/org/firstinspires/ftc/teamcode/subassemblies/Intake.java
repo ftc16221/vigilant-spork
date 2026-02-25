@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.util.Subassembly;
 //@Config
 public class Intake extends Subassembly {
 
-    public static double SERVO_POWER = 0.8;
+    public static double SERVO_POWER = 1.0;
 
     private final CRServo intakeServo;
 

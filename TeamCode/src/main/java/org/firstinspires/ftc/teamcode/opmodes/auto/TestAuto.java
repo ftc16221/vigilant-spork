@@ -41,6 +41,7 @@ public class TestAuto extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
+            navigator.start();
             while (opModeIsActive()) {
                 if (currentPath == 1) {
                     path1.execute(navigator);

@@ -131,7 +131,7 @@ public class Pose {
     }
 
     public Pose mirror() {
-        return new Pose(x, -y, h);
+        return new Pose(x, -y, -h);
     }
 
     public Pose toFieldCentric(double currentHeading) { return rotate(currentHeading); }

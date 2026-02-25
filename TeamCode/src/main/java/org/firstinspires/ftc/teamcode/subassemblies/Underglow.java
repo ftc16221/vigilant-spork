@@ -17,11 +17,11 @@ public class Underglow extends Subassembly {
 
     public Underglow(OpMode opMode) {
         super(opMode,"Underglow");
-        underglow = opMode.hardwareMap.get(RevBlinkinLedDriver.class, "underglow");
+//        underglow = opMode.hardwareMap.get(RevBlinkinLedDriver.class, "underglow");
         setColor(Color.ALLIANCE);
     }
 
-    public void setColor(Color color) {
+    public void setColor(Color color) { /*
         if (color == lastColor) return; // only set strip color if it has changed
         lastColor = color;
 
@@ -56,7 +56,7 @@ public class Underglow extends Subassembly {
             case RAINBOW: // used for debugging maybe?
                 underglow.setPattern(RevBlinkinLedDriver.BlinkinPattern.RAINBOW_RAINBOW_PALETTE);
                 break;
-        }
+        }*/
     }
 
     public enum Color {

@@ -27,10 +27,10 @@ public class Navigator extends Subassembly {
 
     // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)
     public static double DRIVE_P = 0.01, DRIVE_D = 0.0001;
-    public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001;
-    public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035;
+    public static double APPROACH_P = 0.02, APPROACH_I = 0.03, APPROACH_D = 0.0001;
+    public static double HEADING_P = 0.02, HEADING_I = 0.1, HEADING_D = 0.0035;
 
-    public static double MAX_POWER = 0.8;
+    public static double MAX_POWER = 1.0;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
@@ -78,6 +78,14 @@ public class Navigator extends Subassembly {
             opModeType = OpModeType.UNKNOWN;
         }
 
+        if (Global.alliance == null) {
+            Watchdog.w("Alliance is not set, red alliance will be assumed");
+        }
+
+    }
+
+    public void start() {
+        localizationManager.start();
     }
 
     public void update() {
@@ -92,7 +100,6 @@ public class Navigator extends Subassembly {
             underglow.setColor(Underglow.Color.ORANGE);
             return;
         }
-        assert currentPose != null;
 
         if (targetPose == null && isMovementEnabled) {
             Watchdog.e("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
@@ -102,20 +109,6 @@ public class Navigator extends Subassembly {
             driveBase.stopMotors();
             underglow.setColor(Underglow.Color.ORANGE);
             return;
-        }
-//        assert targetPose != null;
-
-        // used for live tuning via FTC dashboard
-        if (Global.ENABLE_TUNING_MODE) {
-            xPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
-            yPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
-            headingPIDController.setPID(HEADING_P, HEADING_I, HEADING_D);
-
-            TelemetryPacket packet = new TelemetryPacket();
-            packet.put("xError", targetPose.x - currentPose.x);
-            packet.put("yError", targetPose.y - currentPose.y);
-            packet.put("hError", AngleUnit.normalizeDegrees(targetPose.h - currentPose.h));
-            dashboard.sendTelemetryPacket(packet);
         }
 
         if (!(isPointTrackingEnabled || isMovementEnabled)) return;
@@ -128,6 +121,21 @@ public class Navigator extends Subassembly {
             targetH = findTrackedHeading(referencePose);
         } else {
             targetH = targetPose.h;
+        }
+
+        // used for live tuning via FTC dashboard
+        if (Global.ENABLE_TUNING_MODE) {
+            xPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
+            yPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
+            headingPIDController.setPID(HEADING_P, HEADING_I, HEADING_D);
+
+            TelemetryPacket packet = new TelemetryPacket();
+            if (targetPose != null) {
+                packet.put("xError", targetPose.x - currentPose.x);
+                packet.put("yError", targetPose.y - currentPose.y);
+                packet.put("hError", AngleUnit.normalizeDegrees(targetH - currentPose.h));
+                dashboard.sendTelemetryPacket(packet);
+            }
         }
 
         // for the heading PID, we need to account for the fact that headings wrap around at 180 degrees. There is a great explanation of this at: https://www.ctrlaltftc.com/practical-examples/controlling-heading
@@ -174,6 +182,7 @@ public class Navigator extends Subassembly {
     }
 
     public boolean isAtTarget() {
+        if (currentPose == null) return false;
         double xPosError = currentPose.x - targetPose.x;
         double yPosError = currentPose.y - targetPose.y;
         double hPosError = currentPose.h - targetPose.h;
@@ -192,6 +201,7 @@ public class Navigator extends Subassembly {
 
     public void stop() {
         Global.lastPose = currentPose;
+        localizationManager.stop();
     }
 
     private enum OpModeType {

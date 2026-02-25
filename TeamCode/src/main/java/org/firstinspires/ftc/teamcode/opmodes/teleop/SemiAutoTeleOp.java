@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
@@ -34,6 +35,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     public static double FAR_LAUNCH_RPM = 3200; // TODO
     public static double FAR_LAUNCH_ANGLE = 45;
 
+    public static double SLOW_COEFF = 0.2; // 20% speed
 
     public static Underglow.Color IDLE_COLOR = Underglow.Color.ALLIANCE;
     public static Underglow.Color GOAL_TRACKING_COLOR = Underglow.Color.GREEN;
@@ -84,7 +86,14 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     }
 
     @Override
+    public void start() {
+        launcher.start();
+    }
+
+    @Override
     public void loop() {
+
+//        RobotLog.i("has a been pressed: " + gamepad2.a);
 
         double dt = time - prevTime;
         prevTime = time;
@@ -92,12 +101,12 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         drawing.prep();
         drawing.drawPoint(GOAL_POSE, "purple");
 
-        if (Global.motif == null) {
+        if (Global.motif == Global.Motif.UNKNOWN) {
             limelightCam.searchForMotif();
         }
 
         // ################   GAMEPAD 1   ################
-        /*else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
+        else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
             goalTrackingEnabled = true;
             navigator.enablePointTracking();
             underglow.setColor(GOAL_TRACKING_COLOR);
@@ -105,27 +114,31 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             goalTrackingEnabled = false;
             navigator.disablePointTracking();
             underglow.setColor(IDLE_COLOR);
-        } TODO commented because there is some PID feedback loop happening somewhere*/
+        }
 
-        if (/*gamepad1.dpadUpWasPressed()*/false) {
+        if (gamepad1.dpadUpWasPressed()) {
             navigator.setUnspecificTargetPose(FAR_LAUNCH_POSE);
             startAutoMovement();
             spindexer.alignAnyForLaunch();
-        } else if (/*gamepad1.dpadDownWasPressed()*/false) {
+        } else if (gamepad1.dpadDownWasPressed()) {
             navigator.setUnspecificTargetPose(CLOSE_LAUNCH_POSE);
             startAutoMovement();
             spindexer.alignAnyForLaunch();
         }
 
-        if (/*!gamepad1.atRest() && autoMovementEnabled*/false) {
+        if (!gamepad1.atRest() && autoMovementEnabled) {
             stopAutoMovement();
         }
 
-        if (/*goalTrackingEnabled*/false) {
+        if (goalTrackingEnabled) {
             driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
         }
-        if (/*!autoMovementEnabled && !goalTrackingEnabled*/true) {
-            driveBase.control(gamepad1);
+        if (!autoMovementEnabled && !goalTrackingEnabled) {
+            if (gamepad1.right_trigger > 0.5) {
+                driveBase.control(gamepad1, SLOW_COEFF);
+            } else {
+                driveBase.control(gamepad1);
+            }
         }
 
         // ################   GAMEPAD 2   ################
@@ -139,13 +152,13 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         }
         if (gamepad2.rightBumperWasPressed()) {
             launcher.launchAny();
-        } else if (gamepad2.yWasPressed() || gamepad2.triangleWasPressed()) {
+        } else if (gamepad2.yWasPressed()) {
             launcher.launchMotif();
-        } else if (gamepad2.aWasPressed() || gamepad2.crossWasPressed()) {
+        } else if (gamepad2.aWasPressed()) {
             launcher.launchGreen();
-        } else if (gamepad2.xWasPressed() || gamepad2.squareWasPressed()) {
+        } else if (gamepad2.xWasPressed()) {
             launcher.launchPurple();
-        } else if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
+        } else if (gamepad2.bWasPressed()) {
             launcher.cancelLaunches();
         } else if (gamepad2.rightStickButtonWasPressed()) {
             spindexer.emptyActiveSlot();

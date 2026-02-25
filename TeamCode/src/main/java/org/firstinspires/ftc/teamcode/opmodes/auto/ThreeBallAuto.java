@@ -19,9 +19,9 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 @Config
 public class ThreeBallAuto extends OpMode {
 
-    public static Pose STARTING_POSE = new Pose(0, 0, 0);
-    public static Pose LAUNCH_POSE = new Pose(0, 0, 0);
-    public static Pose END_POSE = new Pose(0, 0, 0);
+    public static Pose STARTING_POSE = new Pose(-128, 107, -142);
+    public static Pose LAUNCH_POSE = new Pose(-32, 33, 38);
+    public static Pose END_POSE = new Pose(-110, 26, 90);
 
     public static double LAUNCH_SPEED = 3400.0; // RPM
     public static double LAUNCH_ANGLE = 45.0; // degrees
@@ -31,16 +31,24 @@ public class ThreeBallAuto extends OpMode {
     private Spindexer spindexer;
     private Launcher launcher;
     private Watchdog watchdog;
+    private PinpointOdo pinpointOdo;
+    private LimelightCam limelightCam;
 
     private State state = State.NOT_STARTED;
 
     @Override
     public void init() {
-        LocalizationManager localizationManager = new LocalizationManager(
-                this,
-                new PinpointOdo(this, STARTING_POSE),
-                new LimelightCam(this)
-        );
+
+
+        Pose trueStartingPose;
+        if (Global.alliance == Global.Alliance.BLUE) {
+            trueStartingPose = STARTING_POSE.mirror();
+        } else {
+            trueStartingPose = STARTING_POSE;
+        }
+        pinpointOdo = new PinpointOdo(this, trueStartingPose);
+        limelightCam = new LimelightCam(this);
+        LocalizationManager localizationManager = new LocalizationManager(this, pinpointOdo, limelightCam);
         navigator = new Navigator(this, localizationManager);
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
@@ -49,15 +57,30 @@ public class ThreeBallAuto extends OpMode {
     }
 
     @Override
+    public void init_loop() {
+        limelightCam.searchForMotif();
+    }
+
+    @Override
+    public void start() {
+        navigator.setUnspecificTargetPose(LAUNCH_POSE);
+    }
+
+    @Override
     public void loop() {
+
+        if (Global.motif == Global.Motif.UNKNOWN) {
+            limelightCam.searchForMotif();
+        }
+
         switch (state) {
             case NOT_STARTED:
-                navigator.setTargetPose(LAUNCH_POSE);
                 launcher.setTargetVelocity(LAUNCH_SPEED);
                 launcher.setHoodAngle(LAUNCH_ANGLE);
                 state = State.MOVING_TO_LAUNCH;
                 break;
             case MOVING_TO_LAUNCH:
+                navigator.runTelemetry();
                 if (navigator.isAtTarget()) {
                     launcher.launchMotif();
                     state = State.LAUNCHING;
@@ -65,7 +88,7 @@ public class ThreeBallAuto extends OpMode {
                 break;
             case LAUNCHING:
                 if (spindexer.isEmpty()) {
-                    navigator.setTargetPose(END_POSE);
+                    navigator.setUnspecificTargetPose(END_POSE);
                     state = State.MOVING_TO_END;
                 }
                 break;
@@ -80,6 +103,7 @@ public class ThreeBallAuto extends OpMode {
 
         spindexer.update();
         launcher.update();
+        navigator.update();
         watchdog.update();
 
         telemetry.addData("state", state);

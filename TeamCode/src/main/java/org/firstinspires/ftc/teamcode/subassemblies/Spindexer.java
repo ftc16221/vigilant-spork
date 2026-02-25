@@ -4,11 +4,13 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -26,6 +28,7 @@ public class Spindexer extends Subassembly {
 
     public static double ENCODER_RES = 537.7; // PPR
 
+
     public static float PURP_G_PCT_THRESHOLD = 37.5f; // must be less than
     public static float PURP_B_PCT_THRESHOLD = 35f; // must be greater than
 
@@ -38,8 +41,13 @@ public class Spindexer extends Subassembly {
     public static double TOLERANCE = 2.0; // degrees
 
     public static int INTAKE_SAFETY_DEADLINE = 1200; // ms
-    public static int SPINDEXER_MOVEMENT_DELAY = 400;
     public static int INTAKE_DEADLINE = 300; // ms
+
+    public static double CURRENT_ALERT_AMPS = 7;
+    public static int STUCK_ARTIFACT_DEADLINE = 500;
+
+    public static int ARTIFACT_SAMPLES = 5;
+    public static double ARTIFACT_SUCCESS_RATE = 1.00;
 
     public double manualOffset = 0;
 
@@ -50,11 +58,14 @@ public class Spindexer extends Subassembly {
     private boolean hasIntakeSafetyDeadlineExpired = false;
     private final Deadline intakeDeadline = new Deadline(INTAKE_DEADLINE, TimeUnit.MILLISECONDS);
 
-    private final DcMotor spindexerMotor;
+    private boolean isArtifactStuck = false;
+    private final Deadline stuckArtifactDeadline = new Deadline(STUCK_ARTIFACT_DEADLINE, TimeUnit.MILLISECONDS);
+
+    private final DcMotorEx spindexerMotor;
     private final PIDFController spindexerPIDF = new PIDFController(kP, kI, kD, kF);
 
     private final NormalizedColorSensor colorSensor;
-    private final Artifact[] lastDetectedColors = new Artifact[10];
+    private final Artifact[] lastDetectedColors = new Artifact[ARTIFACT_SAMPLES];
     private int detectedColorIndex;
 
     private double baseAngle = INTAKE_ANGLE;
@@ -68,10 +79,10 @@ public class Spindexer extends Subassembly {
         super(opMode, "Spindexer");
         this.intake = intake;
 
-        spindexerMotor = opMode.hardwareMap.dcMotor.get("spindexer");
-        spindexerMotor.setDirection(DcMotorSimple.Direction.FORWARD); // only use this with permanently reversed motors (see: https://ftcforum.firstinspires.org/forum/ftc-technology/75167-warning-about-gobilda-motor-directions)
+        spindexerMotor = (DcMotorEx) opMode.hardwareMap.dcMotor.get("spindexer");
         spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        spindexerMotor.setCurrentAlert(CURRENT_ALERT_AMPS, CurrentUnit.AMPS);
 
         spindexerPIDF.setSetPoint(0);
 
@@ -86,6 +97,21 @@ public class Spindexer extends Subassembly {
     }
 
     public void update() {
+
+        if (spindexerMotor.isOverCurrent() && stuckArtifactDeadline.hasExpired()) {
+            isArtifactStuck = true;
+            stuckArtifactDeadline.reset();
+            spindexerMotor.setPower(0);
+            spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            Watchdog.w("Spindexer is stuck, attempting to recover");
+        }
+
+        if (isArtifactStuck && stuckArtifactDeadline.hasExpired()) {
+            isArtifactStuck = false;
+            spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
+        telemetry.addData("spindexer current", spindexerMotor.getCurrent(CurrentUnit.AMPS));
 
         if (Global.ENABLE_TUNING_MODE) {
             spindexerPIDF.setPIDF(kP, kI, kD, kF);
@@ -181,7 +207,9 @@ public class Spindexer extends Subassembly {
     public void evaluatePID(double error) {
         double power = spindexerPIDF.calculate(error);
         power = MathEx.clamp(power, -1, 1);
-        spindexerMotor.setPower(power);
+        if (!isArtifactStuck) {
+            spindexerMotor.setPower(power);
+        }
         isBusy = error > TOLERANCE;
         sendData("spx error", error);
         sendData("spx power", power);
@@ -336,9 +364,11 @@ public class Spindexer extends Subassembly {
                 else if (detectedColor == Artifact.GREEN) numOfGreenDetections++;
             }
 
-            if (numOfPurpleDetections > 8) return Artifact.PURPLE;
-            else if (numOfGreenDetections > 8) return Artifact.GREEN;
-            else  /* i love alignment */        return Artifact.EMPTY;
+            int threshold = Math.toIntExact(Math.round(ARTIFACT_SAMPLES * ARTIFACT_SUCCESS_RATE));
+
+            if      (numOfPurpleDetections >= threshold) return Artifact.PURPLE;
+            else if (numOfGreenDetections  >= threshold) return Artifact.GREEN;
+            else                                         return Artifact.EMPTY;
         } else {
             return Artifact.EMPTY;
         }

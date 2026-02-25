@@ -32,6 +32,7 @@ public class ThreeBallAuto extends OpMode {
     private Launcher launcher;
     private Watchdog watchdog;
     private PinpointOdo pinpointOdo;
+    private LimelightCam limelightCam;
 
     private State state = State.NOT_STARTED;
 
@@ -46,16 +47,18 @@ public class ThreeBallAuto extends OpMode {
             trueStartingPose = STARTING_POSE;
         }
         pinpointOdo = new PinpointOdo(this, trueStartingPose);
-        LocalizationManager localizationManager = new LocalizationManager(
-                this,
-                pinpointOdo,
-                new LimelightCam(this)
-        );
+        limelightCam = new LimelightCam(this);
+        LocalizationManager localizationManager = new LocalizationManager(this, pinpointOdo, limelightCam);
         navigator = new Navigator(this, localizationManager);
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
         watchdog = new Watchdog(this, spindexer, intake);
+    }
+
+    @Override
+    public void init_loop() {
+        limelightCam.searchForMotif();
     }
 
     @Override
@@ -65,6 +68,11 @@ public class ThreeBallAuto extends OpMode {
 
     @Override
     public void loop() {
+
+        if (Global.motif == Global.Motif.UNKNOWN) {
+            limelightCam.searchForMotif();
+        }
+
         switch (state) {
             case NOT_STARTED:
                 launcher.setTargetVelocity(LAUNCH_SPEED);

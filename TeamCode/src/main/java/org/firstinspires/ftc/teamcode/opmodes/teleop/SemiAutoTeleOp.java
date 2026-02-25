@@ -103,7 +103,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         drawing.prep();
         drawing.drawPoint(GOAL_POSE, "purple");
 
-        if (Global.motif == null) {
+        if (Global.motif == Global.Motif.UNKNOWN) {
             limelightCam.searchForMotif();
         }
 

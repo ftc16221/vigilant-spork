@@ -49,9 +49,9 @@ public class Launcher extends Subassembly {
 
     public static double KICKER_RANGE_MIN = 0.03;
     public static double KICKER_RANGE_MAX = 0.32;
-    public static int KICKER_EXTENSION_TIME = 200; // milliseconds
+    public static int KICKER_EXTENSION_TIME = 225; // milliseconds
 
-    public static int STUCK_DETECTION_TIME = 1000; // milliseconds
+    public static int STUCK_DETECTION_TIME = 500; // milliseconds
     public static int SPINDEXER_MOVEMENT_DELAY = 400;
 
     private final Spindexer spindexer;
@@ -206,12 +206,12 @@ public class Launcher extends Subassembly {
 
     public void launchMotif() {
         if (Global.motif == Global.Motif.UNKNOWN) {
-            Watchdog.e("Unable to launch motif as it is unknown");
-            return;
+            Watchdog.w("Motif is unknown, defaulting to GPP");
         }
         Watchdog.i("Motif added to launch queue: " + Global.motif);
         switch (Global.motif) {
             case GPP:
+            case UNKNOWN:
                 launchQueue.add(Artifact.GREEN);
                 launchQueue.add(Artifact.PURPLE);
                 launchQueue.add(Artifact.PURPLE);
@@ -234,7 +234,7 @@ public class Launcher extends Subassembly {
         for (int i = numOfArtifacts; i > 0; i--) {
             launchQueue.add(Artifact.ANY);
         }
-        Watchdog.i("All " + numOfArtifacts + " artifacts added to launch queue");
+        Watchdog.i("All " + numOfArtifacts + " artifact(s) added to launch queue");
     }
 
     public void launchGreen() {

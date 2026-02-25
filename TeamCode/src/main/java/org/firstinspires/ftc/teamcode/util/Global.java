@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit
 @Config
 public class Global {
     public static Global.Alliance alliance = null;
-    public static Motif motif = Motif.GPP;
+    public static Motif motif = Motif.UNKNOWN;
     public static Pose lastPose = new Pose(0, 0, 0);
 
     public static boolean ENABLE_TUNING_MODE = false; // when enabled this will update PIDF coefficients in real time

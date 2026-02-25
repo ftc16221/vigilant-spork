@@ -48,10 +48,10 @@ public class PinpointOdo extends Localizer {
     }
 
     @Override public void setPose(Pose newPose) {
-        Watchdog.i("pinpoint pose has been set to " + newPose.toPose2D().toString());
         if (newPose != null) {
             pose = newPose;
             pinpoint.setPosition(pose.toPose2D());
+            Watchdog.i("pinpoint pose has been set to " + newPose.toPose2D().toString());
         }
     }
 /*  COMMENTED OUT BECAUSE EVEN THOUGH THIS IS A COOL CONCEPT, THE EXTRA I2C READS AREN'T WORTH IT

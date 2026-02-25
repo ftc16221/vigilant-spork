@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
@@ -54,6 +55,8 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     private boolean goalTrackingEnabled = false;
 
     private boolean gamepad2RightTriggerWasPressed = false;
+    private boolean gamepad2XWasPressed = false;
+    private boolean gamepad2AWasPressed = false;
     private double prevTime = 0;
 
     @Override
@@ -85,7 +88,14 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     }
 
     @Override
+    public void start() {
+        launcher.start();
+    }
+
+    @Override
     public void loop() {
+
+//        RobotLog.i("has a been pressed: " + gamepad2.a);
 
         double dt = time - prevTime;
         prevTime = time;
@@ -146,11 +156,19 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             launcher.launchAny();
         } else if (gamepad2.yWasPressed() || gamepad2.triangleWasPressed()) {
             launcher.launchMotif();
-        } else if (gamepad2.aWasPressed() || gamepad2.crossWasPressed()) {
+        }
+        if (gamepad2.a/* || gamepad2.crossWasPressed()*/ && !gamepad2AWasPressed) {
+            gamepad2AWasPressed = true;
             launcher.launchGreen();
-        } else if (gamepad2.xWasPressed() || gamepad2.squareWasPressed()) {
+        }/* else if (gamepad2AWasPressed) {
+            gamepad2AWasPressed = false;
+        }*/
+        if (gamepad2.x/* || gamepad2.squareWasPressed()*/ && !gamepad2XWasPressed) {
             launcher.launchPurple();
-        } else if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
+        }/* else if (gamepad2XWasPressed) {
+            gamepad2XWasPressed = false;
+        }*/
+        if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
             launcher.cancelLaunches();
         } else if (gamepad2.rightStickButtonWasPressed()) {
             spindexer.emptyActiveSlot();

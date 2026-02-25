@@ -38,8 +38,10 @@ public class Spindexer extends Subassembly {
     public static double TOLERANCE = 2.0; // degrees
 
     public static int INTAKE_SAFETY_DEADLINE = 1200; // ms
-    public static int SPINDEXER_MOVEMENT_DELAY = 400;
     public static int INTAKE_DEADLINE = 300; // ms
+
+    public static int ARTIFACT_SAMPLES = 5;
+    public static double ARTIFACT_SUCCESS_RATE = 1.00;
 
     public double manualOffset = 0;
 
@@ -54,7 +56,7 @@ public class Spindexer extends Subassembly {
     private final PIDFController spindexerPIDF = new PIDFController(kP, kI, kD, kF);
 
     private final NormalizedColorSensor colorSensor;
-    private final Artifact[] lastDetectedColors = new Artifact[10];
+    private final Artifact[] lastDetectedColors = new Artifact[ARTIFACT_SAMPLES];
     private int detectedColorIndex;
 
     private double baseAngle = INTAKE_ANGLE;
@@ -69,7 +71,6 @@ public class Spindexer extends Subassembly {
         this.intake = intake;
 
         spindexerMotor = opMode.hardwareMap.dcMotor.get("spindexer");
-        spindexerMotor.setDirection(DcMotorSimple.Direction.FORWARD); // only use this with permanently reversed motors (see: https://ftcforum.firstinspires.org/forum/ftc-technology/75167-warning-about-gobilda-motor-directions)
         spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spindexerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -336,9 +337,11 @@ public class Spindexer extends Subassembly {
                 else if (detectedColor == Artifact.GREEN) numOfGreenDetections++;
             }
 
-            if (numOfPurpleDetections > 8) return Artifact.PURPLE;
-            else if (numOfGreenDetections > 8) return Artifact.GREEN;
-            else  /* i love alignment */        return Artifact.EMPTY;
+            int threshold = Math.toIntExact(Math.round(ARTIFACT_SAMPLES * ARTIFACT_SUCCESS_RATE));
+
+            if      (numOfPurpleDetections >= threshold) return Artifact.PURPLE;
+            else if (numOfGreenDetections  >= threshold) return Artifact.GREEN;
+            else                                         return Artifact.EMPTY;
         } else {
             return Artifact.EMPTY;
         }

@@ -48,7 +48,7 @@ public class Launcher extends Subassembly {
     public static double GATE_RANGE_MAX = 1.0;
 
     public static double KICKER_RANGE_MIN = 0.03;
-    public static double KICKER_RANGE_MAX = 0.25;
+    public static double KICKER_RANGE_MAX = 0.32;
     public static int KICKER_EXTENSION_TIME = 200; // milliseconds
 
     public static int STUCK_DETECTION_TIME = 1000; // milliseconds

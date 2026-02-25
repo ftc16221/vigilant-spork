@@ -96,7 +96,6 @@ public class Navigator extends Subassembly {
             underglow.setColor(Underglow.Color.ORANGE);
             return;
         }
-//        assert currentPose != null;
 
         if (targetPose == null && isMovementEnabled) {
             Watchdog.e("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
@@ -107,7 +106,6 @@ public class Navigator extends Subassembly {
             underglow.setColor(Underglow.Color.ORANGE);
             return;
         }
-//        assert targetPose != null;
 
         // used for live tuning via FTC dashboard
         if (Global.ENABLE_TUNING_MODE) {

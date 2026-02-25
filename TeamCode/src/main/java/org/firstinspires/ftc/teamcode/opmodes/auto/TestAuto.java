@@ -4,7 +4,10 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.LocalizationManager;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.Drawing;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Path;
@@ -22,7 +25,12 @@ public class TestAuto extends LinearOpMode {
 
     public void runOpMode() {
 
-        Navigator navigator = new Navigator(this, STARTING_POSE);
+        LocalizationManager localizationManager = new LocalizationManager(
+                this,
+                new PinpointOdo(this, STARTING_POSE),
+                new LimelightCam(this)
+        );
+        Navigator navigator = new Navigator(this, localizationManager);
         Drawing drawing = new Drawing(navigator);
 
         int currentPath = 1;
@@ -33,6 +41,7 @@ public class TestAuto extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
+            navigator.start();
             while (opModeIsActive()) {
                 if (currentPath == 1) {
                     path1.execute(navigator);
@@ -48,7 +57,9 @@ public class TestAuto extends LinearOpMode {
                     }
                 }
                 navigator.update();
+                drawing.prep();
                 drawing.update();
+                drawing.send();
             }
         }
     }

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmodes.tests;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -8,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@Config
+//@Config
 @TeleOp(group = Global.OpModeGroup.TEST)
 public class MotorConfigTest extends LinearOpMode {
 
@@ -21,8 +20,8 @@ public class MotorConfigTest extends LinearOpMode {
 
         DcMotor leftFront = driveBase.leftFront;
         DcMotor rightFront = driveBase.rightFront;
-        DcMotor leftRear = driveBase.leftRear;
-        DcMotor rightRear = driveBase.rightRear;
+        DcMotor leftRear = driveBase.leftBack;
+        DcMotor rightRear = driveBase.rightBack;
 
         DcMotor[] motors = new DcMotor[]{ leftFront, rightFront, leftRear, rightRear };
 

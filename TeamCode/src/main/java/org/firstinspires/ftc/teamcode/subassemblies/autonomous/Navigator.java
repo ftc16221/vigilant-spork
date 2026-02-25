@@ -1,15 +1,12 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 
-import static org.firstinspires.ftc.teamcode.util.LoggingKt.log;
 import static org.firstinspires.ftc.teamcode.util.MathEx.clamp;
 
 import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.arcrobotics.ftclib.controller.PDController;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -20,17 +17,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
 import org.firstinspires.ftc.teamcode.util.Global;
-import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.teamcode.util.Subassembly;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.CheckForNull;
 
 /**
  * This class keeps track of the robot's position and handles all autonomous movement
@@ -40,58 +29,44 @@ public class Navigator extends Subassembly {
 
     // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)
     public static double DRIVE_P = 0.01, DRIVE_D = 0.0001;
-    public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001;
-    public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035;
+    public static double APPROACH_P = 0.02, APPROACH_I = 0.03, APPROACH_D = 0.0001;
+    public static double HEADING_P = 0.02, HEADING_I = 0.1, HEADING_D = 0.0035;
 
-    public static double MAX_POWER = 0.8;
+    public static double MAX_POWER = 1.0;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
 
     public static double TRACKING_OFFSET = -90; // degrees
 
-    FtcDashboard dashboard;
+    public boolean useAccurateTolerance = true;
 
-    public PinpointOdo pinpointOdo;
-    LimelightCam limelightCam;
-    List<Localizer> localizers = new ArrayList<>();
-    Localizer activeLocalizer = null;
+    FtcDashboard dashboard;
 
     MecDriveBase driveBase;
     Underglow underglow;
+    LocalizationManager localizationManager;
 
-    final Pose startingPose;
     Pose currentPose;
     Pose targetPose;
     Pose trackingPoint;
 
-    // note use of multiple controllers, one is for accuracy (approach), the other for speed (drive)
-    PDController xDrivePDController = new PDController(DRIVE_P, DRIVE_D);
-    PDController yDrivePDController = new PDController(DRIVE_P, DRIVE_D);
-    PIDController xApproachPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
-    PIDController yApproachPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
+    PIDController xPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
+    PIDController yPIDController = new PIDController(APPROACH_P, APPROACH_I, APPROACH_D);
     PIDController headingPIDController = new PIDController(HEADING_P, HEADING_I, HEADING_D);
 
-    ControllerType controllerType;
     final OpModeType opModeType;
 
     boolean isMovementEnabled = false;
     boolean isPointTrackingEnabled = false;
     double trackingPower = 0;
 
-    public Navigator(OpMode opMode, Pose startingPose) {
+    public Navigator(OpMode opMode, LocalizationManager localizationManager) {
         super(opMode, "Navigator");
+        this.localizationManager = localizationManager;
         dashboard = FtcDashboard.getInstance();
-        this.startingPose = startingPose;
-        currentPose = startingPose;
-        pinpointOdo = new PinpointOdo(opMode, this.startingPose);
-        limelightCam = new LimelightCam(opMode);
         driveBase = new MecDriveBase(opMode);
         underglow = new Underglow(opMode);
-
-        // whatever localizer has the lowest index will take precedent
-        localizers.add(limelightCam);
-        localizers.add(pinpointOdo);
 
         // we can assume that if the opMode is an Autonomous opMode that we can immediately enable movement. If we can't that should be explicitly disabled.
         Class<? extends OpMode> opModeClass = opMode.getClass();
@@ -105,12 +80,20 @@ public class Navigator extends Subassembly {
             opModeType = OpModeType.UNKNOWN;
         }
 
-        log(opMode, "Navigator successfully initialized with the following Localizers: " + localizers);
+        if (Global.alliance == null) {
+            Watchdog.w("Alliance is not set, red alliance will be assumed");
+        }
+
+    }
+
+    public void start() {
+        localizationManager.start();
     }
 
     public void update() {
 
-        currentPose = getPrioritizedPose();
+        localizationManager.update();
+        currentPose = localizationManager.getPose();
 
         if (currentPose == null && isMovementEnabled) {
             Watchdog.e("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
@@ -119,7 +102,6 @@ public class Navigator extends Subassembly {
             underglow.setColor(Color.YELLOW);
             return;
         }
-        assert currentPose != null;
 
         if (targetPose == null && isMovementEnabled) {
             Watchdog.e("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
@@ -129,33 +111,6 @@ public class Navigator extends Subassembly {
             driveBase.stopMotors();
             underglow.setColor(Color.YELLOW);
             return;
-        }
-//        assert targetPose != null;
-
-        if (Global.motif == null) {
-            List<Integer> tagIds = limelightCam.getDetectedTagIds();
-            if (tagIds.contains(21)) Global.motif = Global.Motif.GPP;
-            else if (tagIds.contains(22)) Global.motif = Global.Motif.PGP;
-            else if (tagIds.contains(23)) Global.motif = Global.Motif.PPG;
-            if (Global.motif != null) {
-                Watchdog.i(String.format("Pattern %s detected via obelisk apriltag", Global.motif.name()));
-            }}
-
-        // used for live tuning via FTC dashboard
-        if (Global.ENABLE_TUNING_MODE) {
-            xDrivePDController.setP(DRIVE_P);
-            xDrivePDController.setD(DRIVE_D);
-            yDrivePDController.setP(DRIVE_P);
-            yDrivePDController.setD(DRIVE_D);
-            xApproachPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
-            yApproachPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
-            headingPIDController.setPID(HEADING_P, HEADING_I, HEADING_D);
-
-            TelemetryPacket packet = new TelemetryPacket();
-            packet.put("xError", targetPose.x - currentPose.x);
-            packet.put("yError", targetPose.y - currentPose.y);
-            packet.put("hError", AngleUnit.normalizeDegrees(targetPose.h - currentPose.h));
-            dashboard.sendTelemetryPacket(packet);
         }
 
         if (!(isPointTrackingEnabled || isMovementEnabled)) return;
@@ -170,6 +125,21 @@ public class Navigator extends Subassembly {
             targetH = targetPose.h;
         }
 
+        // used for live tuning via FTC dashboard
+        if (Global.ENABLE_TUNING_MODE) {
+            xPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
+            yPIDController.setPID(APPROACH_P, APPROACH_I, APPROACH_D);
+            headingPIDController.setPID(HEADING_P, HEADING_I, HEADING_D);
+
+            TelemetryPacket packet = new TelemetryPacket();
+            if (targetPose != null) {
+                packet.put("xError", targetPose.x - currentPose.x);
+                packet.put("yError", targetPose.y - currentPose.y);
+                packet.put("hError", AngleUnit.normalizeDegrees(targetH - currentPose.h));
+                dashboard.sendTelemetryPacket(packet);
+            }
+        }
+
         // for the heading PID, we need to account for the fact that headings wrap around at 180 degrees. There is a great explanation of this at: https://www.ctrlaltftc.com/practical-examples/controlling-heading
         // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
         double hError = Global.ANGLE_UNIT == AngleUnit.DEGREES ? AngleUnit.normalizeDegrees(targetH - currentPose.h) : AngleUnit.normalizeRadians(targetH - currentPose.h);
@@ -181,20 +151,8 @@ public class Navigator extends Subassembly {
         if (isPointTrackingEnabled) trackingPower = hPower;
 
         if (isMovementEnabled) {
-
-            double xPower, yPower;
-            if (controllerType == ControllerType.APPROACH) {
-                xPower = xApproachPIDController.calculate(currentPose.x, targetPose.x);
-                yPower = yApproachPIDController.calculate(currentPose.y, targetPose.y);
-            } else if (controllerType == ControllerType.DRIVE) {
-                xPower = xDrivePDController.calculate(currentPose.x, targetPose.x);
-                yPower = yDrivePDController.calculate(currentPose.y, targetPose.y);
-            } else {
-                RobotLog.e("(Navigator) Controller Type is null, setting it to APPROACH");
-                controllerType = ControllerType.APPROACH;
-                xPower = 0.0;
-                yPower = 0.0;
-            }
+            double xPower = xPIDController.calculate(currentPose.x, targetPose.x);
+            double yPower = yPIDController.calculate(currentPose.y, targetPose.y);
 
             xPower = clamp(xPower, -MAX_POWER, MAX_POWER);
             yPower = clamp(yPower, -MAX_POWER, MAX_POWER);
@@ -214,49 +172,8 @@ public class Navigator extends Subassembly {
         return Global.ANGLE_UNIT.fromRadians(Math.atan2(offsetPose.y, offsetPose.x)) + TRACKING_OFFSET; // heading that faces the targetPose
     }
 
-    /** this method returns the pose of the earliest nonnull pose value from the localizer list,
-     * used to make sure more accurate or precise sensors are prioritized for localization. it will
-     * also set less accurate sensors to the most prioritized pose*/
-    @CheckForNull
-    public Pose getPrioritizedPose() {
-        for (int i = 0; i <= localizers.size() - 1; i++) {
-            localizers.get(i).update();
-        }
-
-        Pose pose = null;
-        Localizer newActiveLocalizer = null;
-        for (int i = 0; i <= localizers.size() - 1; i++) {
-            Localizer localizer = localizers.get(i);
-            if (localizer.getPose() != null) {
-                pose = localizer.getPose();
-                newActiveLocalizer = localizer;
-                break;
-            }
-        }
-
-        activeLocalizer = newActiveLocalizer;
-
-        if (pose != null) {
-            for (int i = 0; i <= localizers.size() - 1; i++) {
-                Localizer localizer = localizers.get(i);
-                if (localizer != newActiveLocalizer) localizer.setPose(pose);
-            }
-        }
-
-        return pose;
-    }
-
     public void runTelemetry() {
-        telemetry.addLine("Pose Tracker:");
-        String activeLocalizerString;
-        if (activeLocalizer == null) activeLocalizerString = "NULL";
-        else activeLocalizerString = activeLocalizer.getClass().getName();
-        telemetry.addData("Active Localizer", activeLocalizerString);
-        String currentControllerString;
-        if (controllerType == ControllerType.APPROACH) currentControllerString = "APPROACH";
-        else if (controllerType == ControllerType.DRIVE) currentControllerString = "DRIVE";
-        else currentControllerString = "NULL";
-        telemetry.addData("Current Controller", currentControllerString);
+        telemetry.addLine("Navigator:");
         telemetry.addData("Is Movement Enabled", isMovementEnabled);
         telemetry.addData("Is Point Tracking Enabled", isPointTrackingEnabled);
         if (currentPose != null)
@@ -267,38 +184,31 @@ public class Navigator extends Subassembly {
     }
 
     public boolean isAtTarget() {
+        if (currentPose == null) return false;
         double xPosError = currentPose.x - targetPose.x;
         double yPosError = currentPose.y - targetPose.y;
         double hPosError = currentPose.h - targetPose.h;
+
         double linearError = Math.hypot(xPosError, yPosError);
         double headingError = Math.abs(hPosError);
+
         boolean withinTolerance;
-        if (controllerType == ControllerType.APPROACH) {
-            withinTolerance = !activeLocalizer.isRobotMoving() && linearError < LINEAR_APPROACH_TOLERANCE && headingError < HEADING_APPROACH_TOLERANCE;
-        } else if (controllerType == ControllerType.DRIVE) {
-            withinTolerance = linearError < LINEAR_DRIVE_TOLERANCE && headingError < HEADING_DRIVE_TOLERANCE;
+        if (useAccurateTolerance) {
+            withinTolerance = !localizationManager.isRobotMoving() && linearError < LINEAR_APPROACH_TOLERANCE && headingError < HEADING_APPROACH_TOLERANCE;
         } else {
-            withinTolerance = false;
+            withinTolerance = linearError < LINEAR_DRIVE_TOLERANCE && headingError < HEADING_DRIVE_TOLERANCE;
         }
         return withinTolerance;
     }
 
     public void stop() {
         Global.lastPose = currentPose;
-    }
-
-    public enum ControllerType {
-        DRIVE, APPROACH
+        localizationManager.stop();
     }
 
     private enum OpModeType {
         TELEOP, AUTONOMOUS, UNKNOWN
     }
-    
-    /** Set which P(I)D controller to use */
-    public void setControllerType(ControllerType controllerType) { this.controllerType = controllerType; }
-    /** Get current P(I)D controller type */
-    public ControllerType getControllerType() { return controllerType; }
 
     /** Set target pose, mirroring for blue alliance */
     public void setUnspecificTargetPose(Pose targetPose) {

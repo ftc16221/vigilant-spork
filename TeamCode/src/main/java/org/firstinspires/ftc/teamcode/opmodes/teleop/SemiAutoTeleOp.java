@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
+import org.firstinspires.ftc.teamcode.subassemblies.autonomous.LocalizationManager;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
@@ -27,14 +29,15 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     public static Pose GOAL_POSE = new Pose(-180, 180, 0);
 
-    public static Pose CLOSE_LAUNCH_POSE = new Pose(-120, 120, 45); // TODO
-    public static double CLOSE_LAUNCH_RPM = 1300; // TODO
+    public static Pose CLOSE_LAUNCH_POSE = new Pose(-51, 30, 50.6); // TODO
+    public static double CLOSE_LAUNCH_RPM = 2400; // TODO
     public static double CLOSE_LAUNCH_ANGLE = 40; // degrees
 
     public static Pose FAR_LAUNCH_POSE = new Pose(120, 50, 70); // TODO
     public static double FAR_LAUNCH_RPM = 3200; // TODO
     public static double FAR_LAUNCH_ANGLE = 45;
 
+    public static double SLOW_COEFF = 0.2; // 20% speed
 
     public static int IDLE_COLOR = -1;
     public static int GOAL_TRACKING_COLOR = Color.GREEN;
@@ -47,7 +50,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     Underglow underglow;
     Navigator navigator;
     LimelightCam limelightCam;
-    PinpointOdo pinpointOdo;
     Drawing drawing;
     Watchdog watchdog;
 
@@ -55,6 +57,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     private boolean goalTrackingEnabled = false;
 
     private boolean gamepad2RightTriggerWasPressed = false;
+    private double prevTime = 0;
 
     @Override
     public void init() {
@@ -63,8 +66,12 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
         limelightCam = new LimelightCam(this);
-        pinpointOdo = new PinpointOdo(this, Global.lastPose);
-        navigator = new Navigator(this, Global.lastPose);
+        LocalizationManager localizationManager = new LocalizationManager(
+                this,
+                new PinpointOdo(this, Global.lastPose),
+                limelightCam
+        );
+        navigator = new Navigator(this, localizationManager);
         underglow = new Underglow(this);
         drawing = new Drawing(navigator);
         watchdog = new Watchdog(this);
@@ -73,7 +80,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
         navigator.setTargetPose(FAR_LAUNCH_POSE);
         navigator.setUnspecificTrackingPoint(GOAL_POSE);
-        navigator.setControllerType(Navigator.ControllerType.APPROACH);
     }
 
     @Override
@@ -82,12 +88,27 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     }
 
     @Override
+    public void start() {
+        launcher.start();
+    }
+
+    @Override
     public void loop() {
+
+//        RobotLog.i("has a been pressed: " + gamepad2.a);
+
+        double dt = time - prevTime;
+        prevTime = time;
+
         drawing.prep();
         drawing.drawPoint(GOAL_POSE, "purple");
 
+        if (Global.motif == Global.Motif.UNKNOWN) {
+            limelightCam.searchForMotif();
+        }
+
         // ################   GAMEPAD 1   ################
-        /*else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
+        else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
             goalTrackingEnabled = true;
             navigator.enablePointTracking();
             underglow.setColor(GOAL_TRACKING_COLOR);
@@ -95,7 +116,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             goalTrackingEnabled = false;
             navigator.disablePointTracking();
             underglow.setColor(IDLE_COLOR);
-        } TODO commented because there is some PID feedback loop happening somewhere*/
+        }
 
         if (gamepad1.dpadUpWasPressed()) {
             navigator.setUnspecificTargetPose(FAR_LAUNCH_POSE);
@@ -107,7 +128,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             spindexer.alignAnyForLaunch();
         }
 
-        if (!gamepad1.atRest()) {
+        if (!gamepad1.atRest() && autoMovementEnabled) {
             stopAutoMovement();
         }
 
@@ -115,14 +136,14 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
         }
         if (!autoMovementEnabled && !goalTrackingEnabled) {
-            driveBase.control(gamepad1);
+            if (gamepad1.right_trigger > 0.5) {
+                driveBase.control(gamepad1, SLOW_COEFF);
+            } else {
+                driveBase.control(gamepad1);
+            }
         }
 
         // ################   GAMEPAD 2   ################
-
-        if (gamepad2.dpadDownWasPressed()) {
-            launcher.setTargetVelocity(3000);
-        }
 
         // LAUNCH MODE
         if (gamepad2.right_trigger > 0.2 && !gamepad2RightTriggerWasPressed) {
@@ -133,14 +154,23 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         }
         if (gamepad2.rightBumperWasPressed()) {
             launcher.launchAny();
-        } else if (gamepad2.yWasPressed() || gamepad2.triangleWasPressed()) {
+        } else if (gamepad2.yWasPressed()) {
             launcher.launchMotif();
-        } else if (gamepad2.aWasPressed() || gamepad2.crossWasPressed()) {
+        } else if (gamepad2.aWasPressed()) {
             launcher.launchGreen();
-        } else if (gamepad2.xWasPressed() || gamepad2.squareWasPressed()) {
+        } else if (gamepad2.xWasPressed()) {
             launcher.launchPurple();
-        } else if (gamepad2.bWasPressed() || gamepad2.circleWasPressed()) {
+        } else if (gamepad2.bWasPressed()) {
             launcher.cancelLaunches();
+        } else if (gamepad2.rightStickButtonWasPressed()) {
+            spindexer.emptyActiveSlot();
+            launcher.cancelLaunches();
+        } else if (gamepad2.leftStickButtonWasPressed()) {
+            // if the kicker is stuck inside the spindexer, we need to release the pressure
+            // and retract the kicker.
+            // after that, the driver should be able to re-do whatever action needs to be done.
+            spindexer.stop();
+            launcher.unkick();
         }
 
         if (gamepad2.dpadUpWasPressed()) {
@@ -154,10 +184,14 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             launcher.setHoodAngle(0);
         }
 
+        spindexer.manualOffset += -gamepad2.left_stick_x * 2;
+
         // INTAKE MODE
         if (gamepad2.dpadLeftWasPressed()) {
             spindexer.alignForIntake();
         }
+
+        telemetry.addData("loop time", dt);
 
         // UPDATES
         navigator.update();
@@ -168,7 +202,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         drawing.send();
         navigator.runTelemetry();
         spindexer.runTelemetry();
-        telemetry.update();
     }
 
     @Override

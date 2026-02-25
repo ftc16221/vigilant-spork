@@ -6,11 +6,11 @@ public class MathEx {
         return Math.max(lowerBound, Math.min(upperBound, value));
     }
 
-    public static double encoderPositionToDegrees(int encoderPosition, double encoderResolution) {
+    public static double encoderTicksToDegrees(int encoderPosition, double encoderResolution) {
         return 360 * encoderPosition / encoderResolution;
     }
 
-    public static int degreesToEncoderPosition(double degrees, double encoderResolution) {
+    public static int degreesToEncoderTicks(double degrees, double encoderResolution) {
         return Math.toIntExact(Math.round(degrees / 360 * encoderResolution));
     }
 
@@ -49,12 +49,5 @@ public class MathEx {
 
     public static double toEncoderTicksPerSec(double rpm, double encoderResolution) {
         return rpm / 60 * encoderResolution; // convert to revs/sec, then ticks/sec
-    }
-
-    /**
-     * from revolutions per minute to encoder ticks per second
-     */
-    public static double toTicksPerSec(double rpm, double encoderResolution) {
-        return rpm / 60 * encoderResolution; // convert to revs/sec, then to ticks/sec
     }
 }

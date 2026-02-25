@@ -4,7 +4,9 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.MathEx;
@@ -14,10 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** <a href="https://www.gobilda.com/content/user_manuals/3110-0002-0001%20User%20Guide.pdf">User Guide</a> */
-@Config
+//@Config
 public class PinpointOdo extends Localizer {
 
-    // Both of these offsets are in CM. The tracking point of the robot is the center of the wheelbase
+    // Both of these offsets are in MM. The tracking point of the robot is the center of the wheelbase
     public static double X_OFFSET = 72; // 72mm
     public static double Y_OFFSET = 60; // 60mm
     public static GoBildaPinpointDriver.GoBildaOdometryPods POD_TYPE = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
@@ -27,7 +29,7 @@ public class PinpointOdo extends Localizer {
     public final GoBildaPinpointDriver pinpoint;
 
     public PinpointOdo(OpMode opMode, Pose startingPose) {
-        super(opMode, "Pinpoint Odometry");
+        super(opMode, "Pinpoint Odometry", false, 0.98);
 
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint_imu");
 
@@ -35,33 +37,24 @@ public class PinpointOdo extends Localizer {
         pinpoint.setEncoderResolution(POD_TYPE);
         pinpoint.setEncoderDirections(X_DIRECTION, Y_DIRECTION);
 
-        pinpoint.resetPosAndIMU();
+        pinpoint.recalibrateIMU();
 
         setPose(startingPose);
     }
 
     @Override public void update() {
         pinpoint.update();
-
-        pose = new Pose(
-                pinpoint.getPosX(Global.DISTANCE_UNIT),
-                pinpoint.getPosY(Global.DISTANCE_UNIT),
-                MathEx.normalize(pinpoint.getHeading(Global.UNNORMALIZED_ANGLE_UNIT)) // i'm not sure why, but when a normalized angle unit is used instead the value outputs as degrees but normalizes to the same range as radians
-        );
-        velocity = new Pose(
-                pinpoint.getVelX(Global.DISTANCE_UNIT),
-                pinpoint.getVelY(Global.DISTANCE_UNIT),
-                pinpoint.getHeadingVelocity(Global.UNNORMALIZED_ANGLE_UNIT)
-        );
+        pose = new Pose(pinpoint.getPosition());
     }
 
     @Override public void setPose(Pose newPose) {
-        pose = newPose;
-        pinpoint.setPosX(newPose.x, Global.DISTANCE_UNIT);
-        pinpoint.setPosY(newPose.y, Global.DISTANCE_UNIT);
-        pinpoint.setHeading(newPose.h, Global.ANGLE_UNIT);
+        if (newPose != null) {
+            pose = newPose;
+            pinpoint.setPosition(pose.toPose2D());
+            Watchdog.i("pinpoint pose has been set to " + newPose.toPose2D().toString());
+        }
     }
-
+/*  COMMENTED OUT BECAUSE EVEN THOUGH THIS IS A COOL CONCEPT, THE EXTRA I2C READS AREN'T WORTH IT
     @Override public List<String> findIssues() {
         List<String> issues = new ArrayList<>();
         GoBildaPinpointDriver.DeviceStatus status = pinpoint.getDeviceStatus();
@@ -69,7 +62,7 @@ public class PinpointOdo extends Localizer {
             issues.add("Pinpoint status is " + status.name() + ", odometry functionality is likely very limited");
         }
         return issues;
-    }
+    }*/
 
     public void recalibrate() {
         pinpoint.recalibrateIMU();

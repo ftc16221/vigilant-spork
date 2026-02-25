@@ -26,7 +26,7 @@ public class ThreeWheelOdo extends Localizer {
     private long prevTime;
 
     public ThreeWheelOdo(LinearOpMode opMode, Pose startingPose) {
-        super(opMode, "Three Wheel Odometry");
+        super(opMode, "Three Wheel Odometry", false, 0.90);
 
         this.pose = startingPose;
 
@@ -45,9 +45,6 @@ public class ThreeWheelOdo extends Localizer {
         double leftPos = leftOdoPod.getCurrentPosition() / ODO_ENCODER_RES * ODO_RADIUS;
         double centerPos = centerOdoPod.getCurrentPosition() / ODO_ENCODER_RES * ODO_RADIUS;
         double rightPos = rightOdoPod.getCurrentPosition() / ODO_ENCODER_RES * ODO_RADIUS;
-
-        long currentTime = System.nanoTime();
-        double dt = (currentTime - prevTime) / 1e9; // dt for delta time (change in time); in sec
 
         double leftPosChange = leftPos - prevLeftPos;
         double centerPosChange = centerPos - prevCenterPos;
@@ -74,11 +71,5 @@ public class ThreeWheelOdo extends Localizer {
 
         pose.x += xChange;
         pose.y += yChange;
-
-        velocity.x = xChange / dt;
-        velocity.y = yChange / dt;
-        velocity.h = hChange / dt;
-
-        prevTime = currentTime;
     }
 }

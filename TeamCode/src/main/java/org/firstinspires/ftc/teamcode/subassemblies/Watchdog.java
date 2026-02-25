@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-@Config
+//@Config
 public class Watchdog {
 
     public static boolean WRITE_TO_LOG_FILE = false;

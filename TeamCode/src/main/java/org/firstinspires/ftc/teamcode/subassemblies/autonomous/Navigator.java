@@ -78,6 +78,10 @@ public class Navigator extends Subassembly {
             opModeType = OpModeType.UNKNOWN;
         }
 
+        if (Global.alliance == null) {
+            Watchdog.w("Alliance is not set, red alliance will be assumed");
+        }
+
     }
 
     public void start() {

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.MathEx;
@@ -36,7 +37,7 @@ public class PinpointOdo extends Localizer {
         pinpoint.setEncoderResolution(POD_TYPE);
         pinpoint.setEncoderDirections(X_DIRECTION, Y_DIRECTION);
 
-        pinpoint.resetPosAndIMU();
+        pinpoint.recalibrateIMU();
 
         setPose(startingPose);
     }
@@ -47,6 +48,7 @@ public class PinpointOdo extends Localizer {
     }
 
     @Override public void setPose(Pose newPose) {
+        Watchdog.i("pinpoint pose has been set to " + newPose.toPose2D().toString());
         if (newPose != null) {
             pose = newPose;
             pinpoint.setPosition(pose.toPose2D());

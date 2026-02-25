@@ -27,10 +27,10 @@ public class Navigator extends Subassembly {
 
     // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)
     public static double DRIVE_P = 0.01, DRIVE_D = 0.0001;
-    public static double APPROACH_P = 0.01, APPROACH_I = 0.03, APPROACH_D = 0.0001;
+    public static double APPROACH_P = 0.02, APPROACH_I = 0.03, APPROACH_D = 0.0001;
     public static double HEADING_P = 0.05, HEADING_I = 0.1, HEADING_D = 0.0035;
 
-    public static double MAX_POWER = 0.8;
+    public static double MAX_POWER = 1.0;
     public static boolean USE_X = true, USE_Y = true, USE_H = true;
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
@@ -80,6 +80,10 @@ public class Navigator extends Subassembly {
 
     }
 
+    public void start() {
+        localizationManager.start();
+    }
+
     public void update() {
 
         localizationManager.update();
@@ -92,7 +96,7 @@ public class Navigator extends Subassembly {
             underglow.setColor(Underglow.Color.ORANGE);
             return;
         }
-        assert currentPose != null;
+//        assert currentPose != null;
 
         if (targetPose == null && isMovementEnabled) {
             Watchdog.e("(Navigator) targetPose is null, disabling autonomous movement and stopping robot");
@@ -112,10 +116,12 @@ public class Navigator extends Subassembly {
             headingPIDController.setPID(HEADING_P, HEADING_I, HEADING_D);
 
             TelemetryPacket packet = new TelemetryPacket();
-            packet.put("xError", targetPose.x - currentPose.x);
-            packet.put("yError", targetPose.y - currentPose.y);
-            packet.put("hError", AngleUnit.normalizeDegrees(targetPose.h - currentPose.h));
-            dashboard.sendTelemetryPacket(packet);
+            if (targetPose != null) {
+                packet.put("xError", targetPose.x - currentPose.x);
+                packet.put("yError", targetPose.y - currentPose.y);
+                packet.put("hError", AngleUnit.normalizeDegrees(targetPose.h - currentPose.h));
+                dashboard.sendTelemetryPacket(packet);
+            }
         }
 
         if (!(isPointTrackingEnabled || isMovementEnabled)) return;
@@ -174,6 +180,7 @@ public class Navigator extends Subassembly {
     }
 
     public boolean isAtTarget() {
+        if (currentPose == null) return false;
         double xPosError = currentPose.x - targetPose.x;
         double yPosError = currentPose.y - targetPose.y;
         double hPosError = currentPose.h - targetPose.h;
@@ -192,6 +199,7 @@ public class Navigator extends Subassembly {
 
     public void stop() {
         Global.lastPose = currentPose;
+        localizationManager.stop();
     }
 
     private enum OpModeType {

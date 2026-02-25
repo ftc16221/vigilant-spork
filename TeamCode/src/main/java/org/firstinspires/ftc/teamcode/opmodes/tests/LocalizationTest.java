@@ -30,6 +30,7 @@ public class LocalizationTest extends LinearOpMode implements DashOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
+            navigator.start();
             while (opModeIsActive()) {
                 driveBase.control(gamepad1);
                 navigator.update();

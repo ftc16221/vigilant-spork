@@ -32,6 +32,8 @@ public class LocalizationManager extends Subassembly {
     private Pose velocity;
     private double time;
 
+    private boolean isActive = true;
+
     public LocalizationManager(OpMode opMode, Localizer... localizers) {
         super(opMode, "Localizer Manager");
         this.localizers = new ArrayList<>(Arrays.asList(localizers));
@@ -43,6 +45,7 @@ public class LocalizationManager extends Subassembly {
             if (localizer instanceof LimelightCam) {
                 limelightCam = (LimelightCam) localizer;
             }
+            localizer.update();
         }
 
         if (limelightCam != null) {
@@ -54,52 +57,50 @@ public class LocalizationManager extends Subassembly {
     }
 
     public void start() {
-        sensorThread.start();
+//        sensorThread.start();
     }
 
-    Thread sensorThread = new Thread(() -> {
+    public void update() {
 
-        LinearOpMode lopMode = (LinearOpMode) opMode;
-        while (lopMode.opModeIsActive()) {
-            double prevTime = time;
-            time = System.nanoTime() / 1e9;
-            double dt = time - prevTime;
+        double prevTime = time;
+        time = System.nanoTime() / 1e9;
+        double dt = time - prevTime;
 
-            localizers.forEach(Localizer::update);
+        localizers.forEach(Localizer::update);
 
-            Localizer mostAccurateLocalizer = getMostAccurateLocalizer(absoluteLocalizers);
+        Localizer mostAccurateLocalizer = getMostAccurateLocalizer(absoluteLocalizers);
+        if (mostAccurateLocalizer == null) {
+            mostAccurateLocalizer = getMostAccurateLocalizer(relativeLocalizers);
             if (mostAccurateLocalizer == null) {
-                mostAccurateLocalizer = getMostAccurateLocalizer(relativeLocalizers);
-                if (mostAccurateLocalizer == null) {
-                    Watchdog.e("No valid localizers detected!");
-                    pose = null;
-                    velocity = null;
-                    return;
-                }
-            }
-            Pose prevPose = pose;
-            pose = mostAccurateLocalizer.getPose();
-
-            // if we're using the limelight & MT2, we need to feed it heading data from other sensors, and make sure to never set heading data based off of it's output
-            if (useMT2 && mostAccurateLocalizer instanceof LimelightCam) {
-                Localizer mostAccurateRelativeLocalizer = getMostAccurateLocalizer(relativeLocalizers);
-                pose.h = mostAccurateRelativeLocalizer.getPose().h;
-                limelightCam.updateOrientation(pose.h);
-            }
-
-            // this might not be necessary all the time, and could be slowing loop times?
-            if (mostAccurateLocalizer.isAbsolute) {
-                relativeLocalizers.forEach(localizer -> localizer.setPose(pose));
-            }
-
-            if (prevPose != null) {
-                velocity = pose.subtract(prevPose).divideBy(dt);
+                Watchdog.e("No valid localizers detected!");
+                pose = null;
+                velocity = null;
+                return;
             }
         }
-    });
+        Pose prevPose = pose;
+        pose = mostAccurateLocalizer.getPose();
 
-    public void update() {
-        // intentionally blank
+        // if we're using the limelight & MT2, we need to feed it heading data from other sensors, and make sure to never set heading data based off of it's output
+        if (useMT2 && mostAccurateLocalizer instanceof LimelightCam) {
+            Localizer mostAccurateRelativeLocalizer = getMostAccurateLocalizer(relativeLocalizers);
+            pose.h = mostAccurateRelativeLocalizer.getPose().h;
+            limelightCam.updateOrientation(pose.h);
+        }
+
+        // this might not be necessary all the time, and could be slowing loop times?
+//            if (mostAccurateLocalizer.isAbsolute) {
+//                relativeLocalizers.forEach(localizer -> localizer.setPose(pose));
+//            }
+
+        if (prevPose != null) {
+            velocity = pose.subtract(prevPose).divideBy(dt);
+        }
+
+    }
+
+    public void stop() {
+        isActive = false;
     }
 
     private Localizer getMostAccurateLocalizer(List<Localizer> localizers) {

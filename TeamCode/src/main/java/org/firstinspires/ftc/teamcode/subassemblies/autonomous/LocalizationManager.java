@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
@@ -31,8 +30,6 @@ public class LocalizationManager extends Subassembly {
     private Pose pose;
     private Pose velocity;
     private double time;
-
-    private boolean isActive = true;
 
     public LocalizationManager(OpMode opMode, Localizer... localizers) {
         super(opMode, "Localizer Manager");
@@ -100,7 +97,6 @@ public class LocalizationManager extends Subassembly {
     }
 
     public void stop() {
-        isActive = false;
     }
 
     private Localizer getMostAccurateLocalizer(List<Localizer> localizers) {

@@ -45,7 +45,6 @@ public class Spindexer extends Subassembly {
 
     public static double CURRENT_ALERT_AMPS = 7;
     public static int STUCK_ARTIFACT_DEADLINE = 500;
-    public static double STUCK_ARTIFACT_VELOCITY_THRESHOLD = 20; // ticks/s
 
     public static int ARTIFACT_SAMPLES = 5;
     public static double ARTIFACT_SUCCESS_RATE = 1.00;

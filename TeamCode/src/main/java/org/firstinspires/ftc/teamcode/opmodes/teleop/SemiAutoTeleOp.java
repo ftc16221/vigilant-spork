@@ -55,8 +55,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     private boolean goalTrackingEnabled = false;
 
     private boolean gamepad2RightTriggerWasPressed = false;
-    private boolean gamepad2XWasPressed = false;
-    private boolean gamepad2AWasPressed = false;
     private double prevTime = 0;
 
     @Override
@@ -157,7 +155,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         } else if (gamepad2.yWasPressed()) {
             launcher.launchMotif();
         } else if (gamepad2.aWasPressed()) {
-            gamepad2AWasPressed = true;
             launcher.launchGreen();
         } else if (gamepad2.xWasPressed()) {
             launcher.launchPurple();

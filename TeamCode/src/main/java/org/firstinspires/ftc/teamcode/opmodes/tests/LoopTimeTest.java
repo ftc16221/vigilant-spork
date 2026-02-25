@@ -73,6 +73,6 @@ public class LoopTimeTest extends OpMode {
         double currentTime = System.nanoTime();
         double dt = currentTime - lastTime;
         lastTime = currentTime;
-        return dt / 1000;
+        return dt / 1e6;
     }
 }

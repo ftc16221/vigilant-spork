@@ -18,10 +18,13 @@ public class Indicator extends Subassembly {
 
     public static boolean enabled = false;
 
+    private boolean isActive = true;
+
     private static final int[] colorArray = new int[10];
     private static final int[] brightnessArray = new int[10];
 
     private static SparkFunLEDStick stick;
+
 
     public Indicator(OpMode opMode) {
         super(opMode,"Underglow");
@@ -34,16 +37,21 @@ public class Indicator extends Subassembly {
     }
 
     public void stop() {
-        switch (Global.alliance) {
-            case RED:
-                setAllColor(Color.RED);
-                break;
-            case BLUE:
-                setAllColor(Color.BLUE);
-                break;
-            default:
-                setAllColor(Color.BLACK);
-                break;
+        isActive = false;
+        if (Global.alliance == null) {
+            setAllColor(Color.BLACK);
+        } else {
+            switch (Global.alliance) {
+                case RED:
+                    setAllColor(Color.RED);
+                    break;
+                case BLUE:
+                    setAllColor(Color.BLUE);
+                    break;
+                default:
+                    setAllColor(Color.BLACK);
+                    break;
+            }
         }
         setAllBrightness(DEFAULT_BRIGHTNESS);
     }
@@ -135,16 +143,20 @@ public class Indicator extends Subassembly {
 
     public static void updateMotifAndAlliance() {
         int allianceColor;
-        switch (Global.alliance) {
-            case RED:
-                allianceColor = Color.RED;
-                break;
-            case BLUE:
-                allianceColor = Color.BLUE;
-                break;
-            default:
-                allianceColor = Color.BLACK;
-                break;
+        if (Global.alliance == null) {
+            allianceColor = Color.BLACK;
+        } else {
+            switch (Global.alliance) {
+                case RED:
+                    allianceColor = Color.RED;
+                    break;
+                case BLUE:
+                    allianceColor = Color.BLUE;
+                    break;
+                default:
+                    allianceColor = Color.BLACK;
+                    break;
+            }
         }
         switch (Global.motif) {
             case GPP:

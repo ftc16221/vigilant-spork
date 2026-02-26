@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subassemblies;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -123,6 +125,15 @@ public class Launcher extends Subassembly {
 
         switch (currentState) {
             case IDLE: // waiting for item in queue
+                if (isReady()) {
+                    if (flywheelVel > 100) {
+                        Indicator.setLauncherStatus(Color.GREEN);
+                    } else {
+                        Indicator.setLauncherStatus(Color.RED);
+                    }
+                } else {
+                    Indicator.setLauncherStatus(0xFFFF4500); // burnt orange
+                }
                 if (!launchQueue.isEmpty() && spindexerMovementDeadline.hasExpired()) {
                     switch (launchQueue.getFirst()) {
                         case GREEN:
@@ -143,6 +154,7 @@ public class Launcher extends Subassembly {
                     }
                     currentState = State.AWAITING_SPINDEXER;
                     Watchdog.i("Awaiting " + launchQueue.getFirst() + " artifact from spindexer");
+                    Indicator.setLauncherStatus(0xFFFF8C00); // orange
                 }
                 break;
             case AWAITING_SPINDEXER: // waiting for artifact delivery from spindexer
@@ -152,6 +164,7 @@ public class Launcher extends Subassembly {
                     stuckDeadline.reset();
                     currentState = State.LAUNCHING;
                     Watchdog.i("Launching artifact");
+                    Indicator.setLauncherStatus(Color.YELLOW);
                 }
                 break;
             case LAUNCHING: // waiting for artifact to launch
@@ -166,29 +179,18 @@ public class Launcher extends Subassembly {
                     launchQueue.removeFirst();
                     spindexer.emptyActiveSlot();
                     Watchdog.i("Artifact successfully launched");
-                    if (launchQueue.isEmpty()) {
-                        currentState = State.SPINDOWN;
-                        Watchdog.i("All artifacts in queue launched, spinning down");
-                    } else {
-                        currentState = State.IDLE;
-                    }
+                    currentState = State.IDLE;
                 }
-                break;
-            case ARTIFACT_STUCK:
-                // TODO maybe shake the spindexer around or something?
-                break;
-            case SPINDOWN: // spinning down, all artifacts launched
-                currentState = State.IDLE;
                 break;
             case REJECTED:
                 Watchdog.w("An artifact couldn't be delivered or launch was cancelled");
+                Indicator.setLauncherStatus(Color.RED);
                 if (!launchQueue.isEmpty()) launchQueue.removeFirst();
 
                 gateServo.close(); // ensure this is closed
                 kickerServo.close();
 
-                if (launchQueue.isEmpty()) currentState = State.SPINDOWN;
-                else currentState = State.IDLE;
+                currentState = State.IDLE;
         }
 
         if ((kickerDeadline.hasExpired() || spindexer.getMode() != Spindexer.Mode.LAUNCHER) && kickerServo.isOpen()) {
@@ -197,6 +199,7 @@ public class Launcher extends Subassembly {
 
         telemetry.addData("launcher state", currentState);
         telemetry.addData("launcher isReady", isReady());
+
     }
 
     public double autoAim(double distance) {
@@ -301,6 +304,6 @@ public class Launcher extends Subassembly {
     }
 
     public enum State {
-        IDLE, AWAITING_SPINDEXER, LAUNCHING, ARTIFACT_STUCK, SPINDOWN, REJECTED
+        IDLE, AWAITING_SPINDEXER, LAUNCHING, REJECTED
     }
 }

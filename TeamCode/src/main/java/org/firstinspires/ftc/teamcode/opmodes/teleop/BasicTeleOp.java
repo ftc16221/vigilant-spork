@@ -4,11 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
-import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 
@@ -22,7 +22,7 @@ public class BasicTeleOp extends OpMode {
     Intake intake;
     Spindexer spindexer;
     Launcher launcher;
-    Underglow underglow;
+    Indicator indicator;
 
     boolean dpadWasPressed = false;
     double targetRPM = 0;
@@ -34,7 +34,7 @@ public class BasicTeleOp extends OpMode {
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
-        underglow = new Underglow(this);
+        indicator = new Indicator(this);
 
         telemetry.update();
     }

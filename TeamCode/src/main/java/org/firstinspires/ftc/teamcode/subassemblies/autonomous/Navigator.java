@@ -11,11 +11,10 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
-import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
@@ -44,7 +43,7 @@ public class Navigator extends Subassembly {
     FtcDashboard dashboard;
 
     MecDriveBase driveBase;
-    Underglow underglow;
+    Indicator indicator;
     LocalizationManager localizationManager;
 
     Pose currentPose;
@@ -66,7 +65,7 @@ public class Navigator extends Subassembly {
         this.localizationManager = localizationManager;
         dashboard = FtcDashboard.getInstance();
         driveBase = new MecDriveBase(opMode);
-        underglow = new Underglow(opMode);
+        indicator = new Indicator(opMode);
 
         // we can assume that if the opMode is an Autonomous opMode that we can immediately enable movement. If we can't that should be explicitly disabled.
         Class<? extends OpMode> opModeClass = opMode.getClass();
@@ -99,7 +98,7 @@ public class Navigator extends Subassembly {
             Watchdog.e("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
-            underglow.setColor(Color.YELLOW);
+            Indicator.setRobotStatus(Color.YELLOW);
             return;
         }
 
@@ -109,7 +108,7 @@ public class Navigator extends Subassembly {
             disableMovement();
             isPointTrackingEnabled = false;
             driveBase.stopMotors();
-            underglow.setColor(Color.YELLOW);
+            Indicator.setRobotStatus(Color.YELLOW);
             return;
         }
 

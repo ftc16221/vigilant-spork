@@ -175,6 +175,8 @@ public class Spindexer extends Subassembly {
             intake.setMode(Intake.Mode.OFF);
             hasIntakeSafetyDeadlineExpired = true;
         }
+
+        Indicator.setIndexedArtifacts(drum, activeSlot);
     }
 
     public void stop() {

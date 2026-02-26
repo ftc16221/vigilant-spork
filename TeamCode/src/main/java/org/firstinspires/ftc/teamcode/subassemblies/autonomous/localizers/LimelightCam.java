@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.CircularPoseArray;
 import org.firstinspires.ftc.teamcode.util.Global;
@@ -63,6 +64,7 @@ public class LimelightCam extends Localizer {
         telemetry.addData("tagIDs", tagIds);
         if (Global.motif != lastMotif) {
             Watchdog.i(String.format("New motif %s detected via obelisk apriltag", Global.motif.name()));
+            Indicator.updateMotifAndAlliance();
         }
     }
 

@@ -5,13 +5,13 @@ import android.graphics.Color;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
 import org.firstinspires.ftc.teamcode.util.Global;
 
 @TeleOp(group = Global.OpModeGroup.TEST)
-public class UnderglowTest extends OpMode {
+public class IndicatorTest extends OpMode {
 
-    Underglow underglow;
+    Indicator indicator;
 
     int color = Color.BLACK;
     int[] colors = {Color.BLACK, -1, Color.YELLOW, Color.GREEN, Color.WHITE};
@@ -20,7 +20,7 @@ public class UnderglowTest extends OpMode {
     boolean dpadWasPressed = false;
 
     public void init() {
-        underglow = new Underglow(this);
+        indicator = new Indicator(this);
         callTelemetry();
     }
 
@@ -36,7 +36,7 @@ public class UnderglowTest extends OpMode {
         if (colorIndex < 0) colorIndex = colors.length - 1;
         if (colorIndex >= colors.length) colorIndex = 0;
         color = colors[colorIndex];
-        underglow.setColor(color);
+        Indicator.setAllColor(color);
         callTelemetry();
     }
 

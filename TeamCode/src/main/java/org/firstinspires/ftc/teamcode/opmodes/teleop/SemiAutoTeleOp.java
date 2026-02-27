@@ -205,6 +205,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         launcher.update();
         spindexer.update();
         watchdog.update();
+        indicator.update();
         drawing.update();
         drawing.send();
         navigator.runTelemetry();
@@ -216,6 +217,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         navigator.stop();
         watchdog.stop();
         spindexer.stop();
+        launcher.stop();
         indicator.stop();
     }
 

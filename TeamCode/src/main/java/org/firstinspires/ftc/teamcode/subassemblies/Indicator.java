@@ -18,12 +18,13 @@ public class Indicator extends Subassembly {
 
     public static boolean enabled = false;
 
-    private boolean isActive = true;
-
     private static final int[] colorArray = new int[10];
-    private static final int[] brightnessArray = new int[10];
+    private static int[] prevColorArray = new int[10];
 
-    private static SparkFunLEDStick stick;
+    private static int brightness = DEFAULT_BRIGHTNESS;
+    private static int prevBrightness = -1;
+
+    private final SparkFunLEDStick stick;
 
 
     public Indicator(OpMode opMode) {
@@ -36,8 +37,19 @@ public class Indicator extends Subassembly {
         setAllBrightness(DEFAULT_BRIGHTNESS);
     }
 
+    public void update() {
+        if (stick == null) return;
+        if (Arrays.hashCode(prevColorArray) != Arrays.hashCode(colorArray)) {
+            stick.setColors(colorArray);
+            prevColorArray = colorArray;
+        }
+        if (prevBrightness != brightness) {
+            stick.setBrightness(brightness);
+            prevBrightness = brightness;
+        }
+    }
+
     public void stop() {
-        isActive = false;
         if (Global.alliance == null) {
             setAllColor(Color.BLACK);
         } else {
@@ -57,31 +69,18 @@ public class Indicator extends Subassembly {
     }
 
     public static void setColor(int index, int color) {
-        if (stick == null) return;
         if (color != colorArray[index]) {
             colorArray[index] = color;
-            stick.setColor(index, color);
-        }
-    }
-
-    public static void setBrightness(int index, int brightness) {
-        if (!enabled || stick == null) return;
-        if (brightness != brightnessArray[index]) {
-            brightnessArray[index] = brightness;
-            stick.setBrightness(index, brightness);
+//            stick.setColor(index, color);
         }
     }
 
     public static void setAllColor(int color) {
-        if (stick == null) return;
         Arrays.fill(colorArray, color);
-        stick.setColor(color);
     }
 
     public static void setAllBrightness(int brightness) {
-        if (stick == null) return;
-        Arrays.fill(brightnessArray, brightness);
-        stick.setBrightness(brightness);
+        Indicator.brightness = brightness;
     }
 
     public static void enable() {
@@ -121,13 +120,6 @@ public class Indicator extends Subassembly {
         if (activeArtifact > 2 || activeArtifact < 0) {
             Watchdog.w("Invalid activeArtifact param");
             return;
-        }
-        for (int i = 0; i < artifacts.length; i++) {
-            if (i == activeArtifact) {
-                setBrightness(i, 31);
-            } else {
-                setBrightness(i, DEFAULT_BRIGHTNESS);
-            }
         }
     }
 

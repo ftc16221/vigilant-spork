@@ -143,8 +143,8 @@ public class Navigator extends Subassembly {
         // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
         double hError = Global.ANGLE_UNIT == AngleUnit.DEGREES ? AngleUnit.normalizeDegrees(targetH - currentPose.h) : AngleUnit.normalizeRadians(targetH - currentPose.h);
         double hPower = headingPIDController.calculate(hError, 0);
-        sendData("targetH", targetH);
-        sendData("hPower", hPower);
+//        sendData("targetH", targetH);
+//        sendData("hPower", hPower);
         if (!USE_H) hPower = 0;
 
         if (isPointTrackingEnabled) trackingPower = hPower;

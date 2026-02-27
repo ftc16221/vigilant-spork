@@ -1,21 +1,19 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
-import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
-import org.firstinspires.ftc.teamcode.util.MathEx;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** <a href="https://www.gobilda.com/content/user_manuals/3110-0002-0001%20User%20Guide.pdf">User Guide</a> */
+/**
+ * <a href="https://www.gobilda.com/content/user_manuals/3110-0002-0001%20User%20Guide.pdf">User Guide</a>
+ */
 //@Config
 public class PinpointOdo extends Localizer {
 
@@ -42,27 +40,30 @@ public class PinpointOdo extends Localizer {
         setPose(startingPose);
     }
 
-    @Override public void update() {
-        pinpoint.update();
-        pose = new Pose(pinpoint.getPosition());
-    }
-
-    @Override public void setPose(Pose newPose) {
+    @Override
+    public void setPose(Pose newPose) {
         if (newPose != null) {
             pose = newPose;
             pinpoint.setPosition(pose.toPose2D());
             Watchdog.i("pinpoint pose has been set to " + newPose.toPose2D().toString());
         }
     }
-/*  COMMENTED OUT BECAUSE EVEN THOUGH THIS IS A COOL CONCEPT, THE EXTRA I2C READS AREN'T WORTH IT
-    @Override public List<String> findIssues() {
+
+    @Override
+    public void update() {
+        pinpoint.update();
+        pose = new Pose(pinpoint.getPosition());
+    }
+
+    /*@Override*/
+    public List<String> findIssues() {
         List<String> issues = new ArrayList<>();
         GoBildaPinpointDriver.DeviceStatus status = pinpoint.getDeviceStatus();
         if (status != GoBildaPinpointDriver.DeviceStatus.READY && status != GoBildaPinpointDriver.DeviceStatus.FAULT_BAD_READ) {
-            issues.add("Pinpoint status is " + status.name() + ", odometry functionality is likely very limited");
+            Watchdog.w("Pinpoint status is " + status.name() + ", odometry functionality is likely very limited");
         }
         return issues;
-    }*/
+    }
 
     public void recalibrate() {
         pinpoint.recalibrateIMU();

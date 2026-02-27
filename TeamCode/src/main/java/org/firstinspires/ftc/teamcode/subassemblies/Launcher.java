@@ -202,6 +202,10 @@ public class Launcher extends Subassembly {
 
     }
 
+    public void stop() {
+        kickerServo.close();
+    }
+
     public double autoAim(double distance) {
         // TODO
         return 0.0;

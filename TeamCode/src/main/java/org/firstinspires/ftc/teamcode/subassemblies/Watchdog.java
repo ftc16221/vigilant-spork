@@ -83,39 +83,39 @@ public class Watchdog {
 
     public void update() {
 
-        Set<String> issues = new HashSet<>();
-
-        for (Subassembly subassembly : subassemblies) {
-            List<String> subIssues = subassembly.findIssues();
-            // check if a new issue is discovered, and if so, add it log and activeIssues
-            if (subIssues != null && !subIssues.isEmpty()) {
-                issues.addAll(subIssues);
-            }
-        }
-
-        Set<String> normalizedIssues = new HashSet<>();
-
-        for (String issue : issues) {
-            String normalizedIssue = issue.replaceAll("[0-9]", ""); // this is a message with numbers removed
-            normalizedIssues.add(normalizedIssue);
-            // add new issues
-            if (!prevNormalizedIssues.contains(normalizedIssue)) {
-                prevNormalizedIssues.add(normalizedIssue);
-                e("ISSUE DISCOVERED: " + issue);
-            }
-
-            // add all issues to telemetry
-            telemetry.addLine("Warning: " + issue);
-        }
-
-        // remove old issues, and display message that they have been cleared
-        prevNormalizedIssues.removeIf(i -> {
-            boolean stillActive = normalizedIssues.contains(i); // check if our tracked issues were polled this cycle
-            if (!stillActive) {
-                e("ISSUE RESOLVED: " + i);
-            }
-            return !stillActive;
-        });
+//        Set<String> issues = new HashSet<>();
+//
+//        for (Subassembly subassembly : subassemblies) {
+//            List<String> subIssues = subassembly.findIssues();
+//            // check if a new issue is discovered, and if so, add it log and activeIssues
+//            if (subIssues != null && !subIssues.isEmpty()) {
+//                issues.addAll(subIssues);
+//            }
+//        }
+//
+//        Set<String> normalizedIssues = new HashSet<>();
+//
+//        for (String issue : issues) {
+//            String normalizedIssue = issue.replaceAll("[0-9]", ""); // this is a message with numbers removed
+//            normalizedIssues.add(normalizedIssue);
+//            // add new issues
+//            if (!prevNormalizedIssues.contains(normalizedIssue)) {
+//                prevNormalizedIssues.add(normalizedIssue);
+//                e("ISSUE DISCOVERED: " + issue);
+//            }
+//
+//            // add all issues to telemetry
+//            telemetry.addLine("Warning: " + issue);
+//        }
+//
+//        // remove old issues, and display message that they have been cleared
+//        prevNormalizedIssues.removeIf(i -> {
+//            boolean stillActive = normalizedIssues.contains(i); // check if our tracked issues were polled this cycle
+//            if (!stillActive) {
+//                e("ISSUE RESOLVED: " + i);
+//            }
+//            return !stillActive;
+//        });
     }
 
     private static Subassembly[] findSubassemblies(OpMode opMode) {

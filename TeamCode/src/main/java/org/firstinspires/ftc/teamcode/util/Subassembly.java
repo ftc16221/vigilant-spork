@@ -35,7 +35,7 @@ public abstract class Subassembly {
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
-    public List<String> findIssues() {
-        return null;
-    }
+//    public List<String> findIssues() {
+//        return null;
+//    }
 }

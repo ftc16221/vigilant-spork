@@ -54,6 +54,7 @@ public class LoopTimeTest extends OpMode {
     @Override public void loop() {
         double runtime = getRuntime();
         telemetry.addData("Total", runtime);
+        telemetry.addData("OpMode Processes", "%.3f", timeSinceLastCall());
         driveBase.control(gamepad1);
         telemetry.addData("DriveBase", "%.3f", timeSinceLastCall());
         navigator.update();
@@ -64,6 +65,9 @@ public class LoopTimeTest extends OpMode {
         telemetry.addData("Spindexer", "%.3f", timeSinceLastCall());
         watchdog.update();
         telemetry.addData("Watchdog", "%.3f", timeSinceLastCall());
+        indicator.update();
+        telemetry.addData("Indicator", "%.3f", timeSinceLastCall());
+
 //        drawing.update();
 //        drawing.send();
 //        telemetry.addData("Drawing", timeSinceLastCall());

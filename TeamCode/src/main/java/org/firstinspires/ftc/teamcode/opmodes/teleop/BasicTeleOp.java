@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.MathEx;
 
 @Disabled
-@TeleOp(group = Global.OpModeGroup.MAIN)
+@TeleOp(group = Global.OpModeGroup.DO_NOT_BREAK)
 public class BasicTeleOp extends OpMode {
 
     public static double MAX_RPM = 6000;
@@ -66,6 +66,7 @@ public class BasicTeleOp extends OpMode {
         prevTargetRPM = targetRPM;
 
         launcher.update();
+        indicator.update();
 
         telemetry.addData("Max RPM", MAX_RPM);
         telemetry.addData("Target RPM", targetRPM);

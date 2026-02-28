@@ -43,7 +43,6 @@ public class Navigator extends Subassembly {
     FtcDashboard dashboard;
 
     MecDriveBase driveBase;
-    Indicator indicator;
     LocalizationManager localizationManager;
 
     Pose currentPose;
@@ -65,7 +64,6 @@ public class Navigator extends Subassembly {
         this.localizationManager = localizationManager;
         dashboard = FtcDashboard.getInstance();
         driveBase = new MecDriveBase(opMode);
-        indicator = new Indicator(opMode);
 
         // we can assume that if the opMode is an Autonomous opMode that we can immediately enable movement. If we can't that should be explicitly disabled.
         Class<? extends OpMode> opModeClass = opMode.getClass();

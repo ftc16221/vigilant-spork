@@ -115,14 +115,6 @@ public class Indicator extends Subassembly {
         }
     }
 
-    public static void setIndexedArtifacts(Spindexer.Artifact[] artifacts, int activeArtifact) {
-        setIndexedArtifacts(artifacts);
-        if (activeArtifact > 2 || activeArtifact < 0) {
-            Watchdog.w("Invalid activeArtifact param");
-            return;
-        }
-    }
-
     public static void setRobotStatus(int color) {
         setColor(3, color);
         setColor(4, color);

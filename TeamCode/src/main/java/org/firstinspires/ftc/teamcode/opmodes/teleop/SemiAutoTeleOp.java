@@ -1,16 +1,17 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
-import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.LocalizationManager;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
@@ -37,15 +38,15 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     public static double SLOW_COEFF = 0.2; // 20% speed
 
-    public static Underglow.Color IDLE_COLOR = Underglow.Color.ALLIANCE;
-    public static Underglow.Color GOAL_TRACKING_COLOR = Underglow.Color.GREEN;
-    public static Underglow.Color AUTO_MOVEMENT_COLOR = Underglow.Color.WHITE;
+    public static int IDLE_COLOR = Color.GREEN;
+    public static int GOAL_TRACKING_COLOR = Color.CYAN;
+    public static int AUTO_MOVEMENT_COLOR = Color.WHITE;
 
     MecDriveBase driveBase;
     Spindexer spindexer;
     Launcher launcher;
     Intake intake;
-    Underglow underglow;
+    Indicator indicator;
     Navigator navigator;
     LimelightCam limelightCam;
     Drawing drawing;
@@ -70,7 +71,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
                 limelightCam
         );
         navigator = new Navigator(this, localizationManager);
-        underglow = new Underglow(this);
+        indicator = new Indicator(this);
         drawing = new Drawing(navigator);
         watchdog = new Watchdog(this);
 
@@ -93,8 +94,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     @Override
     public void loop() {
 
-//        RobotLog.i("has a been pressed: " + gamepad2.a);
-
         double dt = time - prevTime;
         prevTime = time;
 
@@ -105,15 +104,16 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
             limelightCam.searchForMotif();
         }
 
+
         // ################   GAMEPAD 1   ################
-        else if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
+        if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
             goalTrackingEnabled = true;
             navigator.enablePointTracking();
-            underglow.setColor(GOAL_TRACKING_COLOR);
+            Indicator.setRobotStatus(GOAL_TRACKING_COLOR);
         } else if (gamepad1.right_stick_x != 0 && goalTrackingEnabled) { // cancel goal tracking
             goalTrackingEnabled = false;
             navigator.disablePointTracking();
-            underglow.setColor(IDLE_COLOR);
+            Indicator.setRobotStatus(IDLE_COLOR);
         }
 
         if (gamepad1.dpadUpWasPressed()) {
@@ -131,7 +131,16 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         }
 
         if (goalTrackingEnabled) {
-            driveBase.moveRobot(gamepad1.left_stick_x, -gamepad1.left_stick_y, navigator.getTrackingPower());
+            double leftX;
+            double leftY;
+            if (gamepad1.right_trigger > 0.5) {
+                leftX = gamepad1.left_stick_x * SLOW_COEFF;
+                leftY = -gamepad1.left_stick_y * SLOW_COEFF;
+            } else {
+                leftX = gamepad1.left_stick_x;
+                leftY = -gamepad1.left_stick_y;
+            }
+            driveBase.moveRobot(leftX, leftY, navigator.getTrackingPower());
         }
         if (!autoMovementEnabled && !goalTrackingEnabled) {
             if (gamepad1.right_trigger > 0.5) {
@@ -196,6 +205,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         launcher.update();
         spindexer.update();
         watchdog.update();
+        indicator.update();
         drawing.update();
         drawing.send();
         navigator.runTelemetry();
@@ -207,17 +217,19 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         navigator.stop();
         watchdog.stop();
         spindexer.stop();
+        launcher.stop();
+        indicator.stop();
     }
 
     private void startAutoMovement() {
         autoMovementEnabled = true;
         navigator.enableMovement();
-        underglow.setColor(AUTO_MOVEMENT_COLOR);
+        Indicator.setRobotStatus(AUTO_MOVEMENT_COLOR);
     }
 
     private void stopAutoMovement() {
         autoMovementEnabled = false;
         navigator.disableMovement();
-        underglow.setColor(IDLE_COLOR);
+        Indicator.setRobotStatus(IDLE_COLOR);
     }
 }

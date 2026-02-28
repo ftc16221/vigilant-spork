@@ -59,7 +59,7 @@ public class MecDriveBase extends Subassembly {
         control(gamepad, 1.0);
     }
 
-    @Override
+//    @Override
     public List<String> findIssues() {
         List<String> issues = new ArrayList<>();
 
@@ -77,9 +77,9 @@ public class MecDriveBase extends Subassembly {
             if (Math.abs(deviation) < 2) break;
             int motorName = motors[i].getPortNumber();
             if (deviation > 0) {
-                issues.add(String.format("driveBase motor (port %s) has a current %.2f amps higher than other motors, and is possibly stalled", motorName, Math.abs(deviation)));
+                Watchdog.w(String.format("driveBase motor (port %s) has a current %.2f amps higher than other motors, and is possibly stalled", motorName, Math.abs(deviation)));
             } else {
-                issues.add(String.format("driveBase motor (port %s) has a current %.2f amps lower than other motors, and is possibly disconnected", motorName, Math.abs(deviation)));
+                Watchdog.w(String.format("driveBase motor (port %s) has a current %.2f amps lower than other motors, and is possibly disconnected", motorName, Math.abs(deviation)));
             }
         }
         return issues;

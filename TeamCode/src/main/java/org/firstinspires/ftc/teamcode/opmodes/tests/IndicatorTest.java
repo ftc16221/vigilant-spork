@@ -1,26 +1,26 @@
 package org.firstinspires.ftc.teamcode.opmodes.tests;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
+import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@Disabled
 @TeleOp(group = Global.OpModeGroup.TEST)
-public class UnderglowTest extends OpMode {
+public class IndicatorTest extends OpMode {
 
-    Underglow underglow;
+    Indicator indicator;
 
-    Underglow.Color color = null;
-    Underglow.Color[] colors = {null, Underglow.Color.ALLIANCE, Underglow.Color.YELLOW, Underglow.Color.GREEN, Underglow.Color.WHITE, Underglow.Color.RAINBOW};
+    int color = Color.BLACK;
+    int[] colors = {Color.BLACK, Color.YELLOW, Color.GREEN, Color.WHITE};
     int colorIndex = 0;
 
     boolean dpadWasPressed = false;
 
     public void init() {
-        underglow = new Underglow(this);
+        indicator = new Indicator(this);
         callTelemetry();
     }
 
@@ -28,7 +28,8 @@ public class UnderglowTest extends OpMode {
         if (gamepad1.b) Global.alliance = Global.Alliance.RED;
         if (gamepad1.x) Global.alliance = Global.Alliance.BLUE;
         if (gamepad1.y) Global.alliance = null;
-        if (gamepad1.dpad_up && !dpadWasPressed) colorIndex++;
+        if (gamepad1.dpad_up && !dpadWasPressed)
+            colorIndex++;
         if (gamepad1.dpad_down && !dpadWasPressed) colorIndex--;
 
         dpadWasPressed = gamepad1.dpad_up || gamepad1.dpad_down;
@@ -36,7 +37,11 @@ public class UnderglowTest extends OpMode {
         if (colorIndex < 0) colorIndex = colors.length - 1;
         if (colorIndex >= colors.length) colorIndex = 0;
         color = colors[colorIndex];
-        underglow.setColor(color);
+
+        Indicator.setAllColor(color);
+
+        indicator.update();
+
         callTelemetry();
     }
 
@@ -45,9 +50,9 @@ public class UnderglowTest extends OpMode {
         telemetry.addData("B", "Set Alliance RED");
         telemetry.addData("X", "Set Alliance BLUE");
         telemetry.addData("Y", "Set Alliance NULL (OFF)");
-        telemetry.addData("D-PAD UP(+)/DOWN(-)", "Cycle through NULL, ALLIANCE COLOR, YELLOW, GREEN, WHITE, and RAINBOW");
+        telemetry.addData("D-PAD UP(+)/DOWN(-)", "Cycle through BLACK, ALLIANCE COLOR, YELLOW, GREEN, and WHITE");
         telemetry.addLine();
-        telemetry.addData("Current Color", color == null ? "NULL" : color);
+        telemetry.addData("Current Color", color);
         telemetry.addData("Current Alliance", Global.alliance == null ? "NULL" : Global.alliance);
         telemetry.update();
     }

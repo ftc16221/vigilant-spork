@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
@@ -28,7 +29,7 @@ public class PinpointTest extends LinearOpMode implements DashOpMode {
         telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         driveBase = new MecDriveBase(this);
         pinpointOdo = new PinpointOdo(this, Global.lastPose);
-        drawing = new Drawing(pinpointOdo);
+//        drawing = new Drawing(pinpointOdo);
 
         driveBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -43,9 +44,13 @@ public class PinpointTest extends LinearOpMode implements DashOpMode {
 
         if (opModeIsActive()) {
             while (opModeIsActive()) {
+                ElapsedTime updateTimer = new ElapsedTime();
                 pinpointOdo.update();
-                drawing.update();
+                telemetry.addData("update time", updateTimer.milliseconds());
+//                drawing.update();
+                ElapsedTime readTimer = new ElapsedTime();
                 Pose currentPose = pinpointOdo.getPose();
+                telemetry.addData("read time", readTimer.milliseconds());
                 if (currentPose != null) {
                     telemetry.addData("x", currentPose.x);
                     telemetry.addData("y", currentPose.y);

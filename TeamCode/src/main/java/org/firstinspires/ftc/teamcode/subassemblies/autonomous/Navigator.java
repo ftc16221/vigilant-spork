@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subassemblies.autonomous;
 
 import static org.firstinspires.ftc.teamcode.util.MathEx.clamp;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -9,11 +11,10 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
-import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
@@ -42,7 +43,6 @@ public class Navigator extends Subassembly {
     FtcDashboard dashboard;
 
     MecDriveBase driveBase;
-    Underglow underglow;
     LocalizationManager localizationManager;
 
     Pose currentPose;
@@ -64,7 +64,6 @@ public class Navigator extends Subassembly {
         this.localizationManager = localizationManager;
         dashboard = FtcDashboard.getInstance();
         driveBase = new MecDriveBase(opMode);
-        underglow = new Underglow(opMode);
 
         // we can assume that if the opMode is an Autonomous opMode that we can immediately enable movement. If we can't that should be explicitly disabled.
         Class<? extends OpMode> opModeClass = opMode.getClass();
@@ -97,7 +96,7 @@ public class Navigator extends Subassembly {
             Watchdog.e("(Navigator) currentPose is null, disabling autonomous movement and stopping robot");
             disableMovement();
             driveBase.stopMotors();
-            underglow.setColor(Underglow.Color.ORANGE);
+            Indicator.setRobotStatus(Color.YELLOW);
             return;
         }
 
@@ -107,7 +106,7 @@ public class Navigator extends Subassembly {
             disableMovement();
             isPointTrackingEnabled = false;
             driveBase.stopMotors();
-            underglow.setColor(Underglow.Color.ORANGE);
+            Indicator.setRobotStatus(Color.YELLOW);
             return;
         }
 
@@ -142,8 +141,8 @@ public class Navigator extends Subassembly {
         // so, instead of giving the PIDController the current and target heading, we give it the error (which we find ourselves) and the targetError (0)
         double hError = Global.ANGLE_UNIT == AngleUnit.DEGREES ? AngleUnit.normalizeDegrees(targetH - currentPose.h) : AngleUnit.normalizeRadians(targetH - currentPose.h);
         double hPower = headingPIDController.calculate(hError, 0);
-        sendData("targetH", targetH);
-        sendData("hPower", hPower);
+//        sendData("targetH", targetH);
+//        sendData("hPower", hPower);
         if (!USE_H) hPower = 0;
 
         if (isPointTrackingEnabled) trackingPower = hPower;

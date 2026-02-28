@@ -98,7 +98,7 @@ public class Spindexer extends Subassembly {
 
     public void update() {
 
-        if (spindexerMotor.isOverCurrent() && stuckArtifactDeadline.hasExpired()) {
+        if (stuckArtifactDeadline.hasExpired() && spindexerMotor.isOverCurrent()) {
             isArtifactStuck = true;
             stuckArtifactDeadline.reset();
             spindexerMotor.setPower(0);
@@ -110,8 +110,6 @@ public class Spindexer extends Subassembly {
             isArtifactStuck = false;
             spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-
-        telemetry.addData("spindexer current", spindexerMotor.getCurrent(CurrentUnit.AMPS));
 
         if (Global.ENABLE_TUNING_MODE) {
             spindexerPIDF.setPIDF(kP, kI, kD, kF);
@@ -127,17 +125,17 @@ public class Spindexer extends Subassembly {
         evaluatePID(error);
 
         // intake mode
-        Artifact detectedArtifact = getDetectedArtifact();
-        if (!isFull() && mode == Spindexer.Mode.INTAKE && !isBusy && detectedArtifact != Artifact.EMPTY && intakeDeadline.hasExpired()) {
-            Watchdog.i(detectedArtifact + " artifact detected in intake");
-            drum[activeSlot] = detectedArtifact;
-            intakeDeadline.reset();
-        }
+        if (mode == Mode.INTAKE) {
+            Artifact detectedArtifact = getDetectedArtifact();
+            if (!isFull() && !isBusy && detectedArtifact != Artifact.EMPTY && intakeDeadline.hasExpired()) {
+                Watchdog.i(detectedArtifact + " artifact detected in intake");
+                drum[activeSlot] = detectedArtifact;
+                intakeDeadline.reset();
+            }
 
-        if (mode == Spindexer.Mode.INTAKE) {
             if (isFull()) {
                 Watchdog.i("Spindexer full, switching to LAUNCHER mode");
-                mode = Spindexer.Mode.LAUNCHER;
+                mode = Mode.LAUNCHER;
                 // go to first color of motif first, to save time
                 int motifSlot = -1;
                 if (Global.motif != Global.Motif.UNKNOWN) {
@@ -154,7 +152,7 @@ public class Spindexer extends Subassembly {
             }
         }
 
-        if (isEmpty() && mode == Spindexer.Mode.LAUNCHER) {
+        if (mode == Spindexer.Mode.LAUNCHER && isEmpty()) {
             Watchdog.i("Spindexer empty, switching to INTAKE mode");
             mode = Spindexer.Mode.INTAKE;
             activeSlot = getIndexOfClosestArtifact(Artifact.EMPTY);
@@ -175,6 +173,8 @@ public class Spindexer extends Subassembly {
             intake.setMode(Intake.Mode.OFF);
             hasIntakeSafetyDeadlineExpired = true;
         }
+
+        Indicator.setIndexedArtifacts(drum);
     }
 
     public void stop() {
@@ -355,20 +355,24 @@ public class Spindexer extends Subassembly {
         lastDetectedColors[detectedColorIndex] = getCurrentColor();
         detectedColorIndex = (detectedColorIndex + 1) % lastDetectedColors.length;
 
-        if (isObjectInProximity()) {
-            int numOfPurpleDetections = 0;
-            int numOfGreenDetections = 0;
+        int numOfPurpleDetections = 0;
+        int numOfGreenDetections = 0;
 
-            for (Artifact detectedColor : lastDetectedColors) {
-                if (detectedColor == Artifact.PURPLE) numOfPurpleDetections++;
-                else if (detectedColor == Artifact.GREEN) numOfGreenDetections++;
-            }
+        for (Artifact detectedColor : lastDetectedColors) {
+            if (detectedColor == Artifact.PURPLE) numOfPurpleDetections++;
+            else if (detectedColor == Artifact.GREEN) numOfGreenDetections++;
+        }
 
-            int threshold = Math.toIntExact(Math.round(ARTIFACT_SAMPLES * ARTIFACT_SUCCESS_RATE));
+        int threshold = Math.toIntExact(Math.round(ARTIFACT_SAMPLES * ARTIFACT_SUCCESS_RATE));
 
-            if      (numOfPurpleDetections >= threshold) return Artifact.PURPLE;
-            else if (numOfGreenDetections  >= threshold) return Artifact.GREEN;
-            else                                         return Artifact.EMPTY;
+        Artifact artifact;
+
+        if      (numOfPurpleDetections >= threshold) artifact = Artifact.PURPLE;
+        else if (numOfGreenDetections  >= threshold) artifact = Artifact.GREEN;
+        else                                         artifact = Artifact.EMPTY;
+
+        if (artifact != Artifact.EMPTY && isObjectInProximity()) {
+            return artifact;
         } else {
             return Artifact.EMPTY;
         }

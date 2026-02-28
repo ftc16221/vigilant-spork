@@ -4,11 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
-import org.firstinspires.ftc.teamcode.subassemblies.Underglow;
 import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.LocalizationManager;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
@@ -24,7 +24,7 @@ public class LoopTimeTest extends OpMode {
     Spindexer spindexer;
     Launcher launcher;
     Intake intake;
-    Underglow underglow;
+    Indicator indicator;
     Navigator navigator;
     LimelightCam limelightCam;
     Drawing drawing;
@@ -44,7 +44,7 @@ public class LoopTimeTest extends OpMode {
                 limelightCam
         );
         navigator = new Navigator(this, localizationManager);
-        underglow = new Underglow(this);
+        indicator = new Indicator(this);
         drawing = new Drawing(navigator);
         watchdog = new Watchdog(this);
 
@@ -54,6 +54,7 @@ public class LoopTimeTest extends OpMode {
     @Override public void loop() {
         double runtime = getRuntime();
         telemetry.addData("Total", runtime);
+        telemetry.addData("OpMode Processes", "%.3f", timeSinceLastCall());
         driveBase.control(gamepad1);
         telemetry.addData("DriveBase", "%.3f", timeSinceLastCall());
         navigator.update();
@@ -64,6 +65,9 @@ public class LoopTimeTest extends OpMode {
         telemetry.addData("Spindexer", "%.3f", timeSinceLastCall());
         watchdog.update();
         telemetry.addData("Watchdog", "%.3f", timeSinceLastCall());
+        indicator.update();
+        telemetry.addData("Indicator", "%.3f", timeSinceLastCall());
+
 //        drawing.update();
 //        drawing.send();
 //        telemetry.addData("Drawing", timeSinceLastCall());

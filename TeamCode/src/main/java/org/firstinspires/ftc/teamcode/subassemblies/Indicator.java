@@ -41,7 +41,7 @@ public class Indicator extends Subassembly {
         if (stick == null) return;
         if (Arrays.hashCode(prevColorArray) != Arrays.hashCode(colorArray)) {
             stick.setColors(colorArray);
-            prevColorArray = colorArray;
+            prevColorArray = colorArray.clone();
         }
         if (prevBrightness != brightness) {
             stick.setBrightness(brightness);
@@ -152,19 +152,19 @@ public class Indicator extends Subassembly {
         }
         switch (Global.motif) {
             case GPP:
-                setColor(0, Color.BLACK);
+                setColor(0, Color.DKGRAY);
                 setColor(1, allianceColor);
                 setColor(2, allianceColor);
                 break;
             case PGP:
                 setColor(0, allianceColor);
-                setColor(1, Color.BLACK);
+                setColor(1, Color.DKGRAY);
                 setColor(2, allianceColor);
                 break;
             case PPG:
                 setColor(0, allianceColor);
                 setColor(1, allianceColor);
-                setColor(2, Color.BLACK);
+                setColor(2, Color.DKGRAY);
                 break;
             default:
                 setColor(0, allianceColor);

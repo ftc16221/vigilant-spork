@@ -14,7 +14,7 @@ public class IndicatorTest extends OpMode {
     Indicator indicator;
 
     int color = Color.BLACK;
-    int[] colors = {Color.BLACK, -1, Color.YELLOW, Color.GREEN, Color.WHITE};
+    int[] colors = {Color.BLACK, Color.YELLOW, Color.GREEN, Color.WHITE};
     int colorIndex = 0;
 
     boolean dpadWasPressed = false;
@@ -28,7 +28,8 @@ public class IndicatorTest extends OpMode {
         if (gamepad1.b) Global.alliance = Global.Alliance.RED;
         if (gamepad1.x) Global.alliance = Global.Alliance.BLUE;
         if (gamepad1.y) Global.alliance = null;
-        if (gamepad1.dpad_up && !dpadWasPressed) colorIndex++;
+        if (gamepad1.dpad_up && !dpadWasPressed)
+            colorIndex++;
         if (gamepad1.dpad_down && !dpadWasPressed) colorIndex--;
 
         dpadWasPressed = gamepad1.dpad_up || gamepad1.dpad_down;
@@ -36,7 +37,11 @@ public class IndicatorTest extends OpMode {
         if (colorIndex < 0) colorIndex = colors.length - 1;
         if (colorIndex >= colors.length) colorIndex = 0;
         color = colors[colorIndex];
+
         Indicator.setAllColor(color);
+
+        indicator.update();
+
         callTelemetry();
     }
 

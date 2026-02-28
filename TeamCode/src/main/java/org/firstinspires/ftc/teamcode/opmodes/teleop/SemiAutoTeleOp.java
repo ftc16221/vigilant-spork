@@ -38,7 +38,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
 
     public static double SLOW_COEFF = 0.2; // 20% speed
 
-    public static int IDLE_COLOR = -1;
+    public static int IDLE_COLOR = Color.GREEN;
     public static int GOAL_TRACKING_COLOR = Color.CYAN;
     public static int AUTO_MOVEMENT_COLOR = Color.WHITE;
 

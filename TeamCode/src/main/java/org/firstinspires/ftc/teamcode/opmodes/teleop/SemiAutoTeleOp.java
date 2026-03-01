@@ -29,11 +29,11 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     public static Pose GOAL_POSE = new Pose(-180, 180, 0);
 
     public static Pose CLOSE_LAUNCH_POSE = new Pose(-51, 30, 50.6); // TODO
-    public static double CLOSE_LAUNCH_RPM = 2400; // TODO
+    public static double CLOSE_LAUNCH_RPM = 3000; // TODO
     public static double CLOSE_LAUNCH_ANGLE = 40; // degrees
 
     public static Pose FAR_LAUNCH_POSE = new Pose(120, 50, 70); // TODO
-    public static double FAR_LAUNCH_RPM = 3200; // TODO
+    public static double FAR_LAUNCH_RPM = 4000; // Experimented 03/01/2026
     public static double FAR_LAUNCH_ANGLE = 45;
 
     public static double SLOW_COEFF = 0.2; // 20% speed

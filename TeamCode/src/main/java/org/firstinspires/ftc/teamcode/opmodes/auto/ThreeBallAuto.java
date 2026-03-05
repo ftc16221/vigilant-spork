@@ -23,7 +23,7 @@ public class ThreeBallAuto extends OpMode {
     public static Pose LAUNCH_POSE = new Pose(-32, 33, 38);
     public static Pose END_POSE = new Pose(-110, 26, 90);
 
-    public static double LAUNCH_SPEED = 3400.0; // RPM
+    public static double LAUNCH_SPEED = 3800.0; // RPM
     public static double LAUNCH_ANGLE = 45.0; // degrees
 
     private Navigator navigator;

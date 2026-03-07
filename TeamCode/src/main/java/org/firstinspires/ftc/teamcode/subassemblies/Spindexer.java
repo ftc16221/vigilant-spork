@@ -28,7 +28,6 @@ public class Spindexer extends Subassembly {
 
     public static double ENCODER_RES = 537.7; // PPR
 
-
     public static float PURP_G_PCT_THRESHOLD = 37.5f; // must be less than
     public static float PURP_B_PCT_THRESHOLD = 35f; // must be greater than
 

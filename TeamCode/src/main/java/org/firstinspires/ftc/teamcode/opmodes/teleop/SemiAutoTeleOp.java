@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.subassemblies.Intake;
 import org.firstinspires.ftc.teamcode.subassemblies.Launcher;
+import org.firstinspires.ftc.teamcode.subassemblies.Lift;
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
 import org.firstinspires.ftc.teamcode.subassemblies.Spindexer;
 import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
@@ -46,6 +47,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
     Spindexer spindexer;
     Launcher launcher;
     Intake intake;
+    Lift lift;
     Indicator indicator;
     Navigator navigator;
     LimelightCam limelightCam;
@@ -64,6 +66,7 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         intake = new Intake(this);
         spindexer = new Spindexer(this, intake);
         launcher = new Launcher(this, spindexer);
+        lift = new Lift(this);
         limelightCam = new LimelightCam(this);
         LocalizationManager localizationManager = new LocalizationManager(
                 this,
@@ -103,7 +106,6 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         if (Global.motif == Global.Motif.UNKNOWN) {
             limelightCam.searchForMotif();
         }
-
 
         // ################   GAMEPAD 1   ################
         if (gamepad1.left_bumper || gamepad1.right_stick_button) { // start goal tracking
@@ -151,6 +153,11 @@ public class SemiAutoTeleOp extends OpMode implements DashOpMode {
         }
 
         // ################   GAMEPAD 2   ################
+
+        // LIFT
+        lift.setPower(-gamepad2.left_stick_y);
+
+        if (gamepad2.left_stick_y > 0.2) launcher.setTargetVelocity(0);
 
         // LAUNCH MODE
         if (gamepad2.right_trigger > 0.2 && !gamepad2RightTriggerWasPressed) {

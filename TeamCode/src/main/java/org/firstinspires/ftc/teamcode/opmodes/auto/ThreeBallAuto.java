@@ -20,7 +20,8 @@ import org.firstinspires.ftc.teamcode.util.Pose;
 public class ThreeBallAuto extends OpMode {
 
     public static Pose STARTING_POSE = new Pose(-128, 107, -142);
-    public static Pose LAUNCH_POSE = new Pose(-32, 33, 38);
+    public static Pose RED_LAUNCH = new Pose(-32, 33, 38);
+    public static Pose BLUE_LAUNCH = new Pose(-32, -33, 142);
     public static Pose END_POSE = new Pose(-110, 26, 90);
 
     public static double LAUNCH_SPEED = 3800.0; // RPM
@@ -63,7 +64,12 @@ public class ThreeBallAuto extends OpMode {
 
     @Override
     public void start() {
-        navigator.setUnspecificTargetPose(LAUNCH_POSE);
+
+        if (Global.alliance == Global.Alliance.RED) {
+            navigator.setTargetPose(RED_LAUNCH);
+        } else {
+            navigator.setTargetPose(BLUE_LAUNCH);
+        }
     }
 
     @Override

@@ -6,16 +6,12 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.subassemblies.Indicator;
-import org.firstinspires.ftc.teamcode.subassemblies.Watchdog;
 import org.firstinspires.ftc.teamcode.util.CircularPoseArray;
-import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.Pose;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -25,7 +21,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Config
+@Config
 public class LimelightCam extends Localizer {
 
     public static int POSE_ARRAY_SIZE = 15; // how many poses that should be stored and averaged
@@ -38,7 +34,6 @@ public class LimelightCam extends Localizer {
     private final CircularPoseArray poseArray;
 
     private LLResult result;
-    private int[] detectedTags;
 
     public boolean useMT2 = true;
 
@@ -52,20 +47,6 @@ public class LimelightCam extends Localizer {
         limelight3A.start();
         FtcDashboard.getInstance().startCameraStream(limelight3A, 60);
         poseArray = new CircularPoseArray(POSE_ARRAY_SIZE);
-    }
-
-    public void searchForMotif() {
-        update();
-        Global.Motif lastMotif = Global.motif;
-        List<Integer> tagIds = getDetectedTagIds();
-        if (tagIds.contains(21)) Global.motif = Global.Motif.GPP;
-        else if (tagIds.contains(22)) Global.motif = Global.Motif.PGP;
-        else if (tagIds.contains(23)) Global.motif = Global.Motif.PPG;
-        telemetry.addData("tagIDs", tagIds);
-        if (Global.motif != lastMotif) {
-            Watchdog.i(String.format("New motif %s detected via obelisk apriltag", Global.motif.name()));
-            Indicator.updateMotifAndAlliance();
-        }
     }
 
     @Override

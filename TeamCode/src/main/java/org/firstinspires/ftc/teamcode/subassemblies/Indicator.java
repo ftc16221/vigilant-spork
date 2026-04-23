@@ -31,7 +31,6 @@ public class Indicator extends Subassembly {
         super(opMode,"Underglow");
 
         stick = hardwareMap.getAll(SparkFunLEDStick.class).get(0);
-        updateMotifAndAlliance();
         setRobotStatus(Color.YELLOW);
         setLauncherStatus(Color.BLACK);
         setAllBrightness(DEFAULT_BRIGHTNESS);
@@ -93,28 +92,6 @@ public class Indicator extends Subassembly {
         setAllBrightness(0);
     }
 
-    public static void setIndexedArtifacts(Spindexer.Artifact[] artifacts) {
-        if (artifacts.length != 3) {
-            Watchdog.w("Artifact array is invalid length");
-            return;
-        }
-        for (int i = 0; i < artifacts.length; i++) {
-            int color;
-            switch (artifacts[i]) {
-                case PURPLE:
-                    color = 0xFF800080; // PURPLE
-                    break;
-                case GREEN:
-                    color = Color.GREEN;
-                    break;
-                default:
-                    color = Color.BLACK;
-                    break;
-            }
-            setColor(i + 7, color);
-        }
-    }
-
     public static void setRobotStatus(int color) {
         setColor(3, color);
         setColor(4, color);
@@ -123,46 +100,5 @@ public class Indicator extends Subassembly {
     public static void setLauncherStatus(int color) {
         setColor(5, color);
         setColor(6, color);
-    }
-
-    public static void updateMotifAndAlliance() {
-        int allianceColor;
-        if (Global.alliance == null) {
-            allianceColor = Color.BLACK;
-        } else {
-            switch (Global.alliance) {
-                case RED:
-                    allianceColor = Color.RED;
-                    break;
-                case BLUE:
-                    allianceColor = Color.BLUE;
-                    break;
-                default:
-                    allianceColor = Color.BLACK;
-                    break;
-            }
-        }
-        switch (Global.motif) {
-            case GPP:
-                setColor(0, Color.DKGRAY);
-                setColor(1, allianceColor);
-                setColor(2, allianceColor);
-                break;
-            case PGP:
-                setColor(0, allianceColor);
-                setColor(1, Color.DKGRAY);
-                setColor(2, allianceColor);
-                break;
-            case PPG:
-                setColor(0, allianceColor);
-                setColor(1, allianceColor);
-                setColor(2, Color.DKGRAY);
-                break;
-            default:
-                setColor(0, allianceColor);
-                setColor(1, allianceColor);
-                setColor(2, allianceColor);
-                break;
-        }
     }
 }

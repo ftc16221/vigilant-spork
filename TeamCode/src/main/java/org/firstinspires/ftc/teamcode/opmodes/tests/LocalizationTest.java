@@ -8,13 +8,12 @@ import org.firstinspires.ftc.teamcode.subassemblies.autonomous.LocalizationManag
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.Navigator;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.PinpointOdo;
-import org.firstinspires.ftc.teamcode.util.DashOpMode;
 import org.firstinspires.ftc.teamcode.util.Drawing;
 import org.firstinspires.ftc.teamcode.util.Global;
 import org.firstinspires.ftc.teamcode.util.Pose;
 
 @TeleOp(group = Global.OpModeGroup.TEST)
-public class LocalizationTest extends LinearOpMode implements DashOpMode {
+public class LocalizationTest extends LinearOpMode{
 
     public void runOpMode() {
 

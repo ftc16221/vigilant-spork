@@ -26,13 +26,11 @@ import org.firstinspires.ftc.teamcode.util.Subassembly;
 @Config
 public class Navigator extends Subassembly {
 
-    // TODO: find more accurate coefficients before competition on the proper surface (foam tiles)
-    public static double DRIVE_P = 0.01, DRIVE_D = 0.0001;
     public static double APPROACH_P = 0.02, APPROACH_I = 0.03, APPROACH_D = 0.0001;
     public static double HEADING_P = 0.02, HEADING_I = 0.1, HEADING_D = 0.0035;
 
-    public static double MAX_POWER = 1.0;
-    public static boolean USE_X = true, USE_Y = true, USE_H = true;
+    public static double MAX_POWER = 1.0; // lower for testing, so we don't break the robot, but bring up to 1.0 for competition
+    public static boolean USE_X = true, USE_Y = true, USE_H = true; // disabled only for debugging
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
 

@@ -25,6 +25,9 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -48,11 +51,11 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
  * Since the dynamics of a launcher wheel system varies greatly from those of most other FTC mechanisms,
  * we will also need to adjust the "PIDF" coefficients with some that are a better fit for our application.
  */
-
+@Config
 @TeleOp(name = "BioBuzz StarterBot Teleop", group = "StarterBot")
 //@Disabled
 public class BioBuzzStarterBotTeleop extends OpMode {
-
+    private FtcDashboard dash;
     // Declare OpMode members.
     private DcMotor leftFrontDrive = null;
     private DcMotor rightFrontDrive = null;
@@ -74,8 +77,8 @@ public class BioBuzzStarterBotTeleop extends OpMode {
      * in the launch() function to only run the windmill servo when the motor is spinning fast
      * enough to make a successful throw.
      */
-    public final int LAUNCHER_TARGET_VELOCITY = 1400; // Ticks / second
-    public final int LAUNCHER_MIN_VELOCITY = 1200;
+    public static int LAUNCHER_TARGET_VELOCITY = 1400; // Ticks / second
+    public static int LAUNCHER_MIN_VELOCITY = 1200;
 
     /*
      * These two variables store the power we need to apply to the motors. In other cases, we may
@@ -95,7 +98,8 @@ public class BioBuzzStarterBotTeleop extends OpMode {
      */
     @Override
     public void init() {
-
+        
+        dash = FtcDashboard.getInstance();
         /*
          * Initialize the hardware variables. Note that the strings used here as parameters
          * to 'get' must correspond to the names assigned during the robot configuration
@@ -236,7 +240,10 @@ public class BioBuzzStarterBotTeleop extends OpMode {
         telemetry.addData("Motors", "FL (%.2f), FR (%.2f), BL(%.2f), BR(%.2f)",
                 leftFrontPower, rightFrontPower, leftBackPower, rightBackPower);
         telemetry.addData("Triggers", "left (%.2f, right (%.2f)",gamepad1.left_trigger, gamepad1.right_trigger);
-
+        telemetry.addData("Flywheel Speed (TPS)", launcher.getVelocity());
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("Flywheel Speed (TPS)", launcher.getVelocity());
+        dash.sendTelemetryPacket(packet);
 
     }
 

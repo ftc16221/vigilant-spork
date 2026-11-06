@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.subassemblies.MecDriveBase;
-import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam;
+//import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.GenericCam;
 import org.firstinspires.ftc.teamcode.util.Global;
 
 @Disabled
@@ -14,14 +14,14 @@ import org.firstinspires.ftc.teamcode.util.Global;
 public class DashboardTeleOp extends OpMode {
 
     MecDriveBase driveBase;
-    GenericCam cam;
+    //GenericCam cam;
 
     @Override
     public void init() {
         driveBase = new MecDriveBase(this);
-        cam = new GenericCam(this);
+        //cam = new GenericCam(this);
 
-        FtcDashboard.getInstance().startCameraStream(cam.getDash(), 0.0);
+        //FtcDashboard.getInstance().startCameraStream(cam.getDash(), 0.0);
     }
 
     @Override

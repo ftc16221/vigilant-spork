@@ -19,8 +19,7 @@ public class LocalizationTest extends LinearOpMode{
 
         MecDriveBase driveBase = new MecDriveBase(this);
         LocalizationManager localizationManager = new LocalizationManager(this,
-                new PinpointOdo(this, Global.lastPose),
-                new LimelightCam(this)
+                new PinpointOdo(this, Global.lastPose)
         );
         Navigator navigator = new Navigator(this, localizationManager);
         Drawing drawing = new Drawing(navigator);

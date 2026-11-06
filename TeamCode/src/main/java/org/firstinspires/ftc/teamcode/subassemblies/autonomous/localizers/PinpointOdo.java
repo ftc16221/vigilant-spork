@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -14,14 +15,14 @@ import java.util.List;
 /**
  * <a href="https://www.gobilda.com/content/user_manuals/3110-0002-0001%20User%20Guide.pdf">User Guide</a>
  */
-//@Config
+@Config
 public class PinpointOdo extends Localizer {
 
     // Both of these offsets are in MM. The tracking point of the robot is the center of the wheelbase
-    public static double X_OFFSET = 72; // 72mm
-    public static double Y_OFFSET = 60; // 60mm
+    public static double X_OFFSET = -168; // millimeters
+    public static double Y_OFFSET = -40; // millimeters
     public static GoBildaPinpointDriver.GoBildaOdometryPods POD_TYPE = GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD;
-    public static GoBildaPinpointDriver.EncoderDirection X_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED;
+    public static GoBildaPinpointDriver.EncoderDirection X_DIRECTION = GoBildaPinpointDriver.EncoderDirection.FORWARD;
     public static GoBildaPinpointDriver.EncoderDirection Y_DIRECTION = GoBildaPinpointDriver.EncoderDirection.REVERSED;
 
     public final GoBildaPinpointDriver pinpoint;

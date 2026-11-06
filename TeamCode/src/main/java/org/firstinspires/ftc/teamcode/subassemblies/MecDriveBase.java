@@ -27,17 +27,18 @@ public class MecDriveBase extends Subassembly {
     public MecDriveBase(OpMode opMode) {
         super(opMode, "Mecanum Drive Base");
 
-        leftFront = hardwareMap.dcMotor.get("left_front");
-        rightFront = hardwareMap.dcMotor.get("right_front");
-        leftBack = hardwareMap.dcMotor.get("left_rear");
-        rightBack = hardwareMap.dcMotor.get("right_rear");
+        leftFront = hardwareMap.dcMotor.get("left_front_drive");
+        rightFront = hardwareMap.dcMotor.get("right_front_drive");
+        leftBack = hardwareMap.dcMotor.get("left_back_drive");
+        rightBack = hardwareMap.dcMotor.get("right_back_drive");
 
         motors = new DcMotor[]{ leftFront, rightFront, leftBack, rightBack};
 
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightBack.setDirection(DcMotorSimple.Direction.FORWARD);
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-//        rightFront.setDirection(DcMotorSimple.Mode.REVERSE);
-//        leftRear.setDirection(DcMotorSimple.Mode.REVERSE);
-        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }

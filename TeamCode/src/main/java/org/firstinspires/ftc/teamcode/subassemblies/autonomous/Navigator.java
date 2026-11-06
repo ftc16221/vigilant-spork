@@ -29,7 +29,7 @@ public class Navigator extends Subassembly {
     public static double APPROACH_P = 0.02, APPROACH_I = 0.03, APPROACH_D = 0.0001;
     public static double HEADING_P = 0.02, HEADING_I = 0.1, HEADING_D = 0.0035;
 
-    public static double MAX_POWER = 1.0; // lower for testing, so we don't break the robot, but bring up to 1.0 for competition
+    public static double MAX_POWER = 0.4; // lower for testing, so we don't break the robot, but bring up to 1.0 for competition
     public static boolean USE_X = true, USE_Y = true, USE_H = true; // disabled only for debugging
     public static double LINEAR_APPROACH_TOLERANCE = 3, HEADING_APPROACH_TOLERANCE = 2;
     public static double LINEAR_DRIVE_TOLERANCE = 30, HEADING_DRIVE_TOLERANCE = 10;
@@ -179,7 +179,7 @@ public class Navigator extends Subassembly {
     }
 
     public boolean isAtTarget() {
-        if (currentPose == null) return false;
+        if (currentPose == null || targetPose == null) return false;
         double xPosError = currentPose.x - targetPose.x;
         double yPosError = currentPose.y - targetPose.y;
         double hPosError = currentPose.h - targetPose.h;
@@ -207,8 +207,7 @@ public class Navigator extends Subassembly {
 
     /** Set target pose, mirroring for blue alliance */
     public void setUnspecificTargetPose(Pose targetPose) {
-        if (Global.alliance == Global.Alliance.BLUE) this.targetPose = targetPose.mirror();
-        else this.targetPose = targetPose;
+        this.targetPose = targetPose;
     }
     /** Set target pose ignoring alliance */
     public void setTargetPose(Pose targetPose) { this.targetPose = targetPose; }
@@ -217,8 +216,7 @@ public class Navigator extends Subassembly {
 
     /** Set tracking point, mirroring for blue alliance */
     public void setUnspecificTrackingPoint(Pose trackingPoint) {
-        if (Global.alliance == Global.Alliance.BLUE) this.trackingPoint = trackingPoint.mirror();
-        else this.trackingPoint = trackingPoint;
+        this.trackingPoint = trackingPoint;
     }
     /** Set tracking point ignoring alliance */
     public void setTrackingPoint(Pose trackingPoint) { this.trackingPoint = trackingPoint; }

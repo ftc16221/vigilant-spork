@@ -56,6 +56,9 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 //@Disabled
 public class BioBuzzStarterBotTeleop extends OpMode {
     private FtcDashboard dash;
+
+    private boolean leftTriggerWasPressed = false;
+    private boolean isRunning = false;
     // Declare OpMode members.
     private DcMotor leftFrontDrive = null;
     private DcMotor rightFrontDrive = null;
@@ -135,7 +138,7 @@ public class BioBuzzStarterBotTeleop extends OpMode {
         leftFrontDrive.setZeroPowerBehavior(BRAKE);
         rightBackDrive.setZeroPowerBehavior(BRAKE);
         rightFrontDrive.setZeroPowerBehavior(BRAKE);
-        rightBackDrive.setZeroPowerBehavior(BRAKE);
+        leftBackDrive.setZeroPowerBehavior(BRAKE);
         intake.setZeroPowerBehavior(BRAKE);
 
         /*
@@ -212,7 +215,16 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * allow us to avoid setting the same motors/servos power more than once per loop. That can
          * create erratic behavior.
          */
+        if (gamepad1.left_bumper && !leftTriggerWasPressed) {
+            isRunning = !isRunning;
+        }
+
+        leftTriggerWasPressed = gamepad1.left_bumper;
+
         intakePower = gamepad1.right_trigger - gamepad1.left_trigger;
+        if (isRunning) {
+            intakePower = 1;
+        }
 
         /*
          * The launch() function handles setting motor velocity, and running the windmill servo
@@ -297,6 +309,7 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * add some power to the intake power. This can sometimes help dislodge stuck elements from
          * inside the hopper.
          */
+
         if (gamepad1.right_bumper && launcher.getVelocity() > LAUNCHER_MIN_VELOCITY) {
             windmillServo.setPower(1);
             intakePower += 0.5;

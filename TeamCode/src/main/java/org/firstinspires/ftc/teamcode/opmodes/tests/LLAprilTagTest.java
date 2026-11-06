@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.subassemblies.autonomous.localizers.LimelightCam;
 import org.firstinspires.ftc.teamcode.util.Global;
 
-@Disabled
+//@Disabled
 @TeleOp(group = Global.OpModeGroup.TEST)
 public class LLAprilTagTest extends OpMode {
 
